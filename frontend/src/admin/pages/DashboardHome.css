@@ -1,0 +1,122 @@
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.kpi-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.kpi-card {
+  background-color: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.kpi-icon {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--admin-text-primary);
+}
+
+.kpi-info p {
+  margin: 0 0 5px 0;
+  color: var(--admin-text-secondary);
+  font-size: 0.9rem;
+}
+
+.kpi-info h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.chart-container {
+  background-color: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 25px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container h3 {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+}
+
+.chart-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.dashboard-list-card {
+  background-color: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.dashboard-list-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--admin-text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+.dash-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dash-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.dash-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.todo-list li {
+  justify-content: flex-start;
+  gap: 12px;
+}

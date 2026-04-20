@@ -1,0 +1,181 @@
+:root {
+  --admin-bg: #0F0F0F;
+  --admin-sidebar-bg: #121212;
+  --admin-card-bg: #1A1A1A;
+  --admin-border: #2A2A2A;
+  --admin-text-primary: #FFFFFF;
+  --admin-text-secondary: #A1A1A1;
+  --admin-success: #22C55E;
+  --admin-error: #EF4444;
+  --admin-accent: #3A3A3A;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--admin-bg);
+  color: var(--admin-text-primary);
+}
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--admin-bg);
+}
+
+.admin-sidebar {
+  width: 250px;
+  background-color: var(--admin-sidebar-bg);
+  border-right: 1px solid var(--admin-border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 0 20px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-logo h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.sidebar-menu {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px;
+}
+
+.menu-title {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+  text-transform: uppercase;
+  margin: 20px 10px 10px 10px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px;
+  color: var(--admin-text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover, .menu-item.active {
+  background-color: var(--admin-accent);
+  color: var(--admin-text-primary);
+}
+
+.icon-plus {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  background-color: var(--admin-bg);
+}
+
+.header-title {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  background-color: var(--admin-bg);
+}
+
+.sidebar-footer {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--admin-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Shared Status Badges */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-active, .status-delivered {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--admin-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-banned, .status-failed {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--admin-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-pending {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: #EAB308;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  background-color: var(--admin-accent);
+  color: var(--admin-text-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border: 1px solid var(--admin-border);
+}

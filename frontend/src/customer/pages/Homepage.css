@@ -1,0 +1,324 @@
+/* Hero Section */
+.hero-section {
+  background-color: #000000;
+  color: #FFFFFF;
+  height: 85vh;
+  display: flex;
+  align-items: center;
+  padding: 0 5%;
+  position: relative;
+  overflow: hidden;
+  margin-top: -80px; /* Pull up underneath Navbar to allow glassmorphism to shine */
+  padding-top: 80px;
+}
+
+.hero-content {
+  flex: 1;
+  z-index: 2;
+  max-width: 600px;
+  animation: fadeUp 0.8s ease-out;
+}
+
+@keyframes fadeUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.hero-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.hero-content h1 {
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  color: #A0A0A0;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.btn-shop-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  color: #000000;
+  padding: 16px 35px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-shop-now:hover {
+  background-color: #DDD;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.hero-trust {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.trust-divider {
+  color: #444;
+}
+
+.hero-image-container {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Fallback immersive UI graphic mimicking a beautiful watch dial */
+.premium-watch-placeholder {
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #222 0%, #050505 80%);
+  box-shadow: inset -20px -20px 60px rgba(255,255,255,0.02), 0 30px 60px rgba(0,0,0,0.8);
+  position: relative;
+}
+.premium-watch-placeholder::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 460px;
+  height: 460px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.floating-spec-card {
+  position: absolute;
+  top: 15%;
+  right: -30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 15px 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: float-offset 5s ease-in-out infinite alternate;
+  z-index: 5;
+}
+
+.floating-spec-card strong {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FFF;
+}
+
+.floating-spec-card span {
+  font-size: 0.8rem;
+  color: #AAA;
+}
+
+@keyframes float-offset {
+  0% { transform: translateY(0px) rotate(2deg); }
+  100% { transform: translateY(-10px) rotate(0deg); }
+}
+
+/* Collection Section */
+.collection-section {
+  padding: 100px 5%;
+  background-color: var(--store-bg);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.link-view-all {
+  color: var(--store-text-light);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+  padding-bottom: 2px;
+}
+
+.link-view-all:hover {
+  color: var(--store-accent);
+  border-color: var(--store-accent);
+}
+
+/* Product Slider (Scroll Snap) */
+.product-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 30px;
+  padding-bottom: 20px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* Hide scrollbar for clean UI */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.product-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  cursor: pointer;
+  min-width: 280px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.product-image-wrapper {
+  aspect-ratio: 4/5;
+  background-color: var(--store-surface);
+  overflow: hidden;
+  position: relative;
+}
+
+.product-image-wrapper img, .img-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card:hover .product-image-wrapper img {
+  transform: scale(1.05); /* strict 1.05 scale max */
+}
+
+.discount-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #22C55E;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Glassmorphism Quick Add Button */
+.add-to-cart-btn {
+  position: absolute;
+  bottom: -60px; /* Hidden below */
+  left: 5%;
+  width: 90%;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.5);
+  padding: 14px 0;
+  border-radius: 4px; /* Minimal edge */
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--store-accent);
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card:hover .add-to-cart-btn {
+  bottom: 20px;
+  opacity: 1;
+}
+
+.add-to-cart-btn:hover {
+  background-color: var(--store-accent);
+  color: #FFF;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  text-align: center;
+}
+
+.truncate-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-price {
+  color: var(--store-text-light);
+  margin: 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+/* Skeleton Loading State */
+.loading-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+.skeleton-card {
+  aspect-ratio: 4/5;
+  background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -1,0 +1,358 @@
+PROJECT OVERVIEW
+
+Build a modern, minimal e-commerce web application for a watch store with:
+
+Customer-facing website (black & white premium UI)
+Fully functional Cash on Delivery (COD) checkout
+Complete Admin Dashboard (dark theme) for managing products, users, and orders
+
+The system must prioritize:
+
+Clean design
+Fast performance
+Clear UX
+Real functionality (not just UI)
+🎨 DESIGN SYSTEM
+🌐 FRONTEND (CUSTOMER WEBSITE)
+Colors:
+Background: #FFFFFF, #F8F8F8
+Primary Text: #111111
+Secondary Text: #666666
+Accent / Buttons: #000000
+Border: #E5E5E5
+Typography:
+Use fluid responsive typography
+Example:
+Heading: text-4xl md:text-5xl lg:text-7xl
+Clean sans-serif font (Inter / Poppins)
+UI Style:
+Minimal, premium
+Rounded corners: 8px–12px
+Very light shadows only
+Use SVG icons only (no PNG icons)
+⚙️ ADMIN DASHBOARD (DARK THEME)
+Colors:
+Background: #0F0F0F
+Sidebar: #121212
+Cards: #1A1A1A
+Border: #2A2A2A
+Text:
+Primary: #FFFFFF
+Secondary: #A1A1A1
+Status Colors:
+Success: #22C55E
+Error: #EF4444
+🧱 CUSTOMER WEBSITE STRUCTURE
+🏠 1. HOMEPAGE
+🔹 Top Campaign Bar
+Text:
+→ “🚚 Free Delivery in Dhaka on orders above ৳2000”
+🔹 Header
+
+Layout:
+
+Left: Logo (WATCH / HOROLOGE style)
+Center: Search bar
+Right:
+User icon (SVG)
+Cart icon (SVG)
+🔹 HERO SECTION (2 COLUMN)
+
+Left:
+
+Label: “THE 2024 COLLECTION”
+Heading: “Find Your Perfect Watch”
+Description (2 lines)
+Trust line:
+✔ Cash on Delivery
+✔ Fast Delivery
+CTA Button:
+→ “Shop Now” (black background, white text)
+
+Right:
+
+Large watch image
+Floating card:
+Product name
+Short spec
+Price
+🔹 WATCH COLLECTION
+Responsive grid:
+1 col mobile
+2 col tablet
+4 col desktop
+Each Product Card:
+Image
+Name
+Price (bold)
+Old price (strikethrough)
+Discount badge (green)
+Interaction:
+Hover:
+→ transform: scale(1.05)
+→ smooth transition
+🔹 BEST SELLERS
+Horizontal scroll slider
+CSS scroll snapping
+🔹 TRUST SECTION
+
+3 columns:
+
+Fast Delivery
+Cash on Delivery
+Easy Exchange
+
+(Each with SVG icon + text)
+
+🔹 FOOTER
+
+4 columns:
+
+Brand info
+Explore links
+Policies
+Contact
+🛍️ 2. PRODUCT PAGE
+Layout: 2 Columns
+LEFT (IMAGES)
+Main large image
+Vertical thumbnails (3–4)
+Click thumbnail → change main image
+Hover zoom effect
+RIGHT (DETAILS)
+Product name (large)
+Price section:
+Current price
+Old price
+“SAVE $X”
+Short description
+Quantity Selector:
+Minus / Plus buttons
+Buttons:
+Primary:
+→ Add to Cart (black)
+Secondary:
+→ Buy Now (outline)
+Extra Info:
+COD Available
+Delivery info
+Exchange policy
+🔽 ACCORDION SECTIONS
+Product Details
+Delivery
+Exchange & Return
+📌 STICKY ADD TO CART BAR
+Appears on scroll
+Shows:
+Product name
+Price
+Add to Cart button
+🔗 RELATED PRODUCTS
+Horizontal cards (like homepage)
+🛒 CART & CHECKOUT
+🛒 CART PAGE
+List of products
+Quantity update
+Remove item
+Total price
+💳 CHECKOUT (COD ONLY)
+
+Form fields:
+
+Name
+Phone
+Address
+
+NO:
+
+Email required
+No login required
+✅ ORDER CONFIRMATION
+Success message
+Save order to database
+⚙️ BACKEND SYSTEM
+🗂 DATABASE (MongoDB)
+Product Schema:
+id
+name
+price
+oldPrice
+discount
+description
+images[]
+category
+brand
+tag
+Order Schema:
+customerName
+phone
+address
+products[]
+total
+status (pending / delivered)
+User Schema (Admin):
+name
+email
+role
+status
+🧑‍💼 ADMIN DASHBOARD
+🧱 LAYOUT
+Sidebar (left)
+Main content (center)
+Slide panel (right)
+📌 SIDEBAR
+Sections:
+
+Application:
+
+Home
+Inbox
+Calendar
+Search
+Settings
+
+Products:
+
+See All Products
+Add Product
+Add Category
+
+Users:
+
+See All Users
+Add User
+
+Orders:
+
+See All Transactions
+Add Order
+📊 DASHBOARD HOME
+Widgets:
+Revenue Chart (bar)
+Visitors Chart (line)
+Latest transactions
+Popular products
+Todo list
+📦 PRODUCTS MANAGEMENT
+TABLE
+
+Columns:
+
+Checkbox
+Image
+Name
+Price (sortable)
+Description
+Actions
+FEATURES
+Multi-select rows
+Bulk delete
+Pagination
+Sorting
+➕ ADD PRODUCT PANEL (RIGHT SLIDE)
+
+Fields:
+
+Name
+Short Description
+Full Description
+Price
+Category
+Images (upload)
+Behavior:
+Slides from right
+Overlay background
+Close on outside click
+On Submit:
+Save to DB
+Show toast:
+→ “Product added successfully”
+👥 USERS MANAGEMENT
+TABLE
+
+Columns:
+
+Avatar
+Name
+Email
+Status
+STATUS
+Active (green)
+Banned (red)
+EDIT USER PANEL
+
+Fields:
+
+First Name
+Last Name
+Email
+Phone
+Role
+Status
+🧾 ORDERS MANAGEMENT
+
+Columns:
+
+ID
+Email
+Status (success / failed)
+Amount
+🏷 CATEGORY SYSTEM
+ADD CATEGORY
+
+Fields:
+
+Name
+Slug (auto-generate)
+🔔 TOAST NOTIFICATIONS
+Behavior:
+Bottom-right
+Auto-hide (3–4 sec)
+Types:
+Success (green)
+Error (red)
+📊 CHARTS
+Bar chart → Revenue
+Line chart → Visitors
+Tooltip on hover
+Responsive
+⚙️ API REQUIREMENTS
+PRODUCTS
+Create
+Read (pagination)
+Update
+Delete (single + bulk)
+USERS
+Read
+Update
+Delete
+ORDERS
+Create (from checkout)
+Read
+Update status
+CATEGORY
+Create
+Read
+🧠 UX PRINCIPLES
+Minimal design (no clutter)
+Clear hierarchy:
+Image → Price → Button
+Fast performance:
+No heavy animations
+Use CSS transitions
+Smooth interactions:
+Hover effects
+Slide panels
+Snap scrolling
+🎯 FINAL INSTRUCTION FOR AI
+
+Build this as a fully functional production-ready web app, not just UI.
+
+Requirements:
+
+Fully responsive
+Clean component structure
+Reusable components
+API-connected backend
+Real CRUD functionality
+Optimized performance
