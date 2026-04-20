@@ -23,6 +23,13 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Description is required']
   },
+  shortDescription: {
+    type: String,
+    default: ''
+  },
+  sizes: [{
+    type: String
+  }],
   images: [{
     type: String // URL endpoints for product images
   }],

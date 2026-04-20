@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ShoppingBag, ChevronDown, ChevronUp, Heart, Truck, Banknote, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,12 +15,13 @@ const ProductDetail = () => {
   const [activeAccordion, setActiveAccordion] = useState('details');
   const [showStickyCart, setShowStickyCart] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [wishlisted, setWishlisted] = useState(false);
+  const relatedSliderRef = useRef(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    // Scroll to top on page load
     window.scrollTo(0, 0);
-    
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -29,17 +31,16 @@ const ProductDetail = () => {
         setProduct(data);
         setActiveImage(data.images && data.images.length > 0 ? data.images[0] : '');
 
-        // Fetch related products (e.g. all products, then filter out the current one)
         try {
           const relatedRes = await fetch('http://localhost:5000/api/products');
           if (relatedRes.ok) {
             const relatedData = await relatedRes.json();
             if (relatedData.products) {
-              setRelatedProducts(relatedData.products.filter(p => p._id !== id).slice(0, 4));
+              setRelatedProducts(relatedData.products.filter(p => p._id !== id).slice(0, 6));
             }
           }
-        } catch(e) {
-          console.error("Could not fetch related products", e);
+        } catch (e) {
+          console.error('Could not fetch related products', e);
         }
 
         setLoading(false);
@@ -51,12 +52,7 @@ const ProductDetail = () => {
     fetchProduct();
 
     const handleScroll = () => {
-      // Show sticky cart when user scrolls down 300px
-      if (window.scrollY > 300) {
-        setShowStickyCart(true);
-      } else {
-        setShowStickyCart(false);
-      }
+      setShowStickyCart(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -66,13 +62,25 @@ const ProductDetail = () => {
     setActiveAccordion(activeAccordion === section ? null : section);
   };
 
+  const handleBuyNow = () => {
+    addToCart(product, quantity);
+    navigate('/checkout');
+  };
+
+  // Step 45: Related slider scroll
+  const scrollRelated = (dir) => {
+    if (relatedSliderRef.current) {
+      relatedSliderRef.current.scrollBy({ left: dir * 300, behavior: 'smooth' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="product-detail-page">
-         <div className="detail-loading-skeleton">
-            <div className="skeleton-img"></div>
-            <div className="skeleton-content"></div>
-         </div>
+        <div className="detail-loading-skeleton">
+          <div className="skeleton-img"></div>
+          <div className="skeleton-content"></div>
+        </div>
       </div>
     );
   }
@@ -80,9 +88,9 @@ const ProductDetail = () => {
   if (error || !product) {
     return (
       <div className="product-detail-page">
-        <div className="detail-error" style={{textAlign:'center', padding:'100px 0'}}>
-          <h2 style={{color:'var(--store-text)'}}>{error}</h2>
-          <Link to="/" className="breadcrumb-back" style={{marginTop:'20px'}}><ArrowLeft size={18}/> Back to Collection</Link>
+        <div style={{ textAlign: 'center', padding: '100px 0' }}>
+          <h2 style={{ color: 'var(--store-text)' }}>{error || 'Product not found'}</h2>
+          <Link to="/" className="breadcrumb-trail" style={{ marginTop: '20px', display: 'inline-block' }}>← Back to Collection</Link>
         </div>
       </div>
     );
@@ -90,159 +98,239 @@ const ProductDetail = () => {
 
   return (
     <div className="product-detail-page">
-      <Link to="/" className="breadcrumb-back"><ArrowLeft size={16}/> Back to Collection</Link>
-      
+
+      {/* Step 44: Breadcrumb trail — HOME > COLLECTIONS > [category] > [name] */}
+      <nav className="breadcrumb-trail" aria-label="breadcrumb">
+        <Link to="/">Home</Link>
+        <span className="bc-sep">›</span>
+        <Link to="/category/all">Collections</Link>
+        {product.category && (
+          <>
+            <span className="bc-sep">›</span>
+            <Link to={`/category/${product.category.slug || 'all'}`}>
+              {product.category.name || 'Category'}
+            </Link>
+          </>
+        )}
+        <span className="bc-sep">›</span>
+        <span className="bc-current">{product.name}</span>
+      </nav>
+
       <div className="detail-container">
-        
-        {/* Left: Image Gallery */}
+
+        {/* ── LEFT: Image Gallery ── */}
         <div className="gallery-section">
           {product.images && product.images.length > 1 && (
             <div className="thumbnail-list">
               {product.images.map((img, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`thumbnail ${activeImage === img ? 'active' : ''}`}
                   onClick={() => setActiveImage(img)}
                 >
                   <img src={img} alt={`${product.name} view ${index + 1}`} />
                 </div>
               ))}
+              {/* Step 45: Video play thumb placeholder if 3+ images */}
+              {product.images.length >= 3 && (
+                <div className="thumbnail thumb-video">
+                  <div className="play-icon-wrap">▶</div>
+                </div>
+              )}
             </div>
           )}
-          
+
           <div className="main-image">
             {activeImage ? (
               <img src={activeImage} alt={product.name} />
             ) : (
-              <div className="img-placeholder" style={{color:'#999'}}>No Image Available</div>
+              <div className="img-placeholder" style={{ color: '#999' }}>No Image Available</div>
             )}
-            {product.discount > 0 && <div className="product-page-discount">-{product.discount}%</div>}
+            {/* Step 45: Heart/wishlist icon on image */}
+            <button
+              className={`wishlist-btn ${wishlisted ? 'wishlisted' : ''}`}
+              onClick={() => setWishlisted(!wishlisted)}
+              aria-label="Add to wishlist"
+            >
+              <Heart size={20} fill={wishlisted ? '#e44' : 'none'} color={wishlisted ? '#e44' : '#555'} />
+            </button>
+            {product.discount > 0 && (
+              <div className="product-page-discount">-{product.discount}%</div>
+            )}
           </div>
         </div>
 
-        {/* Right: Product Info */}
+        {/* ── RIGHT: Product Info ── */}
         <div className="info-section">
+
+          {/* Step 43: Category label + POPULAR ITEM badge */}
+          <div className="product-meta-row">
+            {product.category && (
+              <span className="product-category-label">
+                {product.category.name?.toUpperCase()} COLLECTION
+              </span>
+            )}
+            {product.tag === 'popular' && (
+              <span className="popular-badge">🔥 POPULAR ITEM</span>
+            )}
+          </div>
+
           <h1 className="detail-title">{product.name}</h1>
-          <div className="price-row" style={{display:'flex', gap:'15px', alignItems:'center', marginBottom:'40px'}}>
-            <p className="detail-price" style={{margin:0}}>${product.price.toFixed(2)}</p>
+
+          {/* Price row with SAVE badge */}
+          <div className="detail-price-row">
+            <span className="detail-price">৳{product.price.toLocaleString()}</span>
             {product.oldPrice > product.price && (
               <>
-                <p className="old-price" style={{textDecoration:'line-through', color:'#999', fontSize:'1.2rem', margin:0}}>${product.oldPrice.toFixed(2)}</p>
-                <div className="save-badge" style={{backgroundColor:'rgba(34, 197, 94, 0.1)', border: '1px solid #22C55E', color:'#22C55E', padding:'4px 10px', borderRadius:'50px', fontWeight:'bold', fontSize:'0.85rem'}}>
-                  SAVE ${(product.oldPrice - product.price).toFixed(2)}
-                </div>
+                <span className="detail-old-price">৳{product.oldPrice.toLocaleString()}</span>
+                <span className="save-badge">SAVE ৳{(product.oldPrice - product.price).toLocaleString()}</span>
               </>
             )}
           </div>
-          
-          <div className="detail-actions">
+
+          {/* Product short description */}
+          {product.description && (
+            <p className="detail-description">{product.description}</p>
+          )}
+
+          {/* Step 41: Quantity on own row */}
+          <div className="quantity-row">
             <div className="quantity-selector">
-               <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-               <span>{quantity}</span>
-               <button onClick={() => setQuantity(quantity + 1)}>+</button>
+              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
+              <span>{quantity}</span>
+              <button onClick={() => setQuantity(quantity + 1)}>+</button>
             </div>
-            
-            <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
-              <ShoppingBag size={20} /> Add to Cart
-            </button>
-            <button className="btn-buy-now" onClick={() => { addToCart(product, quantity); window.location.href = '/checkout'; }}>
-              Buy Now
-            </button>
+          </div>
+
+          {/* Step 41: ADD TO CART — full width, own row */}
+          <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
+            <ShoppingBag size={20} /> ADD TO CART
+          </button>
+
+          {/* Step 41: BUY NOW — full width outline, below Add to Cart */}
+          <button className="btn-buy-now" onClick={handleBuyNow}>
+            BUY NOW
+          </button>
+
+          {/* Step 42: COD / Delivery / Exchange trust lines */}
+          <div className="trust-lines">
+            <div className="trust-line">
+              <Banknote size={16} strokeWidth={1.5} />
+              <span>Cash on Delivery Available</span>
+            </div>
+            <div className="trust-line">
+              <Truck size={16} strokeWidth={1.5} />
+              <span>Fast Delivery (3–5 days)</span>
+            </div>
+            <div className="trust-line">
+              <RefreshCcw size={16} strokeWidth={1.5} />
+              <span>Easy Exchange Policy</span>
+            </div>
           </div>
 
           {/* Accordion Sections */}
           <div className="accordion-sections">
+            {/* Product Details */}
             <div className="accordion-item">
               <button className="accordion-header" onClick={() => toggleAccordion('details')}>
                 Product Details
-                {activeAccordion === 'details' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                {activeAccordion === 'details' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
               {activeAccordion === 'details' && (
                 <div className="accordion-content">
-                  <p>{product.description || 'Premium design and superior build quality. Excellent timekeeping accuracy.'}</p>
-                  <ul style={{marginTop: '10px', paddingLeft: '20px'}}>
-                    <li>Water resistant up to 50 meters</li>
-                    <li>Scratch-resistant sapphire crystal</li>
-                    <li>Automatic movement</li>
-                  </ul>
+                  <p>{product.description || 'Premium design and superior build quality.'}</p>
                 </div>
               )}
             </div>
-            
+
+            {/* Delivery */}
             <div className="accordion-item">
               <button className="accordion-header" onClick={() => toggleAccordion('delivery')}>
                 Delivery
-                {activeAccordion === 'delivery' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                {activeAccordion === 'delivery' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
               {activeAccordion === 'delivery' && (
                 <div className="accordion-content">
-                  <p><strong>Inside Dhaka:</strong> Delivered within 24-48 hours. Free delivery on orders over $200.</p>
-                  <p><strong>Outside Dhaka:</strong> Delivered within 3-5 business days via standard courier services.</p>
+                  <p><strong>Inside Dhaka:</strong> Delivered within 24–48 hours. Free delivery on orders over ৳2,000.</p>
+                  <p><strong>Outside Dhaka:</strong> Delivered within 3–5 business days via standard courier.</p>
                   <p>Cash on Delivery is available for all regions.</p>
                 </div>
               )}
             </div>
 
+            {/* Exchange & Return */}
             <div className="accordion-item">
               <button className="accordion-header" onClick={() => toggleAccordion('exchange')}>
-                Exchange & Return
-                {activeAccordion === 'exchange' ? <ChevronUp size={20}/> : <ChevronDown size={20}/>}
+                Exchange &amp; Return
+                {activeAccordion === 'exchange' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </button>
               {activeAccordion === 'exchange' && (
                 <div className="accordion-content">
-                  <p>We offer a 7-day easy exchange policy. If the product is defective or damaged, you can exchange it by contacting our support.</p>
+                  <p>We offer a 7-day easy exchange policy. If the product is defective or damaged, contact our support team.</p>
                   <p>Items must be unused and in their original packaging.</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Premium details block */}
-          <div className="premium-guarantees">
-            <div className="guarantee-item">
-               <strong>Free Shipping</strong>
-               <span>On all orders over $200 securely delivered.</span>
-            </div>
-            <div className="guarantee-item">
-               <strong>2-Year Warranty</strong>
-               <span>Official manufacturer guarantee on internals.</span>
-            </div>
-            <div className="guarantee-item">
-               <strong>Secure Payment</strong>
-               <span>Cash on delivery available at checkout.</span>
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* Related Products Section */}
+      {/* ── RELATED PRODUCTS — Step 45: with prev/next arrows ── */}
       {relatedProducts.length > 0 && (
-        <div className="related-products-section" style={{marginTop: '100px', borderTop: '1px solid var(--store-border)', paddingTop: '50px'}}>
-          <h2 style={{fontSize: '2rem', marginBottom: '30px', fontWeight: '700'}}>You May Also Like</h2>
-          <div className="product-slider" style={{display: 'flex', gap: '20px', overflowX: 'auto', paddingBottom: '20px', scrollSnapType: 'x mandatory'}}>
+        <div className="related-products-section">
+          <div className="related-header">
+            <div>
+              <h2>Best Sellers</h2>
+              <p className="related-subtitle">Our most sought-after timepieces, curated by enthusiasts.</p>
+            </div>
+            <div className="slider-nav-buttons">
+              <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous">
+                <ChevronLeft size={18} />
+              </button>
+              <button className="slider-nav-btn" onClick={() => scrollRelated(1)} aria-label="Next">
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="related-slider" ref={relatedSliderRef}>
             {relatedProducts.map(rel => (
-              <Link to={`/product/${rel._id}`} key={rel._id} className="related-card" style={{minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start', textDecoration: 'none', color: 'inherit'}}>
-                <div style={{backgroundColor: 'var(--store-surface)', borderRadius: '12px', overflow: 'hidden', aspectRatio: '4/5', marginBottom: '15px', position: 'relative'}}>
-                  {rel.images && rel.images[0] ? (
-                    <img src={rel.images[0]} alt={rel.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                  ) : (
-                    <div style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999'}}>No Image</div>
-                  )}
-                  {rel.discount > 0 && (
-                    <div className="discount-badge" style={{position: 'absolute', top: '10px', left: '10px', backgroundColor: '#22C55E', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold'}}>
-                      -{rel.discount}%
+              <div className="related-card" key={rel._id}>
+                <Link to={`/product/${rel._id}`} className="related-card-link">
+                  <div className="related-img-wrap">
+                    {rel.images && rel.images[0] ? (
+                      <img src={rel.images[0]} alt={rel.name} />
+                    ) : (
+                      <div className="img-placeholder">No Image</div>
+                    )}
+                    {rel.oldPrice > rel.price && (
+                      <div className="related-discount-badge">
+                        ৳{(rel.oldPrice - rel.price).toLocaleString()} OFF
+                      </div>
+                    )}
+                  </div>
+                  <div className="related-info">
+                    <h3>{rel.name}</h3>
+                    <div className="related-price-row">
+                      <span className="related-price">৳{rel.price.toLocaleString()}</span>
+                      {rel.oldPrice > rel.price && (
+                        <span className="related-old-price">৳{rel.oldPrice.toLocaleString()}</span>
+                      )}
                     </div>
-                  )}
+                  </div>
+                </Link>
+                <div className="related-card-actions">
+                  <Link to={`/product/${rel._id}`} className="btn-related-buy">Buy Now</Link>
+                  <button
+                    className="btn-related-cart"
+                    onClick={() => addToCart(rel, 1)}
+                    aria-label="Add to cart"
+                  >
+                    <ShoppingBag size={15} />
+                  </button>
                 </div>
-                <h3 style={{fontSize: '1.1rem', margin: '0 0 5px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>{rel.name}</h3>
-                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-                  <p style={{margin: 0, fontWeight: '600', color: 'var(--store-accent)'}}>${rel.price.toFixed(2)}</p>
-                  {rel.oldPrice > rel.price && (
-                    <p style={{margin: 0, textDecoration: 'line-through', color: '#999', fontSize: '0.9rem'}}>${rel.oldPrice.toFixed(2)}</p>
-                  )}
-                </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -254,15 +342,18 @@ const ProductDetail = () => {
           {activeImage && <img src={activeImage} alt={product.name} />}
           <div>
             <h4>{product.name}</h4>
-            <p>${product.price.toFixed(2)}</p>
+            <p>৳{product.price.toLocaleString()}</p>
           </div>
         </div>
-        <div className="detail-actions" style={{ marginBottom: 0, gap: '15px' }}>
-          <button className="btn-add-to-cart" style={{ height: '45px', padding: '0 20px', fontSize: '1rem' }} onClick={() => addToCart(product, quantity)}>
-            <ShoppingBag size={18} /> Add to Cart
-          </button>
-        </div>
+        <button
+          className="btn-add-to-cart"
+          style={{ height: '45px', padding: '0 28px', fontSize: '0.95rem', borderRadius: '6px', width: 'auto', flex: 'none' }}
+          onClick={() => addToCart(product, quantity)}
+        >
+          <ShoppingBag size={18} /> Add to Cart
+        </button>
       </div>
+
     </div>
   );
 };

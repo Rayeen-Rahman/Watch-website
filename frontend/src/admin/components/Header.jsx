@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, MessageSquare, Moon } from 'lucide-react';
+import { Bell, MessageSquare, Moon, Sun, Menu } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ onToggleSidebar }) => {
   const location = useLocation();
-  
-  // Format the title based on the path
+  const [darkMode, setDarkMode] = useState(true);
+
   const formatTitle = (pathname) => {
     if (pathname === '/admin') return 'Dashboard';
     const parts = pathname.split('/');
@@ -15,13 +15,38 @@ const Header = () => {
 
   return (
     <div className="admin-header">
-      <div className="header-title">
-        {formatTitle(location.pathname)}
+      {/* Left: hamburger + page title */}
+      <div className="header-left">
+        <button
+          className="sidebar-toggle-btn"
+          onClick={onToggleSidebar}
+          aria-label="Toggle sidebar"
+          title="Toggle sidebar"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="header-title">
+          {formatTitle(location.pathname)}
+        </div>
       </div>
+
+      {/* Right: actions */}
       <div className="header-actions">
-         <MessageSquare size={20} color="var(--admin-text-secondary)" />
-         <Bell size={20} color="var(--admin-text-secondary)" />
-         <Moon size={20} color="var(--admin-text-secondary)" />
+        <button
+          className="header-icon-btn"
+          onClick={() => setDarkMode(d => !d)}
+          title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {darkMode ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+        <button className="header-icon-btn" title="Messages">
+          <MessageSquare size={18} />
+        </button>
+        <button className="header-icon-btn" title="Notifications">
+          <Bell size={18} />
+        </button>
+        {/* User avatar */}
+        <div className="header-avatar" title="Admin User">J</div>
       </div>
     </div>
   );

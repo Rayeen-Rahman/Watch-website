@@ -8,28 +8,36 @@ import Orders from '../pages/Orders';
 import DashboardHome from '../pages/DashboardHome';
 import AddProductPanel from '../components/AddProductPanel';
 import AddCategoryPanel from '../components/AddCategoryPanel';
+import AddUserPanel from '../components/AddUserPanel';
 import '../adminTheme.css';
 
 const AdminLayout = () => {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [toast, setToast] = useState({ message: '', error: false });
 
   const showToast = (message, error = false) => {
     setToast({ message, error });
     setTimeout(() => {
       setToast({ message: '', error: false });
-    }, 4000); // Hide after 4s
+    }, 4000);
   };
 
   return (
     <div className="admin-layout">
-      <Sidebar 
-        onOpenAddProduct={() => setIsAddProductOpen(true)} 
-        onOpenAddCategory={() => setIsAddCategoryOpen(true)} 
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onOpenAddProduct={() => setIsAddProductOpen(true)}
+        onOpenAddCategory={() => setIsAddCategoryOpen(true)}
+        onOpenAddUser={() => setIsAddUserOpen(true)}
       />
       <div className="admin-main">
-        <Header />
+        <Header
+          onToggleSidebar={() => setSidebarCollapsed(prev => !prev)}
+          sidebarCollapsed={sidebarCollapsed}
+        />
         <div className="admin-content">
           <Routes>
             <Route path="/" element={<DashboardHome />} />
@@ -41,16 +49,22 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      <AddProductPanel 
-        isOpen={isAddProductOpen} 
-        onClose={() => setIsAddProductOpen(false)} 
-        showToast={showToast} 
+      <AddProductPanel
+        isOpen={isAddProductOpen}
+        onClose={() => setIsAddProductOpen(false)}
+        showToast={showToast}
       />
 
-      <AddCategoryPanel 
-        isOpen={isAddCategoryOpen} 
-        onClose={() => setIsAddCategoryOpen(false)} 
-        showToast={showToast} 
+      <AddCategoryPanel
+        isOpen={isAddCategoryOpen}
+        onClose={() => setIsAddCategoryOpen(false)}
+        showToast={showToast}
+      />
+
+      <AddUserPanel
+        isOpen={isAddUserOpen}
+        onClose={() => setIsAddUserOpen(false)}
+        showToast={showToast}
       />
 
       {toast.message && (

@@ -120,3 +120,164 @@
   justify-content: flex-start;
   gap: 12px;
 }
+
+/* Step 47: Donut wrapper — center label overlay */
+.donut-wrapper {
+  position: relative;
+}
+.donut-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.donut-total {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+}
+.donut-caption {
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.chart-trend {
+  margin: 8px 0 0 0;
+  font-size: 0.8rem;
+  color: var(--admin-success);
+  text-align: center;
+}
+
+/* Step 48: Transaction rows */
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.transaction-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.transaction-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.tx-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.tx-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tx-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--admin-text-primary);
+}
+.tx-sub {
+  font-size: 0.75rem;
+  color: var(--admin-text-secondary);
+}
+.tx-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+.tx-amount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--admin-text-primary);
+}
+.tx-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.tx-done { color: var(--admin-success); }
+.tx-pending { color: #EAB308; }
+
+/* Step 50: Popular Products thumbnails */
+.product-thumb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.product-thumb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.product-thumb-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.product-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--admin-border);
+}
+.product-thumb-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.product-thumb-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--admin-text-primary);
+}
+.product-thumb-price {
+  font-size: 0.78rem;
+  color: var(--admin-text-secondary);
+}
+.product-thumb-sold {
+  font-size: 0.78rem;
+  color: #6366F1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Step 51: Todo date pill */
+.todo-date-pill {
+  display: inline-block;
+  background-color: var(--admin-accent);
+  color: var(--admin-text-secondary);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.75rem;
+  margin-bottom: 16px;
+  border: 1px solid var(--admin-border);
+}
+
+/* Step 49: Large visitors chart */
+.visitors-chart-large {
+  height: 280px;
+}

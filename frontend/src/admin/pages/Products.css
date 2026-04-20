@@ -168,3 +168,158 @@
   color: var(--admin-bg);
   border-color: var(--admin-text-primary);
 }
+
+/* ── Kebab "..." menu (Steps 55, 57, 59) ── */
+.kebab-btn {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.kebab-btn:hover { opacity: 1; }
+
+.kebab-menu {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background-color: #1E1E1E;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  min-width: 140px;
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+.kebab-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 10px 16px;
+  color: var(--admin-text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.kebab-menu button:hover {
+  background-color: var(--admin-accent);
+}
+.kebab-menu button.kebab-danger { color: var(--admin-error); }
+.kebab-menu button.kebab-danger:hover { background-color: rgba(239,68,68,0.1); }
+
+/* ── Data-grid table footer (Steps 54, 58, 60) ── */
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-top: 1px solid var(--admin-border);
+  font-size: 0.85rem;
+  color: var(--admin-text-secondary);
+}
+.footer-selected { flex-shrink: 0; }
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.footer-label { white-space: nowrap; }
+.rows-per-page-select {
+  background-color: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-primary);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.page-nav-btns {
+  display: flex;
+  gap: 4px;
+}
+.page-nav-btns button {
+  background-color: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.page-nav-btns button:hover:not(:disabled) {
+  background-color: var(--admin-accent);
+  color: var(--admin-text-primary);
+}
+.page-nav-btns button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Sizes chip grid (Step 61) ── */
+.sizes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.size-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 5px 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--admin-text-secondary);
+  background-color: var(--admin-bg);
+  transition: all 0.15s;
+  user-select: none;
+}
+.size-chip:hover { border-color: #6366F1; color: #6366F1; }
+.size-chip.active {
+  background-color: #6366F1;
+  border-color: #6366F1;
+  color: #fff;
+}
+
+/* ── Two-column form row (Step 56, 61) ── */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── Small primary button for page headers ── */
+.btn-primary-sm {
+  background-color: var(--admin-text-primary);
+  color: var(--admin-bg);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-primary-sm:hover { opacity: 0.85; }
+
+/* ── Local toast fallback ── */
+.local-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #22C55E;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 5000;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+

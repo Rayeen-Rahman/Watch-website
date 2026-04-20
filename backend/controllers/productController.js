@@ -41,18 +41,20 @@ const getProductById = async (req, res) => {
 // @access  Private/Admin
 const createProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, discount, description, images, category, brand, tag } = req.body;
+    const { name, price, oldPrice, discount, shortDescription, description, images, category, brand, tag, sizes } = req.body;
 
     const product = new Product({
       name,
       price,
       oldPrice,
       discount,
+      shortDescription,
       description,
       images,
       category,
       brand,
       tag,
+      sizes: sizes || [],
     });
 
     const createdProduct = await product.save();
@@ -67,7 +69,7 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
   try {
-    const { name, price, oldPrice, discount, description, images, category, brand, tag } = req.body;
+    const { name, price, oldPrice, discount, shortDescription, description, images, category, brand, tag, sizes } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -76,11 +78,13 @@ const updateProduct = async (req, res) => {
       product.price = price || product.price;
       product.oldPrice = oldPrice !== undefined ? oldPrice : product.oldPrice;
       product.discount = discount !== undefined ? discount : product.discount;
+      product.shortDescription = shortDescription !== undefined ? shortDescription : product.shortDescription;
       product.description = description || product.description;
       product.images = images || product.images;
       product.category = category || product.category;
       product.brand = brand || product.brand;
       product.tag = tag !== undefined ? tag : product.tag;
+      product.sizes = sizes !== undefined ? sizes : product.sizes;
 
       const updatedProduct = await product.save();
       res.json(updatedProduct);

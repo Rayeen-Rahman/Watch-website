@@ -24,7 +24,8 @@ const Checkout = () => {
     if (cartItems.length === 0) {
       navigate('/');
     }
-  }, [cartItems, navigate, setIsCartOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems.length]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,16 +39,12 @@ const Checkout = () => {
     const orderPayload = {
       customerName: formData.customerName,
       phone: formData.phone,
-      shippingAddress: {
-        address: formData.address,
-        city: formData.city,
-        postalCode: formData.postalCode
-      },
-      items: cartItems.map(item => ({
-        product: item._id, // Must match product ID backend
-        qty: item.qty
+      address: `${formData.address}, ${formData.city} ${formData.postalCode}`.trim(),
+      products: cartItems.map(item => ({
+        product: item._id,
+        quantity: item.qty,
+        price: item.price
       })),
-      paymentMethod: 'COD',
       total: cartTotal
     };
 
@@ -144,16 +141,16 @@ const Checkout = () => {
                   </div>
                   <div className="summary-details">
                     <h4>{item.name}</h4>
-                    <p>${(item.price * item.qty).toFixed(2)}</p>
+                    <p>৳{(item.price * item.qty).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
             </div>
             
             <div className="summary-totals">
-              <div className="total-row"><span>Subtotal</span><span>${cartTotal.toFixed(2)}</span></div>
+              <div className="total-row"><span>Subtotal</span><span>৳{cartTotal.toLocaleString()}</span></div>
               <div className="total-row"><span>Shipping</span><span>Free</span></div>
-              <div className="total-row final-total"><span>Total</span><span>${cartTotal.toFixed(2)}</span></div>
+              <div className="total-row final-total"><span>Total</span><span>৳{cartTotal.toLocaleString()}</span></div>
             </div>
           </div>
         </div>

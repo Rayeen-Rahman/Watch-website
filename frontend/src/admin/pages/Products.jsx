@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Edit } from 'lucide-react';
+import { Trash2, MoreHorizontal } from 'lucide-react';
 import './Products.css';
 
 const Products = () => {
@@ -11,9 +11,11 @@ const Products = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [selectedIds, setSelectedIds] = useState([]);
-  
-  // Sorting state
   const [sortOrder, setSortOrder] = useState('asc');
+  const [openKebab, setOpenKebab] = useState(null);
+
+  // Step 60: data-grid pagination
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchProducts();
@@ -87,6 +89,22 @@ const Products = () => {
     setProducts(sorted);
   };
 
+  const handleDeleteOne = async (productId) => {
+    if (!window.confirm('Delete this product permanently?')) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/${productId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setOpenKebab(null);
+        fetchProducts();
+      } else {
+        const d = await res.json();
+        alert(d.message || 'Failed to delete product');
+      }
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -143,13 +161,25 @@ const Products = () => {
                     </div>
                   </td>
                   <td style={{fontWeight: 500}}>{product.name}</td>
-                  <td>${product.price}</td>
+                  <td>৳{Number(product.price).toLocaleString()}</td>
                   <td><div className="truncate-text">{product.description}</div></td>
-                  <td>
-                    <div className="action-buttons">
-                      <button className="btn-icon" title="Edit"><Edit size={16}/></button>
-                      <button className="btn-icon btn-icon-danger" title="Delete"><Trash2 size={16}/></button>
-                    </div>
+                  <td style={{ position: 'relative' }}>
+                    {/* Step 59: kebab menu */}
+                    <button
+                      className="btn-icon kebab-btn"
+                      onClick={() => setOpenKebab(openKebab === product._id ? null : product._id)}
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
+                    {openKebab === product._id && (
+                      <div className="kebab-menu">
+                        <button>✏️ Edit</button>
+                        <button
+                          className="kebab-danger"
+                          onClick={() => handleDeleteOne(product._id)}
+                        >🗑️ Delete</button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -159,19 +189,27 @@ const Products = () => {
             </tbody>
           </table>
           
-          {pages > 1 && (
-            <div className="pagination">
-              {[...Array(pages).keys()].map(x => (
-                <button 
-                  key={x + 1} 
-                  className={`page-btn ${x + 1 === page ? 'active' : ''}`}
-                  onClick={() => setPage(x + 1)}
-                >
-                  {x + 1}
-                </button>
-              ))}
+          {/* Step 60: data-grid pagination footer */}
+          <div className="table-footer">
+            <span className="footer-selected">{selectedIds.length} of {products.length} row(s) selected.</span>
+            <div className="footer-right">
+              <span className="footer-label">Rows per page:</span>
+              <select
+                className="rows-per-page-select"
+                value={rowsPerPage}
+                onChange={e => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
+              >
+                {[10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <span className="footer-label">{page} of {pages}</span>
+              <div className="page-nav-btns">
+                <button onClick={() => setPage(1)} disabled={page === 1} title="First">|◀</button>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} title="Prev">◀</button>
+                <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} title="Next">▶</button>
+                <button onClick={() => setPage(pages)} disabled={page === pages} title="Last">▶|</button>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

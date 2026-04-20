@@ -1,21 +1,19 @@
-/* Hero Section */
+/* ── HERO SECTION ── */
 .hero-section {
-  background-color: #000000;
-  color: #FFFFFF;
-  height: 85vh;
+  background-color: #f8f8f8;
+  min-height: 80vh;
   display: flex;
   align-items: center;
-  padding: 0 5%;
+  padding: 60px 5%;
   position: relative;
   overflow: hidden;
-  margin-top: -80px; /* Pull up underneath Navbar to allow glassmorphism to shine */
-  padding-top: 80px;
+  gap: 60px;
 }
 
 .hero-content {
   flex: 1;
   z-index: 2;
-  max-width: 600px;
+  max-width: 520px;
   animation: fadeUp 0.8s ease-out;
 }
 
@@ -25,136 +23,146 @@
 }
 
 .hero-label {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 2px;
-  color: #888;
-  margin-bottom: 20px;
+  letter-spacing: 3px;
+  color: #999;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-label::before {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 1.5px;
+  background: #999;
 }
 
 .hero-content h1 {
-  font-size: 5rem;
+  font-size: 4.2rem;
   font-weight: 800;
   letter-spacing: -2px;
   line-height: 1.1;
-  margin-bottom: 20px;
+  margin: 0 0 20px 0;
+  color: #0a0a0a;
 }
 
 .hero-content p {
-  font-size: 1.25rem;
-  color: #A0A0A0;
-  margin-bottom: 40px;
-  line-height: 1.6;
+  font-size: 1.05rem;
+  color: #555;
+  margin-bottom: 36px;
+  line-height: 1.7;
 }
 
+/* Step 35: Square SHOP NOW button */
 .btn-shop-now {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background-color: #FFFFFF;
-  color: #000000;
-  padding: 16px 35px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  display: inline-block;
+  background-color: #000000;
+  color: #ffffff;
+  padding: 14px 30px;
+  font-size: 0.95rem;
+  font-weight: 700;
   text-decoration: none;
-  border-radius: 50px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 6px;
+  letter-spacing: 1px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-bottom: 30px;
 }
 
 .btn-shop-now:hover {
-  background-color: #DDD;
+  background-color: #222;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
 .hero-trust {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-top: 30px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #888;
 }
 
-.trust-divider {
-  color: #444;
-}
+.trust-divider { color: #ccc; }
 
+/* Step 34: Hero watch image */
 .hero-image-container {
   flex: 1;
   display: flex;
   justify-content: flex-end;
-  z-index: 1;
+  align-items: center;
+  position: relative;
   animation: float 6s ease-in-out infinite;
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-12px); }
   100% { transform: translateY(0px); }
 }
 
-/* Fallback immersive UI graphic mimicking a beautiful watch dial */
-.premium-watch-placeholder {
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #222 0%, #050505 80%);
-  box-shadow: inset -20px -20px 60px rgba(255,255,255,0.02), 0 30px 60px rgba(0,0,0,0.8);
-  position: relative;
-}
-.premium-watch-placeholder::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 460px;
-  height: 460px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.1);
+.hero-watch-img {
+  max-width: 480px;
+  width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 60px rgba(0,0,0,0.18));
 }
 
+/* Step 35: Floating product spec card */
 .floating-spec-card {
   position: absolute;
-  top: 15%;
-  right: -30px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 15px 20px;
-  border-radius: 12px;
+  bottom: 40px;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  padding: 16px 22px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  gap: 4px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
   animation: float-offset 5s ease-in-out infinite alternate;
   z-index: 5;
+  min-width: 200px;
 }
 
 .floating-spec-card strong {
   font-size: 1rem;
-  font-weight: 600;
-  color: #FFF;
+  font-weight: 700;
+  color: #0a0a0a;
 }
 
 .floating-spec-card span {
   font-size: 0.8rem;
-  color: #AAA;
+  color: #888;
+}
+
+.floating-price {
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  color: #0a0a0a !important;
+  margin-top: 4px;
 }
 
 @keyframes float-offset {
-  0% { transform: translateY(0px) rotate(2deg); }
-  100% { transform: translateY(-10px) rotate(0deg); }
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(-8px); }
 }
 
-/* Collection Section */
+/* ── COLLECTION SECTION (Step 36) ── */
 .collection-section {
-  padding: 100px 5%;
+  padding: 90px 5%;
   background-color: var(--store-bg);
 }
 
+.best-sellers-section {
+  padding-top: 40px;
+  background-color: #f8f8f8;
+}
+
+/* Step 36: Centered header */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -162,163 +170,291 @@
   margin-bottom: 50px;
 }
 
+.centered-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
 .section-header h2 {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
   margin: 0;
-  letter-spacing: -1px;
+  letter-spacing: -0.5px;
 }
 
-.link-view-all {
-  color: var(--store-text-light);
-  text-decoration: none;
-  font-weight: 500;
+/* Step 36: subtitle */
+.section-subtitle {
   font-size: 0.95rem;
-  border-bottom: 1px solid transparent;
+  color: var(--store-text-light);
+  margin: 10px 0 0 0;
+  max-width: 500px;
+}
+
+/* Step 36: Centered VIEW ALL WATCHES link below grid */
+.view-all-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.link-view-all-centered {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--store-text);
+  text-decoration: underline;
+  letter-spacing: 1.5px;
+  transition: color 0.2s;
+}
+
+.link-view-all-centered:hover {
+  color: var(--store-text-light);
+}
+
+/* Step 39: Best Sellers header with arrow buttons */
+.best-sellers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.slider-nav-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.slider-nav-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--store-text);
   transition: all 0.2s;
-  padding-bottom: 2px;
 }
 
-.link-view-all:hover {
-  color: var(--store-accent);
+.slider-nav-btn:hover {
   border-color: var(--store-accent);
+  background-color: var(--store-accent);
+  color: #fff;
 }
 
-/* Product Slider (Scroll Snap) */
+/* ── PRODUCT GRID (4-col) ── */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .product-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-section { flex-direction: column; padding: 40px 5%; }
+  .hero-content h1 { font-size: 2.8rem; }
+  .hero-watch-img { max-width: 90%; }
+}
+
+@media (max-width: 480px) {
+  .product-grid { grid-template-columns: 1fr; }
+}
+
+/* ── PRODUCT SLIDER (Best Sellers) ── */
 .product-slider {
   display: flex;
   overflow-x: auto;
-  gap: 30px;
-  padding-bottom: 20px;
+  gap: 24px;
+  padding-bottom: 10px;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  /* Hide scrollbar for clean UI */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.product-slider::-webkit-scrollbar {
-  display: none;
-}
+.product-slider::-webkit-scrollbar { display: none; }
 
-.product-card {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  cursor: pointer;
-  min-width: 280px;
+.slider-card {
+  min-width: 260px;
   flex: 0 0 auto;
   scroll-snap-align: start;
 }
 
+/* ── PRODUCT CARD ── */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--store-bg);
+  border: 1px solid var(--store-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
 .product-image-wrapper {
-  aspect-ratio: 4/5;
+  aspect-ratio: 1 / 1;
   background-color: var(--store-surface);
   overflow: hidden;
   position: relative;
 }
 
-.product-image-wrapper img, .img-placeholder {
+.product-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card:hover .product-image-wrapper img {
-  transform: scale(1.05); /* strict 1.05 scale max */
+  transform: scale(1.05); /* strict 1.05 max */
 }
 
+/* Step 38: Discount badge — "৳X OFF" */
 .discount-badge {
   position: absolute;
-  top: 15px;
-  left: 15px;
+  top: 12px;
+  left: 12px;
   background-color: #22C55E;
   color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
-  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
   border-radius: 4px;
   z-index: 2;
+  letter-spacing: 0.5px;
 }
 
 .img-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
-  font-size: 0.9rem;
-}
-
-/* Glassmorphism Quick Add Button */
-.add-to-cart-btn {
-  position: absolute;
-  bottom: -60px; /* Hidden below */
-  left: 5%;
-  width: 90%;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.5);
-  padding: 14px 0;
-  border-radius: 4px; /* Minimal edge */
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--store-accent);
-  cursor: pointer;
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.product-card:hover .add-to-cart-btn {
-  bottom: 20px;
-  opacity: 1;
-}
-
-.add-to-cart-btn:hover {
-  background-color: var(--store-accent);
-  color: #FFF;
+  color: #bbb;
+  font-size: 0.85rem;
 }
 
 .product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: center;
-  text-align: center;
+  padding: 14px 14px 10px;
 }
 
 .truncate-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 0;
-  width: 100%;
+  margin: 0 0 8px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.price-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .product-price {
-  color: var(--store-text-light);
+  color: var(--store-text);
   margin: 0;
-  font-weight: 500;
+  font-weight: 700;
   font-size: 1rem;
 }
 
-/* Skeleton Loading State */
-.loading-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
+.old-price {
+  margin: 0;
+  text-decoration: line-through;
+  color: #aaa;
+  font-size: 0.85rem;
 }
 
+/* Step 37: Always-visible Buy Now + Cart button row */
+.card-actions {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--store-border);
+  margin-top: auto;
+}
+
+.btn-card-buy {
+  flex: 1;
+  padding: 12px 0;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--store-text);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.btn-card-buy:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.btn-card-cart {
+  width: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--store-border);
+  cursor: pointer;
+  color: var(--store-text);
+  transition: background-color 0.2s;
+}
+
+.btn-card-cart:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* ── SKELETON LOADING ── */
 .skeleton-card {
-  aspect-ratio: 4/5;
-  background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: skeletonLoading 1.5s infinite;
+  border-radius: 8px;
 }
 
 @keyframes skeletonLoading {
-  0% { background-position: 200% 0; }
+  0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+.error-message {
+  text-align: center;
+  color: #e44;
+  padding: 30px;
+}
+
+.empty-message {
+  text-align: center;
+  padding: 50px;
+  color: var(--store-text-light);
 }
