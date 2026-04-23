@@ -5,6 +5,8 @@ import Header from '../components/Header';
 import Products from '../pages/Products';
 import Users from '../pages/Users';
 import Orders from '../pages/Orders';
+import Categories from '../pages/Categories';
+import Inventory from '../pages/Inventory';
 import DashboardHome from '../pages/DashboardHome';
 import AddProductPanel from '../components/AddProductPanel';
 import AddCategoryPanel from '../components/AddCategoryPanel';
@@ -40,10 +42,12 @@ const AdminLayout = () => {
         />
         <div className="admin-content">
           <Routes>
-            <Route path="/" element={<DashboardHome />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/orders" element={<Orders />} />
+            <Route path="/" element={<DashboardHome showToast={showToast} />} />
+            <Route path="/products"   element={<Products   showToast={showToast} />} />
+            <Route path="/users"      element={<Users      showToast={showToast} />} />
+            <Route path="/orders"     element={<Orders     showToast={showToast} />} />
+            <Route path="/categories" element={<Categories showToast={showToast} />} />
+            <Route path="/inventory"  element={<Inventory  showToast={showToast} />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
           </Routes>
         </div>

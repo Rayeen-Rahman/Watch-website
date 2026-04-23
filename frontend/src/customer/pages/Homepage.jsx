@@ -1,97 +1,69 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCart } from '../context/CartContext';
-import heroWatchImg from '../../assets/hero_watch.png';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
 import './Homepage.css';
 
+const API = import.meta.env.VITE_API_URL;
+
 const Homepage = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { addToCart } = useCart();
+  const [collection,   setCollection]   = useState([]);
+  const [bestSellers,  setBestSellers]  = useState([]);
+  const [featuredProd, setFeaturedProd] = useState(null);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+
   const bestSellersRef = useRef(null);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/products');
-        if (!res.ok) throw new Error('Failed to fetch products');
-        const data = await res.json();
-        setProducts(data.products ? data.products.slice(0, 8) : []);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [collRes, bsRes, featRes] = await Promise.allSettled([
+        fetch(`${API}/api/products?limit=8`),
+        fetch(`${API}/api/products?bestSeller=true&limit=8`),
+        fetch(`${API}/api/products/featured`),
+      ]);
+
+      if (collRes.status === 'fulfilled' && collRes.value.ok) {
+        const d = await collRes.value.json();
+        setCollection(d.products || []);
       }
-    };
-    fetchProducts();
+      if (bsRes.status === 'fulfilled' && bsRes.value.ok) {
+        const d = await bsRes.value.json();
+        setBestSellers(d.products || []);
+      }
+      if (featRes.status === 'fulfilled' && featRes.value.ok) {
+        const d = await featRes.value.json();
+        setFeaturedProd(d);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Step 38: compute "৳X OFF" savings label
-  const getSavingsLabel = (product) => {
-    if (product.oldPrice && product.oldPrice > product.price) {
-      const saved = (product.oldPrice - product.price).toFixed(0);
-      return `৳${Number(saved).toLocaleString()} OFF`;
-    }
-    return null;
-  };
+  useEffect(() => { fetchAll(); }, [fetchAll]);
 
-  // Step 39: prev/next scroll handlers
-  const scrollBestSellers = (dir) => {
-    if (bestSellersRef.current) {
-      bestSellersRef.current.scrollBy({ left: dir * 320, behavior: 'smooth' });
-    }
-  };
+  const scrollBestSellers = (dir) =>
+    bestSellersRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
 
-  // Reusable product card (Steps 37, 38)
-  const ProductCard = ({ product, keyPrefix }) => {
-    const savings = getSavingsLabel(product);
-    return (
-      <div className="product-card" key={`${keyPrefix}-${product._id}`}>
-        <Link to={`/product/${product._id}`} className="product-card-link">
-          <div className="product-image-wrapper">
-            {savings && <div className="discount-badge">{savings}</div>}
-            {product.images && product.images[0] ? (
-              <img src={product.images[0]} alt={product.name} />
-            ) : (
-              <div className="img-placeholder">No Image</div>
-            )}
-          </div>
-          <div className="product-info">
-            <h3 className="truncate-title">{product.name}</h3>
-            <div className="price-row">
-              <p className="product-price">৳{product.price.toLocaleString()}</p>
-              {product.oldPrice > product.price && (
-                <p className="old-price">৳{product.oldPrice.toLocaleString()}</p>
-              )}
-            </div>
-          </div>
-        </Link>
-        {/* Step 37: Always-visible Buy Now + Cart buttons */}
-        <div className="card-actions">
-          <Link to={`/product/${product._id}`} className="btn-card-buy">Buy Now</Link>
-          <button
-            className="btn-card-cart"
-            aria-label="Add to cart"
-            onClick={() => addToCart(product, 1)}
-          >
-            <ShoppingCart size={16} />
-          </button>
-        </div>
-      </div>
-    );
-  };
+  // Resolve image URLs
+  const resolveImg = (url) =>
+    url?.startsWith('/uploads') ? `${API}${url}` : url;
 
   return (
     <div className="homepage">
 
-      {/* ── HERO SECTION (Steps 34, 35) ── */}
+      {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
       <section className="hero-section">
         <div className="hero-content">
-          <div className="hero-label">THE 2024 COLLECTION</div>
+          <div className="hero-label">THE 2025 COLLECTION</div>
           <h1>Find Your Perfect Watch</h1>
-          <p>Discover precision engineering paired with timeless design. Elevate your presence with a timepiece crafted for the modern individual.</p>
+          <p>
+            Discover precision engineering paired with timeless design.
+            Elevate your presence with a timepiece crafted for the modern individual.
+          </p>
           <a href="#collection" className="btn-shop-now">SHOP NOW</a>
           <div className="hero-trust">
             <span>✔ Cash on Delivery</span>
@@ -100,107 +72,127 @@ const Homepage = () => {
           </div>
         </div>
 
-        {/* Step 34: Real watch image */}
         <div className="hero-image-container">
-          <img src={heroWatchImg} alt="Premium Chronograph Watch" className="hero-watch-img" />
-          {/* Step 35: Floating card with product name + spec + price */}
-          <div className="floating-spec-card">
-            <strong>Chronograph Pro</strong>
-            <span>Automatic Movement • 42mm</span>
-            <span className="floating-price">৳45,000</span>
-          </div>
+          {/* Hero image — uses the first featured product image if available */}
+          {featuredProd?.images?.[0] ? (
+            <img
+              src={resolveImg(featuredProd.images[0])}
+              alt={featuredProd.name}
+              className="hero-watch-img"
+            />
+          ) : (
+            // Fallback to local asset
+            <img
+              src={new URL('../../assets/hero_watch.png', import.meta.url).href}
+              alt="Premium Chronograph Watch"
+              className="hero-watch-img"
+            />
+          )}
+
+          {/* Floating featured product card */}
+          {featuredProd ? (
+            <Link
+              to={`/product/${featuredProd._id}`}
+              className="floating-spec-card floating-spec-link"
+            >
+              {featuredProd.images?.[0] && (
+                <img
+                  src={resolveImg(featuredProd.images[0])}
+                  alt={featuredProd.name}
+                  className="floating-thumb"
+                />
+              )}
+              <div className="floating-info">
+                <span className="floating-label">⚡ Featured</span>
+                <strong>{featuredProd.name}</strong>
+                <span>
+                  {[featuredProd.movementType, featuredProd.caseSize]
+                    .filter(Boolean).join(' · ')}
+                </span>
+                <span className="floating-price">
+                  ৳{(featuredProd.price ?? 0).toLocaleString()}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div className="floating-spec-card">
+              <div className="floating-info">
+                <strong>Chronograph Pro</strong>
+                <span>Automatic Movement · 42mm</span>
+                <span className="floating-price">৳45,000</span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ── WATCH COLLECTION (Steps 36, 37, 38, 39) ── */}
+      {/* ── WATCH COLLECTION ──────────────────────────────────────────────── */}
       <section id="collection" className="collection-section">
-        {/* Step 36: Centered title + subtitle */}
         <div className="section-header centered-header">
           <h2>Watch Collection</h2>
-          <p className="section-subtitle">Explore our full range of meticulously crafted pieces, designed to stand the test of time.</p>
+          <p className="section-subtitle">
+            Explore our full range of meticulously crafted pieces, designed to stand the test of time.
+          </p>
         </div>
 
         {loading ? (
           <div className="product-grid">
-            {[...Array(4)].map((_, i) => <div key={i} className="skeleton-card" />)}
+            {[...Array(8)].map((_, i) => <div key={i} className="skeleton-card" />)}
           </div>
         ) : error ? (
           <div className="error-message">Failed to load collection: {error}</div>
-        ) : products.length === 0 ? (
-          <div className="empty-message">No watches yet. Head to the Admin Dashboard to add products!</div>
+        ) : collection.length === 0 ? (
+          <div className="empty-message">
+            No watches yet. Head to the Admin Dashboard to add products!
+          </div>
         ) : (
           <div className="product-grid">
-            {products.map(product => (
-              <ProductCard product={product} keyPrefix="col" key={product._id} />
+            {collection.map(p => (
+              <ProductCard key={p._id} product={p} />
             ))}
           </div>
         )}
 
-        {/* Step 36: "View All Watches" centered below grid */}
-        {products.length > 0 && (
+        {collection.length > 0 && (
           <div className="view-all-wrap">
-            <Link to="/category/all" className="link-view-all-centered">VIEW ALL WATCHES</Link>
+            <Link to="/category/all" className="link-view-all-centered">
+              VIEW ALL WATCHES
+            </Link>
           </div>
         )}
       </section>
 
-      {/* ── BEST SELLERS (Steps 39) ── */}
-      {products.length > 0 && (
+      {/* ── BEST SELLERS ──────────────────────────────────────────────────── */}
+      {!loading && bestSellers.length > 0 && (
         <section className="collection-section best-sellers-section">
           <div className="section-header best-sellers-header">
             <div>
               <h2>Best Sellers</h2>
-              {/* Step 39: subtitle text */}
-              <p className="section-subtitle" style={{ marginTop: '6px', marginBottom: 0 }}>
+              <p className="section-subtitle" style={{ marginTop: 6, marginBottom: 0 }}>
                 Our most sought-after timepieces, curated by enthusiasts.
               </p>
             </div>
-            {/* Step 39: prev/next arrow buttons */}
             <div className="slider-nav-buttons">
-              <button className="slider-nav-btn" onClick={() => scrollBestSellers(-1)} aria-label="Previous">
+              <button
+                className="slider-nav-btn"
+                onClick={() => scrollBestSellers(-1)}
+                aria-label="Previous"
+              >
                 <ChevronLeft size={18} />
               </button>
-              <button className="slider-nav-btn" onClick={() => scrollBestSellers(1)} aria-label="Next">
+              <button
+                className="slider-nav-btn"
+                onClick={() => scrollBestSellers(1)}
+                aria-label="Next"
+              >
                 <ChevronRight size={18} />
               </button>
             </div>
           </div>
 
           <div className="product-slider" ref={bestSellersRef}>
-            {products.slice(0, 6).map(product => (
-              <div className="product-card slider-card" key={`bs-${product._id}`}>
-                <Link to={`/product/${product._id}`} className="product-card-link">
-                  <div className="product-image-wrapper">
-                    {getSavingsLabel(product) && (
-                      <div className="discount-badge">{getSavingsLabel(product)}</div>
-                    )}
-                    {product.images && product.images[0] ? (
-                      <img src={product.images[0]} alt={product.name} />
-                    ) : (
-                      <div className="img-placeholder">No Image</div>
-                    )}
-                  </div>
-                  <div className="product-info">
-                    <h3 className="truncate-title">{product.name}</h3>
-                    <div className="price-row">
-                      <p className="product-price">৳{product.price.toLocaleString()}</p>
-                      {product.oldPrice > product.price && (
-                        <p className="old-price">৳{product.oldPrice.toLocaleString()}</p>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-                <div className="card-actions">
-                  <Link to={`/product/${product._id}`} className="btn-card-buy">Buy Now</Link>
-                  <button
-                    className="btn-card-cart"
-                    aria-label="Add to cart"
-                    onClick={() => addToCart(product, 1)}
-                  >
-                    <ShoppingCart size={16} />
-                  </button>
-                </div>
-              </div>
+            {bestSellers.map(p => (
+              <ProductCard key={`bs-${p._id}`} product={p} sliderCard />
             ))}
           </div>
         </section>

@@ -1,0 +1,156 @@
+/* ── Success page ────────────────────────────────────────────────────────── */
+.success-page {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 5%;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.success-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Animated check ring ─────────────────────────────────────────────────── */
+.success-icon-ring {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.12), transparent 70%);
+  border: 2px solid rgba(34,197,94,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  animation: pulseRing 2.5s ease-in-out infinite;
+}
+.success-check {
+  color: #22C55E;
+  animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.2s;
+}
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0  rgba(34,197,94,0.15); }
+  50%       { box-shadow: 0 0 0 16px rgba(34,197,94,0); }
+}
+@keyframes popIn {
+  from { transform: scale(0.3); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Heading ─────────────────────────────────────────────────────────────── */
+.success-heading {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: var(--store-text);
+  margin: 0 0 14px;
+}
+.success-sub {
+  font-size: 1.05rem;
+  color: var(--store-text-light);
+  max-width: 480px;
+  line-height: 1.7;
+  margin: 0 auto 40px;
+}
+
+/* ── Info cards row ─────────────────────────────────────────────────────── */
+.success-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.success-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--store-surface, #f9f9f9);
+  border: 1px solid var(--store-border, #eee);
+  border-radius: 12px;
+  padding: 18px 22px;
+  text-align: left;
+  max-width: 220px;
+  flex: 1;
+  min-width: 180px;
+}
+.success-card svg {
+  color: var(--store-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.success-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.success-card strong {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--store-text);
+}
+.success-card span {
+  font-size: 0.78rem;
+  color: var(--store-text-light);
+  line-height: 1.5;
+}
+
+/* ── CTA buttons ─────────────────────────────────────────────────────────── */
+.success-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+.btn-success-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--store-accent);
+  color: #fff;
+  padding: 14px 30px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-success-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.btn-success-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--store-text);
+  padding: 14px 28px;
+  border-radius: 50px;
+  border: 1.5px solid var(--store-border);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-success-ghost:hover {
+  border-color: var(--store-accent);
+  color: var(--store-accent);
+}
+
+/* ── Support note ────────────────────────────────────────────────────────── */
+.success-note {
+  font-size: 0.82rem;
+  color: var(--store-text-light);
+}
+.success-note strong {
+  color: var(--store-text);
+}

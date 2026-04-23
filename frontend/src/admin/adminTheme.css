@@ -252,3 +252,75 @@ body {
   font-weight: bold;
   border: 1px solid var(--admin-border);
 }
+
+/* ── Step 37: Sidebar quick-action buttons ───────────────────────────────── */
+.sidebar-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 10px 16px 10px;
+  border-bottom: 1px solid var(--admin-border);
+  margin-bottom: 6px;
+}
+.quick-action-btn {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: opacity 0.2s, transform 0.1s;
+  letter-spacing: 0.02em;
+}
+.quick-action-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Step 37: Sidebar section divider ────────────────────────────────────── */
+.sidebar-section {
+  margin-bottom: 4px;
+}
+
+/* ── Step 37: Local toast for pages without parent showToast ─────────────── */
+.local-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: #22C55E;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 9999;
+  animation: slideInToast 0.25s ease;
+}
+.local-toast.toast-error {
+  background: #EF4444;
+}
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Step 37: Toast notification (global) ────────────────────────────────── */
+.toast-notification {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--admin-success);
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  z-index: 9999;
+  animation: slideInToast 0.25s ease;
+}
+.toast-notification.toast-error {
+  background: var(--admin-error);
+}
+

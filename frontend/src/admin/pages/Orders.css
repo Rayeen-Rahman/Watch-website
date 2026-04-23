@@ -1,0 +1,146 @@
+/* ── Orders-specific styles ──────────────────────────────────────────────────── */
+
+/* Filter row */
+.orders-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Status filter tabs */
+.status-filter-tabs {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+.filter-tab {
+  background: none;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-tab:hover {
+  border-color: var(--admin-text-secondary);
+  color: var(--admin-text-primary);
+}
+.filter-tab-active {
+  background-color: var(--admin-text-primary);
+  color: var(--admin-bg);
+  border-color: var(--admin-text-primary);
+}
+
+/* ── Inline status select ────────────────────────────────────────────────────── */
+.status-select {
+  border: none;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 22px;
+  transition: opacity 0.2s;
+}
+.status-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.status-select-pending   { background-color: rgba(234,179,8,0.15);  color: #EAB308; }
+.status-select-delivered { background-color: rgba(34,197,94,0.12);  color: #22C55E; }
+.status-select-failed    { background-color: rgba(239,68,68,0.12);   color: #EF4444; }
+
+/* Status badge (used in modal) */
+.status-delivered { color: #22C55E; }
+.status-pending   { color: #EAB308; }
+.status-failed    { color: #EF4444; }
+
+/* ── Order Detail Modal ───────────────────────────────────────────────────────── */
+.order-modal {
+  width: 520px;
+  max-width: 100%;
+  background-color: var(--admin-sidebar-bg);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalFadeIn 0.2s ease;
+  margin: auto;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Center modal vertically (panel-overlay uses flex-end by default) */
+.panel-overlay:has(.order-modal) {
+  justify-content: center;
+  align-items: center;
+}
+
+.order-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.order-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.order-info-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.info-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--admin-text-secondary);
+  font-weight: 600;
+}
+
+/* ── Order Items List ────────────────────────────────────────────────────────── */
+.order-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.order-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background-color: var(--admin-bg);
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+}
+.order-item-name {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--admin-text-primary);
+}
+.order-item-qty {
+  font-size: 0.82rem;
+  color: var(--admin-text-secondary);
+}
+.order-item-price {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--admin-text-primary);
+}

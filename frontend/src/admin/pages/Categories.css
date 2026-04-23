@@ -1,0 +1,135 @@
+/* ── Categories page layout ──────────────────────────────────────────────── */
+.categories-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .categories-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Add panel ───────────────────────────────────────────────────────────── */
+.cat-add-panel {
+  background: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 24px;
+  position: sticky;
+  top: 80px;
+}
+
+.cat-table-panel {
+  background: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.panel-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--admin-text-secondary);
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+/* ── Add form fields ─────────────────────────────────────────────────────── */
+.cat-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cat-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--admin-text-secondary);
+}
+
+.cat-field input {
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  padding: 9px 12px;
+  color: var(--admin-text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.cat-field input:focus {
+  outline: none;
+  border-color: var(--admin-text-primary);
+}
+
+.field-hint {
+  font-size: 0.72rem;
+  color: var(--admin-text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Slug pill (read-only display) ───────────────────────────────────────── */
+.slug-pill {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.1);
+  color: #818CF8;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* ── Inline edit input ───────────────────────────────────────────────────── */
+.inline-edit-input {
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-text-primary);
+  border-radius: 5px;
+  padding: 5px 9px;
+  color: var(--admin-text-primary);
+  font-size: 0.88rem;
+  font-family: inherit;
+  width: 100%;
+  min-width: 0;
+  outline: none;
+}
+
+/* ── Action buttons ──────────────────────────────────────────────────────── */
+.cat-action-btns {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btn-icon-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  background: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-icon-action.edit-btn   { color: #818CF8; }
+.btn-icon-action.delete-btn { color: #EF4444; }
+.btn-icon-action.save-btn   { color: #22C55E; }
+.btn-icon-action.cancel-btn { color: var(--admin-text-secondary); }
+
+.btn-icon-action:hover { opacity: 0.8; transform: scale(1.08); }
+.btn-icon-action:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }

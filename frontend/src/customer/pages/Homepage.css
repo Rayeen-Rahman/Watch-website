@@ -458,3 +458,78 @@
   padding: 50px;
   color: var(--store-text-light);
 }
+
+/* ── Step 29: New ProductCard fields ──────────────────────────────────────── */
+.product-brand {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.product-spec {
+  display: block;
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-bottom: 6px;
+}
+
+/* Best Seller overlay badge */
+.badge-bs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+/* ── Step 29: Hero floating featured card ─────────────────────────────────── */
+.floating-spec-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 12px;
+}
+.floating-spec-link:hover { opacity: 0.9; }
+
+.floating-thumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.15);
+  flex-shrink: 0;
+}
+
+.floating-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.floating-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6366F1;
+  margin-bottom: 2px;
+}
+

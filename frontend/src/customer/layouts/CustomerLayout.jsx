@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Homepage from '../pages/Homepage';
 import ProductDetail from '../pages/ProductDetail';
+import CategoryPage from '../pages/CategoryPage';
 import Checkout from '../pages/Checkout';
 import Success from '../pages/Success';
 import CartPanel from '../components/CartPanel';
@@ -27,6 +28,8 @@ const CustomerLayout = () => {
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/category/:slug" element={<CategoryPage />} />
+            <Route path="/category" element={<CategoryPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/success" element={<Success />} />
           </Routes>

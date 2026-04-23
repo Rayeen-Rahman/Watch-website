@@ -22,22 +22,28 @@ const ProductDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    const API = import.meta.env.VITE_API_URL;
+    const resolveImg = (url) => url?.startsWith('/uploads') ? `${API}${url}` : url;
+
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:5000/api/products/${id}`);
+        const res = await fetch(`${API}/api/products/${id}`);
         if (!res.ok) throw new Error('Product not found in the database');
         const data = await res.json();
         setProduct(data);
-        setActiveImage(data.images && data.images.length > 0 ? data.images[0] : '');
+        // Resolve image URLs for /uploads paths
+        const firstImg = data.images?.[0] ? resolveImg(data.images[0]) : '';
+        setActiveImage(firstImg);
 
+        // Step 30: fetch related by same category
         try {
-          const relatedRes = await fetch('http://localhost:5000/api/products');
+          const catParam = data.category?._id ? `&category=${data.category._id}` : '';
+          const relatedRes = await fetch(`${API}/api/products?limit=8${catParam}`);
           if (relatedRes.ok) {
             const relatedData = await relatedRes.json();
-            if (relatedData.products) {
-              setRelatedProducts(relatedData.products.filter(p => p._id !== id).slice(0, 6));
-            }
+            const filtered = (relatedData.products || []).filter(p => p._id !== id).slice(0, 6);
+            setRelatedProducts(filtered);
           }
         } catch (e) {
           console.error('Could not fetch related products', e);
@@ -122,15 +128,18 @@ const ProductDetail = () => {
         <div className="gallery-section">
           {product.images && product.images.length > 1 && (
             <div className="thumbnail-list">
-              {product.images.map((img, index) => (
-                <div
-                  key={index}
-                  className={`thumbnail ${activeImage === img ? 'active' : ''}`}
-                  onClick={() => setActiveImage(img)}
-                >
-                  <img src={img} alt={`${product.name} view ${index + 1}`} />
-                </div>
-              ))}
+              {product.images.map((img, index) => {
+                const resolved = img?.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${img}` : img;
+                return (
+                  <div
+                    key={index}
+                    className={`thumbnail ${activeImage === resolved ? 'active' : ''}`}
+                    onClick={() => setActiveImage(resolved)}
+                  >
+                    <img src={resolved} alt={`${product.name} view ${index + 1}`} />
+                  </div>
+                );
+              })}
               {/* Step 45: Video play thumb placeholder if 3+ images */}
               {product.images.length >= 3 && (
                 <div className="thumbnail thumb-video">
@@ -175,6 +184,7 @@ const ProductDetail = () => {
             )}
           </div>
 
+          {product.brand && <span className="detail-brand">{product.brand}</span>}
           <h1 className="detail-title">{product.name}</h1>
 
           {/* Price row with SAVE badge */}
@@ -230,6 +240,31 @@ const ProductDetail = () => {
 
           {/* Accordion Sections */}
           <div className="accordion-sections">
+            {/* Watch Specs */}
+            {(product.movementType || product.caseSize || product.dialColor || product.strapMaterial || product.waterResistance || product.gender) && (
+              <div className="accordion-item">
+                <button className="accordion-header" onClick={() => toggleAccordion('specs')}>
+                  Watch Specifications
+                  {activeAccordion === 'specs' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+                {activeAccordion === 'specs' && (
+                  <div className="accordion-content">
+                    <table className="specs-table">
+                      <tbody>
+                        {product.movementType   && <tr><td>Movement</td><td>{product.movementType}</td></tr>}
+                        {product.caseSize       && <tr><td>Case Size</td><td>{product.caseSize}</td></tr>}
+                        {product.dialColor      && <tr><td>Dial Color</td><td>{product.dialColor}</td></tr>}
+                        {product.strapMaterial  && <tr><td>Strap</td><td>{product.strapMaterial}</td></tr>}
+                        {product.waterResistance && <tr><td>Water Resistance</td><td>{product.waterResistance}</td></tr>}
+                        {product.gender         && <tr><td>Gender</td><td>{product.gender}</td></tr>}
+                        {product.brand          && <tr><td>Brand</td><td>{product.brand}</td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Product Details */}
             <div className="accordion-item">
               <button className="accordion-header" onClick={() => toggleAccordion('details')}>
@@ -299,10 +334,13 @@ const ProductDetail = () => {
               <div className="related-card" key={rel._id}>
                 <Link to={`/product/${rel._id}`} className="related-card-link">
                   <div className="related-img-wrap">
-                    {rel.images && rel.images[0] ? (
-                      <img src={rel.images[0]} alt={rel.name} />
+                    {rel.images?.[0] ? (
+                      <img
+                        src={rel.images[0].startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${rel.images[0]}` : rel.images[0]}
+                        alt={rel.name}
+                      />
                     ) : (
-                      <div className="img-placeholder">No Image</div>
+                      <div className="img-placeholder">{(rel.brand || 'W').charAt(0)}</div>
                     )}
                     {rel.oldPrice > rel.price && (
                       <div className="related-discount-badge">

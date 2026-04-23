@@ -277,7 +277,117 @@
   border: 1px solid var(--admin-border);
 }
 
-/* Step 49: Large visitors chart */
-.visitors-chart-large {
-  height: 280px;
+/* ── Steps 19-20: 6-KPI grid ───────────────────────────────────────────────── */
+.kpi-six {
+  grid-template-columns: repeat(6, 1fr);
 }
+@media (max-width: 1200px) { .kpi-six { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .kpi-six { grid-template-columns: repeat(2, 1fr); } }
+
+.kpi-warning .kpi-icon { background-color: rgba(234, 179, 8, 0.15);  color: #EAB308; }
+.kpi-danger  .kpi-icon { background-color: rgba(239, 68, 68, 0.15);  color: #EF4444; }
+
+/* ── Step 22: Full-width chart ─────────────────────────────────────────────── */
+.chart-full {
+  height: 320px;
+}
+
+/* ── Step 24: Panel header with "View all" link ────────────────────────────── */
+.list-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.list-card-header h3 { margin: 0; font-size: 1rem; font-weight: 500; color: var(--admin-text-secondary); }
+.panel-link {
+  font-size: 0.78rem;
+  color: #6366F1;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.panel-link:hover { opacity: 0.7; }
+
+/* ── Step 21: Status colours ───────────────────────────────────────────────── */
+.tx-done    { color: var(--admin-success); }
+.tx-pending { color: #EAB308; }
+.tx-failed  { color: #EF4444; }
+
+/* ── Step 22: Popular product thumb placeholder ────────────────────────────── */
+.product-thumb-placeholder {
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--admin-text-secondary);
+}
+
+/* ── Step 23: Functional todo ──────────────────────────────────────────────── */
+.todo-list li {
+  justify-content: flex-start;
+  gap: 10px;
+  position: relative;
+  cursor: pointer;
+}
+.todo-list li span {
+  flex: 1;
+  font-size: 0.88rem;
+}
+.todo-done span {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+.todo-delete-btn {
+  background: none;
+  border: none;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+}
+.todo-list li:hover .todo-delete-btn { opacity: 1; }
+.todo-delete-btn:hover { color: #EF4444; }
+
+.todo-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.todo-add-row input {
+  flex: 1;
+  background-color: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-primary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.todo-add-row input:focus { outline: none; border-color: var(--admin-text-secondary); }
+.todo-add-btn {
+  background-color: var(--admin-text-primary);
+  color: var(--admin-bg);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+.todo-add-btn:hover { opacity: 0.85; }
+
+/* ── Empty state ────────────────────────────────────────────────────────────── */
+.empty-state {
+  color: var(--admin-text-secondary);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}
+

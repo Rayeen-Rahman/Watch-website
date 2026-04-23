@@ -1,0 +1,162 @@
+/* ── Inventory page ──────────────────────────────────────────────────────── */
+
+/* Controls bar */
+.inv-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.inv-threshold {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--admin-text-secondary);
+}
+.threshold-input {
+  width: 60px;
+  background: var(--admin-sidebar-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--admin-text-primary);
+  font-size: 0.85rem;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+}
+.inv-filter-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-pill {
+  background: none;
+  border: 1px solid var(--admin-border);
+  border-radius: 20px;
+  color: var(--admin-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.filter-pill.active {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  border-color: transparent;
+  color: #fff;
+}
+.filter-pill:hover:not(.active) {
+  border-color: #6366F1;
+  color: #818CF8;
+}
+.refresh-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border);
+  background: none;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.refresh-btn:hover { color: var(--admin-text-primary); border-color: var(--admin-text-primary); }
+
+/* Low stock badge in header */
+.low-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #EF4444;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* Product thumbnail */
+.inv-thumb {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  flex-shrink: 0;
+}
+.inv-thumb-placeholder {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  background: var(--admin-accent);
+  flex-shrink: 0;
+}
+
+/* Stock level pill */
+.stock-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.stock-ok  { background: rgba(34,197,94,0.1);  color: #22C55E; }
+.stock-med { background: rgba(234,179,8,0.1);  color: #EAB308; }
+.stock-low { background: rgba(239,68,68,0.12); color: #EF4444; }
+
+/* Low stock row highlight */
+.low-stock-row {
+  background: rgba(239,68,68,0.04) !important;
+}
+
+/* Inline stock edit input */
+.stock-edit-input {
+  width: 80px;
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--admin-text-primary);
+  font-size: 0.88rem;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.stock-edit-input:focus { border-color: #6366F1; }
+
+/* Save button */
+.save-stock-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid var(--admin-border);
+  background: none;
+  color: var(--admin-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+.save-stock-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.save-stock-btn.save-stock-dirty {
+  background: rgba(34,197,94,0.1);
+  border-color: #22C55E;
+  color: #22C55E;
+}
+.save-stock-btn.save-stock-dirty:hover {
+  background: #22C55E;
+  color: #fff;
+}

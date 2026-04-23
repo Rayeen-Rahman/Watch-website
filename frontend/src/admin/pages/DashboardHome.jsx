@@ -1,207 +1,267 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Legend, PieChart, Pie, Cell } from 'recharts';
-import { TrendingUp, Users, DollarSign, ListTodo } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  TrendingUp, Users, DollarSign, ListTodo,
+  Clock, Package, AlertTriangle, Plus, Trash2,
+} from 'lucide-react';
 import './DashboardHome.css';
 
+const API = import.meta.env.VITE_API_URL;
+
 const DashboardHome = () => {
-  // Mock data specifically for the charts as requested by plan
-  const revenueData = [
-    { name: 'Mon', orders: 400, successful: 320 },
-    { name: 'Tue', orders: 300, successful: 250 },
-    { name: 'Wed', orders: 550, successful: 480 },
-    { name: 'Thu', orders: 200, successful: 160 },
-    { name: 'Fri', orders: 700, successful: 610 },
-    { name: 'Sat', orders: 900, successful: 780 },
-    { name: 'Sun', orders: 650, successful: 540 },
-  ];
+  // ── Step 19–20: Real KPI stats ──────────────────────────────────────────────
+  const [stats, setStats] = useState(null);
 
-  const visitorDonutData = [
-    { name: 'Direct', value: 400 },
-    { name: 'Social', value: 300 },
-    { name: 'Email', value: 200 },
-    { name: 'Other', value: 100 },
-  ];
-  const DONUT_COLORS = ['#6366F1', '#22C55E', '#F59E0B', '#3A3A3A'];
-  const totalVisitors = visitorDonutData.reduce((a, b) => a + b.value, 0);
+  // ── Step 21: Real recent orders ─────────────────────────────────────────────
+  const [recentOrders, setRecentOrders] = useState([]);
 
-  const totalVisitorsData = [
-    { name: 'Mon', mobile: 120, desktop: 200 },
-    { name: 'Tue', mobile: 200, desktop: 300 },
-    { name: 'Wed', mobile: 150, desktop: 400 },
-    { name: 'Thu', mobile: 280, desktop: 350 },
-    { name: 'Fri', mobile: 320, desktop: 500 },
-    { name: 'Sat', mobile: 390, desktop: 620 },
-    { name: 'Sun', mobile: 250, desktop: 480 },
-  ];
+  // ── Step 22: Real popular products + revenue chart ──────────────────────────
+  const [popularProducts, setPopularProducts] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
-  const transactions = [
-    { id: '#1A2B', name: 'Ahmad Reza', initials: 'AR', amount: '৳29,999', status: 'Completed' },
-    { id: '#8F9A', name: 'Mina Khan',  initials: 'MK', amount: '৳15,900', status: 'Completed' },
-    { id: '#4C5D', name: 'Omar Faruq', initials: 'OF', amount: '৳42,000', status: 'Pending'   },
-    { id: '#2E3F', name: 'Sadia Islam', initials: 'SI', amount: '৳18,500', status: 'Completed' },
-  ];
+  // ── Step 23: Functional Todo list ───────────────────────────────────────────
+  const [todos, setTodos] = useState(() => {
+    try {
+      const saved = localStorage.getItem('adminTodos');
+      return saved ? JSON.parse(saved) : [
+        { id: 1, text: 'Restock Chronograph series', done: false },
+        { id: 2, text: 'Verify pending orders',      done: false },
+        { id: 3, text: 'Launch new layout',           done: false },
+      ];
+    } catch { return []; }
+  });
+  const [newTodo, setNewTodo] = useState('');
 
-  const popularProducts = [
-    { name: 'Chronograph Obsidian', price: '৳45,000', sold: 45, img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=80&h=80&fit=crop' },
-    { name: 'Silver Horizon', price: '৳32,000', sold: 32, img: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=80&h=80&fit=crop' },
-    { name: 'Sapphire Night', price: '৳28,500', sold: 28, img: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=80&h=80&fit=crop' },
-  ];
+  const saveTodos = (updated) => {
+    setTodos(updated);
+    localStorage.setItem('adminTodos', JSON.stringify(updated));
+  };
 
-  const today = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const toggleTodo  = (id) => saveTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const deleteTodo  = (id) => saveTodos(todos.filter(t => t.id !== id));
+  const addTodo     = ()   => {
+    if (!newTodo.trim()) return;
+    saveTodos([...todos, { id: Date.now(), text: newTodo.trim(), done: false }]);
+    setNewTodo('');
+  };
 
+  const today = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
 
+  useEffect(() => {
+    // Dashboard stats
+    fetch(`${API}/api/admin/dashboard-stats`)
+      .then(r => r.json())
+      .then(setStats)
+      .catch(() => {});
+
+    // Recent orders
+    fetch(`${API}/api/admin/recent-orders?limit=8`)
+      .then(r => r.json())
+      .then(data => setRecentOrders(Array.isArray(data) ? data : []))
+      .catch(() => {});
+
+    // Popular products
+    fetch(`${API}/api/admin/popular-products?limit=5`)
+      .then(r => r.json())
+      .then(data => setPopularProducts(Array.isArray(data) ? data : []))
+      .catch(() => {});
+
+    // Revenue chart
+    fetch(`${API}/api/admin/revenue-chart?days=7`)
+      .then(r => r.json())
+      .then(data => setChartData(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
+  const fmt = (n) => (n ?? 0).toLocaleString();
+
+  // Status badge helper
+  const statusClass = (s = '') => {
+    const v = s.toLowerCase();
+    if (v === 'delivered' || v === 'completed') return 'tx-done';
+    if (v === 'failed'    || v === 'cancelled') return 'tx-failed';
+    return 'tx-pending';
+  };
 
   return (
     <div className="admin-page">
       <div className="page-header">
-        <h2 style={{margin:0, fontWeight: 500}}>Admin Dashboard</h2>
+        <h2 style={{ margin: 0, fontWeight: 500 }}>Admin Dashboard</h2>
       </div>
 
       <div className="dashboard-grid">
-        
-        {/* KPI Cards */}
-        <div className="kpi-cards-row">
+
+        {/* ── Step 19–20: 6 KPI Cards ─────────────────────────────────────── */}
+        <div className="kpi-cards-row kpi-six">
           <div className="kpi-card">
-            <div className="kpi-icon"><DollarSign size={24} /></div>
+            <div className="kpi-icon"><DollarSign size={22} /></div>
             <div className="kpi-info">
               <p>Total Revenue</p>
-              <h3>৳14,230.50</h3>
+              <h3>৳{fmt(stats?.totalRevenue)}</h3>
             </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-icon"><TrendingUp size={24} /></div>
+            <div className="kpi-icon"><TrendingUp size={22} /></div>
             <div className="kpi-info">
               <p>Sales Today</p>
-              <h3>24 Orders</h3>
+              <h3>{stats?.todayOrders ?? '—'} Orders</h3>
             </div>
           </div>
           <div className="kpi-card">
-            <div className="kpi-icon"><Users size={24} /></div>
+            <div className="kpi-icon"><Users size={22} /></div>
             <div className="kpi-info">
-              <p>Active Users</p>
-              <h3>1,420</h3>
+              <p>Total Users</p>
+              <h3>{fmt(stats?.totalUsers)}</h3>
+            </div>
+          </div>
+          <div className="kpi-card kpi-warning">
+            <div className="kpi-icon"><Clock size={22} /></div>
+            <div className="kpi-info">
+              <p>Pending Orders</p>
+              <h3>{stats?.pendingOrders ?? '—'}</h3>
+            </div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-icon"><Package size={22} /></div>
+            <div className="kpi-info">
+              <p>Total Products</p>
+              <h3>{fmt(stats?.totalProducts)}</h3>
+            </div>
+          </div>
+          <div className="kpi-card kpi-danger">
+            <div className="kpi-icon"><AlertTriangle size={22} /></div>
+            <div className="kpi-info">
+              <p>Low Stock Items</p>
+              <h3>{stats?.lowStockCount ?? '—'}</h3>
             </div>
           </div>
         </div>
 
-        {/* Charts Row */}
-        <div className="charts-row">
-          <div className="chart-container">
-            <h3>Revenue (Last 7 Days)</h3>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueData} barGap={4}>
-                  <XAxis dataKey="name" stroke="#666" tick={{fontSize:12}} />
-                  <YAxis stroke="#666" tick={{fontSize:12}} />
-                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{backgroundColor: '#111', border: '1px solid #333', borderRadius:'8px'}} />
-                  <Legend wrapperStyle={{paddingTop:'16px', color:'#A1A1A1', fontSize:'0.8rem'}} />
-                  <Bar dataKey="orders" name="Orders" fill="#FFFFFF" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="successful" name="Successful" fill="#6366F1" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Step 47: Donut Chart - Visitor Breakdown */}
-          <div className="chart-container">
-            <h3>Visitor Breakdown</h3>
-            <div className="chart-wrapper donut-wrapper">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={visitorDonutData}
-                    cx="50%" cy="50%"
-                    innerRadius={60} outerRadius={90}
-                    dataKey="value"
-                    paddingAngle={3}
-                  >
-                    {visitorDonutData.map((entry, i) => (
-                      <Cell key={i} fill={DONUT_COLORS[i % DONUT_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{backgroundColor:'#111',border:'1px solid #333',borderRadius:'8px'}} />
-                  <Legend wrapperStyle={{color:'#A1A1A1',fontSize:'0.8rem'}} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="donut-center-label">
-                <span className="donut-total">{totalVisitors.toLocaleString()}</span>
-                <span className="donut-caption">Total</span>
-              </div>
-            </div>
-            <p className="chart-trend">↑ Trending up by 5.2% this month</p>
-          </div>
-        </div>
-
-        {/* Bottom Row - Steps 48, 50, 51 */}
-        <div className="bottom-row">
-          {/* Step 48: Transactions with avatars */}
-          <div className="dashboard-list-card">
-            <h3>Latest Transactions</h3>
-            <div className="transaction-list">
-              {transactions.map(t => (
-                <div key={t.id} className="transaction-row">
-                  <div className="tx-avatar">{t.initials}</div>
-                  <div className="tx-info">
-                    <span className="tx-name">{t.name}</span>
-                    <span className="tx-sub">Order Payment · {t.id}</span>
-                  </div>
-                  <div className="tx-right">
-                    <span className="tx-amount">{t.amount}</span>
-                    <span className={`tx-status ${t.status === 'Pending' ? 'tx-pending' : 'tx-done'}`}>{t.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Step 50: Popular Products with thumbnails */}
-          <div className="dashboard-list-card">
-            <h3>Popular Products</h3>
-            <div className="product-thumb-list">
-              {popularProducts.map((p, i) => (
-                <div key={i} className="product-thumb-row">
-                  <img src={p.img} alt={p.name} className="product-thumb" />
-                  <div className="product-thumb-info">
-                    <span className="product-thumb-name">{p.name}</span>
-                    <span className="product-thumb-price">{p.price}</span>
-                  </div>
-                  <span className="product-thumb-sold">{p.sold} sold</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Step 51: Todo with date pill */}
-          <div className="dashboard-list-card">
-            <h3><ListTodo size={18} style={{marginRight: '8px'}}/> Todo List</h3>
-            <div className="todo-date-pill">📅 {today}</div>
-            <ul className="dash-list todo-list">
-              <li><input type="checkbox" /> Restock Chronograph series</li>
-              <li><input type="checkbox" /> Verify pending orders</li>
-              <li><input type="checkbox" /> Launch new layout</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Step 49: Total Visitors dual-line chart */}
-        <div className="chart-container visitors-chart-large">
-          <h3>Total Visitors — Mobile vs Desktop</h3>
+        {/* ── Step 22: Revenue Bar Chart ──────────────────────────────────── */}
+        <div className="chart-container chart-full">
+          <h3>Revenue — Last 7 Days</h3>
           <div className="chart-wrapper">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={totalVisitorsData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e1e" />
-                <XAxis dataKey="name" stroke="#666" tick={{fontSize:12}} />
-                <YAxis stroke="#666" tick={{fontSize:12}} />
-                <Tooltip contentStyle={{backgroundColor:'#111',border:'1px solid #333',borderRadius:'8px'}} />
-                <Legend wrapperStyle={{color:'#A1A1A1',fontSize:'0.8rem'}} />
-                <Line type="monotone" dataKey="mobile" name="Mobile" stroke="#6366F1" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="desktop" name="Desktop" stroke="#22C55E" strokeWidth={2.5} dot={false} />
-              </LineChart>
+              <BarChart data={chartData} barGap={4}>
+                <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 12 }} />
+                <YAxis stroke="#666" tick={{ fontSize: 12 }} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
+                />
+                <Legend wrapperStyle={{ paddingTop: '16px', color: '#A1A1A1', fontSize: '0.8rem' }} />
+                <Bar dataKey="orders"  name="Orders"       fill="#FFFFFF"  radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" name="Revenue (৳)"  fill="#6366F1"  radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* ── Bottom Row ──────────────────────────────────────────────────── */}
+        <div className="bottom-row">
+
+          {/* Step 21 + 24: Real recent orders with "View all" link */}
+          <div className="dashboard-list-card">
+            <div className="list-card-header">
+              <h3>Latest Orders</h3>
+              <Link to="/admin/orders" className="panel-link">View all orders →</Link>
+            </div>
+            <div className="transaction-list">
+              {recentOrders.length === 0 ? (
+                <p className="empty-state">No orders yet.</p>
+              ) : recentOrders.map(o => (
+                <div key={o._id} className="transaction-row">
+                  <div className="tx-avatar">
+                    {(o.customerName || 'U').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="tx-info">
+                    <span className="tx-name">{o.customerName || 'Customer'}</span>
+                    <span className="tx-sub">#{o._id.toString().slice(-6).toUpperCase()} · {new Date(o.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="tx-right">
+                    <span className="tx-amount">৳{fmt(o.total)}</span>
+                    <span className={`tx-status ${statusClass(o.status)}`}>{o.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 22 + 24: Real popular products with "Manage" link */}
+          <div className="dashboard-list-card">
+            <div className="list-card-header">
+              <h3>Popular Products</h3>
+              <Link to="/admin/products" className="panel-link">Manage products →</Link>
+            </div>
+            <div className="product-thumb-list">
+              {popularProducts.length === 0 ? (
+                <p className="empty-state">No sales data yet.</p>
+              ) : popularProducts.map((p, i) => (
+                <div key={i} className="product-thumb-row">
+                  {p.image ? (
+                    <img
+                      src={p.image.startsWith('/uploads') ? `${API}${p.image}` : p.image}
+                      alt={p.name}
+                      className="product-thumb"
+                    />
+                  ) : (
+                    <div className="product-thumb product-thumb-placeholder">
+                      {(p.name || 'W').charAt(0)}
+                    </div>
+                  )}
+                  <div className="product-thumb-info">
+                    <span className="product-thumb-name">{p.name}</span>
+                    <span className="product-thumb-price">৳{fmt(p.price)}</span>
+                  </div>
+                  <span className="product-thumb-sold">{p.totalSold} sold</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 23: Functional Todo List */}
+          <div className="dashboard-list-card">
+            <h3><ListTodo size={18} style={{ marginRight: '8px', verticalAlign: 'middle' }} />Todo List</h3>
+            <div className="todo-date-pill">📅 {today}</div>
+            <ul className="dash-list todo-list">
+              {todos.map(t => (
+                <li key={t.id} className={t.done ? 'todo-done' : ''}>
+                  <input
+                    type="checkbox"
+                    checked={t.done}
+                    onChange={() => toggleTodo(t.id)}
+                  />
+                  <span>{t.text}</span>
+                  <button className="todo-delete-btn" onClick={() => deleteTodo(t.id)} aria-label="Delete">
+                    <Trash2 size={12} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="todo-add-row">
+              <input
+                type="text"
+                placeholder="Add new task..."
+                value={newTodo}
+                onChange={e => setNewTodo(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addTodo()}
+              />
+              <button onClick={addTodo} className="todo-add-btn" aria-label="Add task">
+                <Plus size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
 };
+
 export default DashboardHome;

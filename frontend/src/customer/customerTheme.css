@@ -357,3 +357,180 @@ body.customer-view {
   color: var(--store-text-light);
   font-size: 0.82rem;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Step 34 — Navbar: Category links, search clear, mobile menu, dropdown
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Category links row inside navbar */
+.navbar-cats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 16px;
+}
+
+.nav-cat-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--store-text-light);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.nav-cat-link:hover {
+  color: var(--store-accent);
+  background: rgba(0,0,0,0.04);
+}
+.nav-cat-more {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Category "More" dropdown */
+.cat-more-wrap {
+  position: relative;
+}
+.cat-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid var(--store-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  padding: 8px 0;
+  min-width: 160px;
+  z-index: 1100;
+  animation: dropFadeIn 0.15s ease;
+}
+@keyframes dropFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.cat-dropdown-link {
+  display: block;
+  padding: 9px 18px;
+  font-size: 0.85rem;
+  color: var(--store-text);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.cat-dropdown-link:hover {
+  background: var(--store-surface);
+  color: var(--store-accent);
+}
+
+/* Search clear button */
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  transition: color 0.2s;
+}
+.search-clear-btn:hover { color: #333; }
+
+/* Mobile hamburger — hidden on desktop */
+.mobile-menu-btn { display: none !important; }
+
+/* Mobile menu panel */
+.mobile-menu {
+  display: none;
+  background: #fff;
+  border-bottom: 1px solid var(--store-border);
+  padding: 16px 5%;
+  position: sticky;
+  top: 80px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.mobile-search-form {
+  display: flex;
+  border: 1.5px solid var(--store-accent);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.mobile-search-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.mobile-search-form button {
+  background: var(--store-accent);
+  border: none;
+  color: #fff;
+  padding: 0 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mobile-nav-links a {
+  text-decoration: none;
+  color: var(--store-text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--store-border);
+  transition: color 0.2s;
+}
+.mobile-nav-links a:last-child { border-bottom: none; }
+.mobile-nav-links a:hover { color: var(--store-accent); }
+
+/* Responsive: collapse category row + show hamburger on tablet/mobile */
+@media (max-width: 900px) {
+  .navbar-cats      { display: none; }
+  .mobile-menu-btn  { display: flex !important; }
+  .mobile-menu      { display: block; }
+  .navbar-search    { margin: 0 16px; }
+}
+@media (max-width: 600px) {
+  .navbar-search { display: none; }
+  .store-navbar  { padding: 0 4%; }
+}
+
+/* ── Step 35: Footer social icons ────────────────────────────────────────── */
+.footer-social {
+  display: flex;
+  gap: 12px;
+}
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--store-border);
+  border-radius: 50%;
+  color: var(--store-text-light);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.social-icon:hover {
+  border-color: var(--store-accent);
+  color: var(--store-accent);
+  transform: translateY(-2px);
+}
+
+

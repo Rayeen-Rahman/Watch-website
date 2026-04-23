@@ -5,13 +5,15 @@ const Order = require('../models/Order');
 // @access  Private/Admin
 const getOrders = async (req, res) => {
   try {
-    // Populate the product details so the frontend dashboard can display names instead of just IDs
-    const orders = await Order.find({}).populate('products.product', 'name price');
+    const orders = await Order.find({})
+      .populate('products.product', 'name brand price images')
+      .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
   }
 };
+
 
 // @desc    Get single order by ID
 // @route   GET /api/orders/:id

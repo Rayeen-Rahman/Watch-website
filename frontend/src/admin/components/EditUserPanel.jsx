@@ -41,7 +41,7 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       
-      const res = await fetch(`http://localhost:5000/api/users/${user._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,26 +1,70 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { CheckCircle, Package, Clock, ArrowRight, ShoppingBag } from 'lucide-react';
+import './Success.css';
 
 const Success = () => {
-  const { clearCart } = useCart();
-  
+  const [animate, setAnimate] = useState(false);
+
   useEffect(() => {
-    // Clear the cart exactly when they hit this success page!
-    if (clearCart) clearCart();
-  }, [clearCart]);
+    // Trigger entrance animation after mount
+    requestAnimationFrame(() => setAnimate(true));
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (
-    <div style={{minHeight:'80vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'20px'}}>
-      <CheckCircle size={80} color="var(--store-success, #22C55E)" style={{marginBottom: '30px'}} />
-      <h1 style={{fontSize: '3rem', fontWeight: 800, letterSpacing: '-1px', marginBottom: '20px', textAlign: 'center'}}>Order placed successfully!</h1>
-      <p style={{fontSize: '1.2rem', color: 'var(--store-text-light)', marginBottom: '40px', textAlign: 'center'}}>
-        Your premium timepiece is being prepared for Cash on Delivery. 
+    <div className={`success-page ${animate ? 'success-visible' : ''}`}>
+
+      {/* ── Animated check icon ─────────────────────────────────────────── */}
+      <div className="success-icon-ring">
+        <CheckCircle size={56} strokeWidth={1.5} className="success-check" />
+      </div>
+
+      {/* ── Heading ────────────────────────────────────────────────────── */}
+      <h1 className="success-heading">Order Confirmed!</h1>
+      <p className="success-sub">
+        Your timepiece is on its way. You'll receive it shortly via Cash on Delivery.
       </p>
-      <Link to="/" style={{backgroundColor: 'var(--store-accent)', color: 'white', padding: '16px 35px', borderRadius: '50px', textDecoration: 'none', fontWeight: 600, transition: 'transform 0.2s'}}>
-        CONTINUE SHOPPING
-      </Link>
+
+      {/* ── Info cards ─────────────────────────────────────────────────── */}
+      <div className="success-cards">
+        <div className="success-card">
+          <Package size={24} strokeWidth={1.5} />
+          <div>
+            <strong>Being Packaged</strong>
+            <span>Our team is preparing your order with care.</span>
+          </div>
+        </div>
+        <div className="success-card">
+          <Clock size={24} strokeWidth={1.5} />
+          <div>
+            <strong>Delivery ETA</strong>
+            <span>3–5 business days within Bangladesh.</span>
+          </div>
+        </div>
+        <div className="success-card">
+          <ShoppingBag size={24} strokeWidth={1.5} />
+          <div>
+            <strong>Cash on Delivery</strong>
+            <span>No payment needed until your order arrives.</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CTA buttons ────────────────────────────────────────────────── */}
+      <div className="success-actions">
+        <Link to="/" className="btn-success-primary">
+          Continue Shopping <ArrowRight size={16} />
+        </Link>
+        <Link to="/category/all" className="btn-success-ghost">
+          Browse Collection
+        </Link>
+      </div>
+
+      <p className="success-note">
+        Questions? Contact us at <strong>support@watchvault.com</strong>
+      </p>
     </div>
   );
 };

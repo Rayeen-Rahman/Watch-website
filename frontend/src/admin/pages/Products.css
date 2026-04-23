@@ -323,3 +323,156 @@
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
+/* ── Step 25: Search bar ─────────────────────────────────────────────────── */
+.table-search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.search-input-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 380px;
+}
+.search-input-wrap .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-text-secondary);
+  pointer-events: none;
+}
+.search-input-wrap input {
+  width: 100%;
+  background-color: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-primary);
+  padding: 9px 12px 9px 36px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+.search-input-wrap input:focus {
+  outline: none;
+  border-color: var(--admin-text-secondary);
+}
+.btn-icon-sm {
+  background-color: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+.btn-icon-sm:hover {
+  background-color: var(--admin-bg);
+  color: var(--admin-text-primary);
+}
+
+/* ── Step 25: Low-stock row ─────────────────────────────────────────────── */
+.low-stock-row { border-left: 3px solid #EF4444; }
+
+.stock-low  { color: #EF4444; font-weight: 700; }
+.stock-ok   { color: var(--admin-success); font-weight: 600; }
+
+/* ── Step 25: Status badges ─────────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.status-active { background: rgba(34,197,94,0.12); color: #22C55E; }
+.status-banned { background: rgba(239,68,68,0.12);  color: #EF4444; }
+
+/* ── Step 25: Best Seller / Featured toggle buttons ─────────────────────── */
+.toggle-flag-btn {
+  background: none;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text-secondary);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-flag-btn:hover { border-color: #EAB308; color: #EAB308; }
+.toggle-flag-btn.flag-on { background: rgba(234,179,8,0.15); border-color: #EAB308; color: #EAB308; }
+.toggle-flag-btn.flag-featured:hover,
+.toggle-flag-btn.flag-on.flag-featured { background: rgba(99,102,241,0.15); border-color: #6366F1; color: #6366F1; }
+
+/* ── Step 27: Users page additions ─────────────────────────────────────────── */
+.role-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.role-admin   { background: rgba(99,102,241,0.15); color: #6366F1; }
+.role-manager { background: rgba(234,179,8,0.12);  color: #EAB308; }
+
+.banned-row { opacity: 0.65; }
+
+/* ── Step 39: Shared admin UI primitives ─────────────────────────────────── */
+
+/* Small primary action button (used in Categories + other admin pages) */
+.btn-primary-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-primary-sm:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Page header (title + count row) */
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+/* Inline error card */
+.error-card {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #EF4444;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* Admin page base */
+.admin-page {
+  animation: fadeUp 0.25s ease-out;
+}
+
+
+
+
