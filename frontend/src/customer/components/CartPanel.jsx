@@ -15,9 +15,9 @@ const CartPanel = () => {
       <div className="cart-slide-panel" onClick={e => e.stopPropagation()}>
         <div className="cart-header">
           <h3>Your Bag ({cartItems.length})</h3>
-          <button className="cart-close-btn" onClick={() => setIsCartOpen(false)}><X size={20}/></button>
+          <button className="cart-close-btn" onClick={() => setIsCartOpen(false)}><X size={20} /></button>
         </div>
-        
+
         <div className="cart-items-container">
           {cartItems.length === 0 ? (
             <div className="cart-empty-message">Your shopping bag is currently empty.</div>
@@ -31,7 +31,7 @@ const CartPanel = () => {
                   <div className="cart-item-top">
                     <h4>{item.name}</h4>
                     <button className="cart-item-remove" aria-label="Remove item" onClick={() => removeFromCart(item._id)}>
-                      <Trash2 size={16}/>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                   <p className="cart-item-price">${item.price.toFixed(2)}</p>
@@ -52,8 +52,8 @@ const CartPanel = () => {
             <strong>${cartTotal.toFixed(2)}</strong>
           </div>
           <p className="cart-disclaimer">Shipping & taxes calculated at checkout</p>
-          <button 
-            className="btn-checkout" 
+          <button
+            className="btn-checkout"
             disabled={cartItems.length === 0}
             onClick={() => {
               setIsCartOpen(false);

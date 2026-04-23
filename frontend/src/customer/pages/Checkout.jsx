@@ -22,8 +22,8 @@ const Checkout = () => {
     postalCode: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error,        setError]        = useState('');
-  const [fieldErrors,  setFieldErrors]  = useState({});
+  const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Close cart panel + redirect empty carts
   useEffect(() => {
@@ -47,7 +47,7 @@ const Checkout = () => {
       errs.phone = 'Enter a valid phone number';
     }
     if (!formData.address.trim()) errs.address = 'Address is required';
-    if (!formData.city.trim())    errs.city    = 'City is required';
+    if (!formData.city.trim()) errs.city = 'City is required';
     return errs;
   };
 
@@ -63,22 +63,22 @@ const Checkout = () => {
 
     const orderPayload = {
       customerName: formData.customerName.trim(),
-      phone:        formData.phone.trim(),
-      address:      [formData.address, formData.city, formData.postalCode]
-                      .filter(Boolean).join(', '),
+      phone: formData.phone.trim(),
+      address: [formData.address, formData.city, formData.postalCode]
+        .filter(Boolean).join(', '),
       products: cartItems.map(item => ({
-        product:  item._id,
+        product: item._id,
         quantity: item.qty,
-        price:    item.price,
+        price: item.price,
       })),
       total: cartTotal,
     };
 
     try {
-      const res  = await fetch(`${API}/api/orders`, {
-        method:  'POST',
+      const res = await fetch(`${API}/api/orders`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(orderPayload),
+        body: JSON.stringify(orderPayload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to place order');
@@ -207,8 +207,8 @@ const Checkout = () => {
                       {imgSrc
                         ? <img src={imgSrc} alt={item.name} />
                         : <div className="summary-img-placeholder">
-                            {(item.brand || item.name || 'W').charAt(0)}
-                          </div>
+                          {(item.brand || item.name || 'W').charAt(0)}
+                        </div>
                       }
                       <span className="summary-qty-badge">{item.qty}</span>
                     </div>
