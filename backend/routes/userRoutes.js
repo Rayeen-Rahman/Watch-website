@@ -76,6 +76,34 @@ router.get('/profile', protect, async (req, res) => {
   res.json(user);
 });
 
+// PUT /api/users/profile  — update name, email, phone, optional password
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { name, email, phone, currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // If password change requested, verify current password first
+    if (newPassword) {
+      if (!currentPassword)
+        return res.status(400).json({ message: 'Current password is required to set a new one' });
+      const match = await bcrypt.compare(currentPassword, user.password);
+      if (!match)
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    if (name)  user.name  = name;
+    if (email) user.email = email.toLowerCase();
+    if (phone !== undefined) user.phone = phone;
+
+    const updated = await user.save();
+    res.json({ _id: updated._id, name: updated.name, email: updated.email, role: updated.role });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ── ADMIN: list / get / update / delete ──────────────────────────────────────
 router.route('/').get(getUsers);
 router.route('/:id').get(getUserById).put(updateUser).delete(deleteUser);

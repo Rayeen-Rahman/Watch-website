@@ -105,7 +105,8 @@ const productRoutes  = require('./routes/productRoutes');
 const userRoutes     = require('./routes/userRoutes');
 const orderRoutes    = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
-const adminRoutes    = require('./routes/adminRoutes');   // Steps 14-16
+const adminRoutes    = require('./routes/adminRoutes');     // Steps 14-16
+const paymentRoutes  = require('./routes/paymentRoutes'); // Step 27 — COD
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // ── STEP 7: Health check endpoint ────────────────────────────────────────────
@@ -129,6 +130,7 @@ app.use('/api/users',      userRoutes);
 app.use('/api/orders',     orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin',      adminRoutes);    // Steps 14-16: dashboard stats/orders/charts
+app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
 
 
 // Error Handling Middlewares (must be below routes)

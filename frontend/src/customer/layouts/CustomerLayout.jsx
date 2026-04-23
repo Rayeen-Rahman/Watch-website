@@ -5,10 +5,13 @@ import Footer from '../components/Footer';
 import Homepage from '../pages/Homepage';
 import ProductDetail from '../pages/ProductDetail';
 import CategoryPage from '../pages/CategoryPage';
+import CartPage from '../pages/CartPage';
 import Checkout from '../pages/Checkout';
 import Success from '../pages/Success';
+import OrderHistoryPage from '../pages/OrderHistoryPage';
+import ProfilePage from '../pages/ProfilePage';
+import NotFoundPage from '../pages/NotFoundPage';
 import CartPanel from '../components/CartPanel';
-import { CartProvider } from '../context/CartContext';
 import '../customerTheme.css';
 
 const CustomerLayout = () => {
@@ -17,27 +20,29 @@ const CustomerLayout = () => {
     document.body.classList.add('customer-view');
     return () => {
       document.body.classList.remove('customer-view');
-    }
+    };
   }, []);
 
   return (
-    <CartProvider>
-      <div className="store-layout">
-        <Navbar />
-        <main className="store-main">
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/category/:slug" element={<CategoryPage />} />
-            <Route path="/category" element={<CategoryPage />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/success" element={<Success />} />
-          </Routes>
-        </main>
-        <Footer />
-        <CartPanel />
-      </div>
-    </CartProvider>
+    <div className="store-layout">
+      <Navbar />
+      <main className="store-main">
+        <Routes>
+          <Route path="/"                element={<Homepage />} />
+          <Route path="/product/:id"     element={<ProductDetail />} />
+          <Route path="/category/:slug"  element={<CategoryPage />} />
+          <Route path="/category"        element={<CategoryPage />} />
+          <Route path="/cart"            element={<CartPage />} />
+          <Route path="/checkout"        element={<Checkout />} />
+          <Route path="/success"         element={<Success />} />
+          <Route path="/orders"          element={<OrderHistoryPage />} />
+          <Route path="/profile"         element={<ProfilePage />} />
+          <Route path="*"               element={<NotFoundPage />} />
+        </Routes>
+      </main>
+      <Footer />
+      <CartPanel />
+    </div>
   );
 };
 

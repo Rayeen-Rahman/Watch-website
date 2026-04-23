@@ -1,0 +1,24 @@
+/* NotFoundPage.css */
+.not-found-page {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 70vh; padding: 2rem;
+}
+.not-found-content { text-align: center; }
+.not-found-code {
+  font-size: clamp(6rem, 20vw, 10rem); font-weight: 900;
+  color: #f0f0f0; margin: 0; line-height: 1; letter-spacing: -4px;
+}
+.not-found-title { font-size: 1.6rem; font-weight: 700; color: #111; margin: 0 0 0.5rem; }
+.not-found-desc  { font-size: 0.95rem; color: #888; margin: 0 0 2rem; }
+.not-found-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-nf-home {
+  padding: 10px 24px; background: #000; color: #fff; border-radius: 50px;
+  text-decoration: none; font-weight: 700; font-size: 0.88rem; transition: opacity 0.2s;
+}
+.btn-nf-home:hover { opacity: 0.8; }
+.btn-nf-shop {
+  padding: 10px 24px; background: transparent; color: #000;
+  border: 1.5px solid #000; border-radius: 50px; text-decoration: none;
+  font-weight: 700; font-size: 0.88rem; transition: background 0.2s, color 0.2s;
+}
+.btn-nf-shop:hover { background: #000; color: #fff; }
