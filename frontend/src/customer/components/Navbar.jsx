@@ -1,23 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingBag, X, Menu, ChevronDown } from 'lucide-react';
+import { Search, ShoppingBag, X, Menu, ChevronDown, User, LogOut, Settings } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import LoginModal from './LoginModal';
 
 const API = import.meta.env.VITE_API_URL;
 
 const Navbar = () => {
   const { cartCount, setIsCartOpen } = useCart();
+  const { user, logout }             = useAuth();
   const navigate = useNavigate();
 
   const [searchQuery,  setSearchQuery]  = useState('');
   const [categories,   setCategories]   = useState([]);
   const [menuOpen,     setMenuOpen]     = useState(false);
   const [catDropOpen,  setCatDropOpen]  = useState(false);
+  const [showLogin,    setShowLogin]    = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const dropRef  = useRef(null);
-  const inputRef = useRef(null);
+  const dropRef     = useRef(null);
+  const userMenuRef = useRef(null);
+  const inputRef    = useRef(null);
 
-  // ── Fetch categories for nav links ────────────────────────────────────────
+  // ── Fetch categories for nav links ──────────────────────────────────────────
   useEffect(() => {
     fetch(`${API}/api/categories`)
       .then(r => r.json())
@@ -25,12 +31,13 @@ const Navbar = () => {
       .catch(() => {});
   }, []);
 
-  // Close category dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e) => {
-      if (dropRef.current && !dropRef.current.contains(e.target)) {
+      if (dropRef.current && !dropRef.current.contains(e.target))
         setCatDropOpen(false);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target))
+        setShowUserMenu(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -44,6 +51,12 @@ const Navbar = () => {
       setSearchQuery('');
       setMenuOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate('/');
   };
 
   return (
@@ -67,7 +80,7 @@ const Navbar = () => {
           WATCH
         </Link>
 
-        {/* ── Desktop Search ────────────────────────────────────────────── */}
+        {/* ── Desktop Search ─────────────────────────────────────────────── */}
         <form className="navbar-search" onSubmit={handleSearch}>
           <input
             ref={inputRef}
@@ -88,7 +101,7 @@ const Navbar = () => {
           </button>
         </form>
 
-        {/* ── Desktop Category Nav ─────────────────────────────────────── */}
+        {/* ── Desktop Category Nav ──────────────────────────────────────── */}
         <div className="navbar-cats">
           <Link to="/category/all" className="nav-cat-link">All</Link>
           {categories.slice(0, 4).map(c => (
@@ -96,7 +109,6 @@ const Navbar = () => {
               {c.name}
             </Link>
           ))}
-          {/* More dropdown when >4 categories */}
           {categories.length > 4 && (
             <div className="cat-more-wrap" ref={dropRef}>
               <button
@@ -120,8 +132,10 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* ── Icon buttons ──────────────────────────────────────────────── */}
+        {/* ── Auth + Cart icons ─────────────────────────────────────────── */}
         <div className="navbar-icons">
+
+          {/* Cart */}
           <button
             className="icon-btn cart-btn"
             aria-label="Open cart"
@@ -130,6 +144,45 @@ const Navbar = () => {
             <ShoppingBag size={22} strokeWidth={1.5} />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
+
+          {/* Not logged in → Login button */}
+          {!user && (
+            <button
+              className="btn-navbar-login"
+              onClick={() => setShowLogin(true)}
+            >
+              Login
+            </button>
+          )}
+
+          {/* Logged in → User avatar + dropdown */}
+          {user && (
+            <div className="user-menu-wrap" ref={userMenuRef}>
+              <button
+                className="btn-user-avatar"
+                onClick={() => setShowUserMenu(m => !m)}
+                aria-label="User menu"
+              >
+                <User size={18} />
+                <span className="navbar-username">{user.name?.split(' ')[0]}</span>
+              </button>
+
+              {showUserMenu && (
+                <div className="user-dropdown">
+                  <Link to="/orders"  onClick={() => setShowUserMenu(false)}>My Orders</Link>
+                  <Link to="/profile" onClick={() => setShowUserMenu(false)}>Profile</Link>
+                  {user.role === 'admin' && (
+                    <Link to="/admin" onClick={() => setShowUserMenu(false)}>
+                      <Settings size={14} /> Admin Panel
+                    </Link>
+                  )}
+                  <button onClick={handleLogout} className="dropdown-logout">
+                    <LogOut size={14} /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile hamburger */}
           <button
@@ -163,8 +216,26 @@ const Navbar = () => {
               </Link>
             ))}
           </nav>
+          {/* Mobile auth section */}
+          <div className="mobile-auth">
+            {!user ? (
+              <button className="btn-navbar-login" onClick={() => { setShowLogin(true); setMenuOpen(false); }}>
+                Login / Register
+              </button>
+            ) : (
+              <div className="mobile-user-info">
+                <span>👤 {user.name}</span>
+                <button onClick={() => { handleLogout(); setMenuOpen(false); }} className="mobile-logout-btn">
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
+
+      {/* ── Login Modal ───────────────────────────────────────────────────── */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
   );
 };
