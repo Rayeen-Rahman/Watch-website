@@ -25,7 +25,8 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc:     ["'self'", 'data:', 'https:'],
+      imgSrc:     ["'self'", 'data:', 'https:', 'http://localhost:5000', 'http://localhost:5173'],
+      connectSrc: ["'self'", 'http://localhost:5000'],
     },
   })
 );
