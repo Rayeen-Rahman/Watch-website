@@ -16,3 +16,34 @@
   color: var(--admin-text-secondary);
   font-size: 0.8rem;
 }
+
+/* ── Fix: Input text visible on dark background ────────────────────────── */
+.category-slide-panel input[type="text"],
+.category-slide-panel input[type="email"],
+.category-slide-panel input[type="url"],
+.category-slide-panel input[type="password"],
+.category-slide-panel input[type="number"],
+.category-slide-panel select,
+.category-slide-panel textarea {
+  background-color: #1e1e2e !important;
+  color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+  border: 1px solid #2d2d44 !important;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.category-slide-panel input::placeholder,
+.category-slide-panel textarea::placeholder {
+  color: #4b5563 !important;
+}
+.category-slide-panel input:focus,
+.category-slide-panel select:focus,
+.category-slide-panel textarea:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}

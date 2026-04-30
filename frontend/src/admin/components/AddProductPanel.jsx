@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import './AddProductPanel.css';
 
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name:             '',
     brand:            '',
@@ -10,7 +11,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     oldPrice:         '',
     shortDescription: '',
     description:      '',
-    category:         '650a3f9e9d1a1b1c3d4e5f6a',
+    category:         '',
     tag:              '',
     stock:            '',
     dialColor:        '',
@@ -22,6 +23,15 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     isBestSeller:     false,
     isFeatured:       false,
   });
+
+  // Fetch categories when panel opens
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+      .then(r => r.json())
+      .then(d => setCategories(Array.isArray(d) ? d : []))
+      .catch(() => {});
+  }, [isOpen]);
 
   const [images, setImages]           = useState([]);   // array of URL strings
   const [urlInput, setUrlInput]       = useState('');
@@ -110,13 +120,26 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
         }
       );
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to add product');
+      if (!res.ok) {
+        // Translate technical errors into plain language
+        let msg = data.message || 'Failed to add product';
+        if (msg.includes('Cast to ObjectId')) {
+          msg = 'Please select a valid category from the dropdown. The category field cannot be left empty or typed manually.';
+        } else if (msg.includes('validation failed')) {
+          msg = 'Some required fields are missing or invalid. Please check all fields marked with *.';
+        } else if (msg.includes('duplicate key') || msg.includes('E11000')) {
+          msg = 'A product with this name already exists. Please use a different name.';
+        } else if (msg.includes('images')) {
+          msg = 'Please add at least one product image before saving.';
+        }
+        throw new Error(msg);
+      }
       showToast('Product added successfully ✓');
       onSave && onSave();
       // Reset form
       setFormData({
         name: '', brand: '', price: '', oldPrice: '', shortDescription: '',
-        description: '', category: '650a3f9e9d1a1b1c3d4e5f6a', tag: '',
+        description: '', category: '', tag: '',
         stock: '', dialColor: '', strapMaterial: '', movementType: '',
         caseSize: '', waterResistance: '', gender: '',
         isBestSeller: false, isFeatured: false,
@@ -154,22 +177,57 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
                 onChange={handleChange} placeholder="e.g. Seiko, Casio" />
             </div>
             <div className="form-group">
-              <label>Stock *</label>
-              <input type="number" name="stock" required min="0" value={formData.stock}
-                onChange={handleChange} placeholder="0" />
+              <label>Gender</label>
+              <select name="gender" value={formData.gender} onChange={handleChange}>
+                <option value="">Select...</option>
+                <option>Men</option>
+                <option>Women</option>
+                <option>Unisex</option>
+              </select>
             </div>
           </div>
 
-          <div className="form-row-2">
+          <div className="form-row-price">
             <div className="form-group">
               <label>Sale Price (৳) *</label>
-              <input type="number" name="price" required min="0" value={formData.price}
-                onChange={handleChange} placeholder="0" />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                name="price"
+                required
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="e.g. 3500"
+                autoComplete="off"
+              />
             </div>
-            <div className="form-group">
+            <div className="form-group form-group-narrow">
               <label>Old Price (৳) <span className="label-optional">(optional)</span></label>
-              <input type="number" name="oldPrice" min="0" value={formData.oldPrice}
-                onChange={handleChange} placeholder="0" />
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                name="oldPrice"
+                value={formData.oldPrice}
+                onChange={handleChange}
+                placeholder="e.g. 4500"
+                autoComplete="off"
+              />
+            </div>
+            <div className="form-group form-group-narrow">
+              <label>Stock *</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                name="stock"
+                required
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="0"
+                autoComplete="off"
+              />
             </div>
           </div>
 
@@ -309,9 +367,23 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
                 onChange={handleChange} placeholder="popular" />
             </div>
             <div className="form-group">
-              <label>Category ID</label>
-              <input type="text" name="category" value={formData.category}
-                onChange={handleChange} placeholder="MongoDB ObjectId" />
+              <label>Category *</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select a category --</option>
+                {categories.map(c => (
+                  <option key={c._id} value={c._id}>{c.name}</option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <small style={{ color: '#f59e0b', marginTop: 4, display: 'block' }}>
+                  ⚠ No categories found. Add a category first from the sidebar.
+                </small>
+              )}
             </div>
           </div>
 

@@ -164,6 +164,19 @@
   gap: 16px;
 }
 
+/* Fix 3: Price row — Sale Price wide, Old Price + Stock narrow */
+.form-row-price {
+  display: grid;
+  grid-template-columns: 1fr 130px 100px;
+  gap: 12px;
+  align-items: start;
+}
+
+/* Narrow field for Stock / Old Price — caps width so they don't stretch */
+.form-group-narrow {
+  max-width: 140px;
+}
+
 .label-optional {
   color: var(--admin-text-secondary);
   font-size: 0.78rem;
