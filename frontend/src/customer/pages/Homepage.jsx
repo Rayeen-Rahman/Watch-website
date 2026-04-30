@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import './Homepage.css';
 
@@ -128,21 +127,14 @@ const Homepage = () => {
 
       {/* ── WATCH COLLECTION ──────────────────────────────────────────────── */}
       <section id="collection" className="collection-section">
-        <div className="section-header">
-          <div>
-            <h2>The Collection</h2>
-            <p className="section-title-lg">Crafted for Every Occasion</p>
-          </div>
-          {collection.length > 0 && (
-            <Link to="/category/all" className="link-view-all-centered">
-              View All →
-            </Link>
-          )}
+        <div className="section-header centered-header">
+          <h2>Watch Collection</h2>
+          <p className="section-subtitle-center">Explore our full range of meticulously crafted pieces, designed to stand the test of time.</p>
         </div>
 
         {loading ? (
           <div className="product-grid">
-            {[...Array(8)].map((_, i) => <div key={i} className="skeleton-card" />)}
+            {[...Array(4)].map((_, i) => <div key={i} className="skeleton-card" />)}
           </div>
         ) : error ? (
           <div className="error-message">Failed to load collection: {error}</div>
@@ -151,11 +143,16 @@ const Homepage = () => {
             No watches yet. Head to the Admin Dashboard to add products!
           </div>
         ) : (
-          <div className="product-grid">
-            {collection.map(p => (
-              <ProductCard key={p._id} product={p} />
-            ))}
-          </div>
+          <>
+            <div className="product-grid">
+              {collection.slice(0, 8).map(p => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
+            <div className="view-all-wrap">
+              <Link to="/category/all" className="link-view-all-centered">VIEW ALL WATCHES</Link>
+            </div>
+          </>
         )}
       </section>
 
@@ -164,8 +161,8 @@ const Homepage = () => {
         <section className="collection-section best-sellers-section">
           <div className="section-header best-sellers-header">
             <div>
-              <h2>Best Sellers</h2>
-              <p className="section-title-lg">Most Loved Timepieces</p>
+              <h2 className="section-label">Best Sellers</h2>
+              <p className="section-subtitle-sm">Our most sought-after timepieces, curated by connoisseurs.</p>
             </div>
             <div className="slider-nav-buttons">
               <button
@@ -173,14 +170,14 @@ const Homepage = () => {
                 onClick={() => scrollBestSellers(-1)}
                 aria-label="Previous"
               >
-                <ChevronLeft size={16} />
+                −
               </button>
               <button
                 className="slider-nav-btn"
                 onClick={() => scrollBestSellers(1)}
                 aria-label="Next"
               >
-                <ChevronRight size={16} />
+                +
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { ShoppingBag, User, LogOut, Settings, Search } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from './LoginModal';
@@ -12,19 +12,11 @@ const Navbar = () => {
   const { user, logout }             = useAuth();
   const navigate = useNavigate();
 
-  const [categories,   setCategories]   = useState([]);
   const [showLogin,    setShowLogin]    = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchQuery,  setSearchQuery]  = useState('');
 
   const userMenuRef = useRef(null);
-
-  // Fetch categories
-  useEffect(() => {
-    fetch(`${API}/api/categories`)
-      .then(r => r.json())
-      .then(d => setCategories(Array.isArray(d) ? d.slice(0, 4) : []))
-      .catch(() => {});
-  }, []);
 
   // Close user menu on outside click
   useEffect(() => {
@@ -42,6 +34,13 @@ const Navbar = () => {
     navigate('/');
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/category/all?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <>
       {/* ── Campaign Bar ── */}
@@ -53,57 +52,55 @@ const Navbar = () => {
       <nav className="store-navbar">
 
         {/* Logo */}
-        <Link to="/" className="navbar-logo" style={{ letterSpacing: '2px', fontSize: '1.2rem', fontWeight: '800' }}>
+        <Link to="/" className="navbar-logo">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect x="14" y="1" width="18" height="18" rx="2"
+              transform="rotate(45 14 1)" fill="none" stroke="currentColor" strokeWidth="2"/>
+            <rect x="14" y="7" width="10" height="10" rx="1"
+              transform="rotate(45 14 7)" fill="currentColor" opacity="0.9"/>
+          </svg>
           WATCH
         </Link>
 
-        {/* ── Category Nav (minimalist) ── */}
-        <nav className="navbar-cats" style={{ gap: '20px' }}>
-          <Link to="/category/all" className="nav-cat-link">All Watches</Link>
-          {categories.slice(0, 2).map(c => (
-            <Link key={c._id} to={`/category/${c.slug}`} className="nav-cat-link">
-              {c.name}
-            </Link>
-          ))}
-        </nav>
+        {/* ── Center Search Bar ── */}
+        <form className="navbar-search" onSubmit={handleSearch} role="search">
+          <input
+            type="search"
+            placeholder="Search Product"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search products"
+          />
+          <button type="submit" className="search-submit" aria-label="Submit search">
+            <Search size={16} />
+          </button>
+        </form>
 
         {/* ── Right icons ── */}
         <div className="navbar-icons">
 
-          {/* Cart */}
-          <button
-            className="icon-btn cart-btn"
-            aria-label="Open cart"
-            onClick={() => setIsCartOpen(true)}
-          >
-            <ShoppingBag size={20} strokeWidth={1.5} />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </button>
-
-          {/* Not logged in → small Login button */}
-          {!user && (
+          {/* User icon or Login */}
+          {!user ? (
             <button
-              className="btn-navbar-login"
+              className="icon-btn"
+              aria-label="Login"
               onClick={() => setShowLogin(true)}
             >
-              Login
+              <User size={20} strokeWidth={1.5} />
             </button>
-          )}
-
-          {/* Logged in → User avatar + dropdown */}
-          {user && (
+          ) : (
             <div className="user-menu-wrap" ref={userMenuRef}>
               <button
-                className="btn-user-avatar"
+                className="icon-btn"
                 onClick={() => setShowUserMenu(m => !m)}
                 aria-label="User menu"
               >
-                <User size={15} />
-                <span className="navbar-username">{user.name?.split(' ')[0]}</span>
+                <User size={20} strokeWidth={1.5} />
               </button>
 
               {showUserMenu && (
                 <div className="user-dropdown">
+                  <div className="dropdown-user-name">{user.name?.split(' ')[0]}</div>
                   <Link to="/orders"  onClick={() => setShowUserMenu(false)}>My Orders</Link>
                   <Link to="/profile" onClick={() => setShowUserMenu(false)}>Profile</Link>
                   {user.role === 'admin' && (
@@ -118,6 +115,16 @@ const Navbar = () => {
               )}
             </div>
           )}
+
+          {/* Cart */}
+          <button
+            className="icon-btn cart-btn"
+            aria-label="Open cart"
+            onClick={() => setIsCartOpen(true)}
+          >
+            <ShoppingBag size={20} strokeWidth={1.5} />
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </button>
 
         </div>
       </nav>
