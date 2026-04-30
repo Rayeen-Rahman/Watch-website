@@ -92,9 +92,12 @@
   border-radius: 6px;
   font-family: inherit;
   font-size: 1rem;
-  background-color: var(--store-bg);
+  background-color: #ffffff;
+  color: #111111;
+  caret-color: #111111;
   transition: border-color 0.2s;
 }
+.form-group input::placeholder { color: #aaa; }
 
 .form-group input:focus {
   outline: none;

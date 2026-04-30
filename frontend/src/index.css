@@ -109,18 +109,46 @@ code {
   background: var(--code-bg);
 }
 
-/* ── BUG-02: Admin form input visibility fix ───────────────────────────────
-   Admin uses a dark theme (#0d0d14 bg). Without explicit color overrides,
-   inputs inherit a dark text color and become invisible on dark backgrounds.
-─────────────────────────────────────────────────────────────────────────── */
-.admin-page input[type="text"],
-.admin-page input[type="number"],
-.admin-page input[type="email"],
-.admin-page input[type="url"],
-.admin-page input[type="password"],
-.admin-page input[type="search"],
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GLOBAL INPUT VISIBILITY FIX — covers ALL pages, ALL form controls
+   1) Customer (public) pages  → white bg, black text  (light theme, always)
+   2) Admin dashboard pages    → dark bg, light text   (admin dark theme)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── 1. CUSTOMER SIDE ──────────────────────────────────────────────────────── */
+/* Forces every input/textarea/select on the public site to be white bg /
+   black text. This also prevents OS dark-mode from making text invisible. */
+.customer-view input,
+.customer-view textarea,
+.customer-view select {
+  background-color: #ffffff;
+  color: #111111;
+  caret-color: #111111;
+}
+.customer-view input::placeholder,
+.customer-view textarea::placeholder {
+  color: #aaaaaa;
+}
+.customer-view input:focus,
+.customer-view textarea:focus,
+.customer-view select:focus {
+  outline: none;
+}
+
+/* ── 2. ADMIN SIDE ─────────────────────────────────────────────────────────── */
+/* Covers admin-page root, all slide panels (AddProductPanel, AddUserPanel,
+   AddCategoryPanel, EditUserPanel) and category-slide-panel variant.
+   Using shorthand `input` (no type filter) catches ALL input types including
+   type="text" used for price/stock after the previous sprint fix. */
+.admin-page input,
+.admin-page textarea,
 .admin-page select,
-.admin-page textarea {
+.slide-panel input,
+.slide-panel textarea,
+.slide-panel select,
+.category-slide-panel input,
+.category-slide-panel textarea,
+.category-slide-panel select {
   background-color: #1e1e2e !important;
   color: #f3f4f6 !important;
   caret-color: #f3f4f6 !important;
@@ -128,36 +156,23 @@ code {
   border-radius: 8px;
 }
 .admin-page input::placeholder,
-.admin-page textarea::placeholder {
-  color: #4b5563 !important;
+.admin-page textarea::placeholder,
+.slide-panel input::placeholder,
+.slide-panel textarea::placeholder,
+.category-slide-panel input::placeholder,
+.category-slide-panel textarea::placeholder {
+  color: #6b7280 !important;
 }
 .admin-page input:focus,
+.admin-page textarea:focus,
 .admin-page select:focus,
-.admin-page textarea:focus {
+.slide-panel input:focus,
+.slide-panel textarea:focus,
+.slide-panel select:focus,
+.category-slide-panel input:focus,
+.category-slide-panel textarea:focus,
+.category-slide-panel select:focus {
   outline: none;
   border-color: #6366f1 !important;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
-}
-
-/* Also fix the slide-panel form inputs (AddProductPanel, AddUserPanel etc.) */
-.slide-panel input[type="text"],
-.slide-panel input[type="number"],
-.slide-panel input[type="email"],
-.slide-panel input[type="url"],
-.slide-panel input[type="password"],
-.slide-panel select,
-.slide-panel textarea {
-  background-color: #1e1e2e !important;
-  color: #f3f4f6 !important;
-  caret-color: #f3f4f6 !important;
-  border: 1px solid #2d2d44 !important;
-}
-.slide-panel input::placeholder,
-.slide-panel textarea::placeholder {
-  color: #4b5563 !important;
-}
-.slide-panel input:focus,
-.slide-panel select:focus,
-.slide-panel textarea:focus {
-  border-color: #6366f1 !important;
 }
