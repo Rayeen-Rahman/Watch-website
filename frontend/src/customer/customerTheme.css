@@ -366,6 +366,45 @@ body.customer-view {
   font-size: 0.82rem;
 }
 
+.footer-brand-desc {
+  color: var(--store-text-light);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  margin: 14px 0 20px;
+}
+
+.footer-newsletter-desc {
+  color: var(--store-text-light);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.footer-subscribed {
+  color: #22c55e;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.footer-privacy-note {
+  color: var(--store-text-light);
+  font-size: 0.75rem;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.dropdown-user-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--store-text-light);
+  padding: 4px 12px 8px;
+  border-bottom: 1px solid var(--store-border);
+  margin-bottom: 4px;
+}
+
 /* ══════════════════════════════════════════════════════════════════════
    Step 34 — Navbar: Category links, search clear, mobile menu, dropdown
    ══════════════════════════════════════════════════════════════════════ */
@@ -520,11 +559,57 @@ body.customer-view {
 .mobile-nav-links a:last-child { border-bottom: none; }
 .mobile-nav-links a:hover { color: var(--store-accent); }
 
-/* Responsive: hide categories on small screens — no hamburger */
+/* \u2500\u2500 Mobile search toggle \u2500\u2500 */
+/* Hidden on desktop, visible on mobile */
+.mobile-search-toggle { display: none; }
+
+/* Mobile search bar — slides in below navbar */
+.mobile-search-bar {
+  position: sticky;
+  top: 60px;
+  z-index: 999;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  padding: 10px 4%;
+  animation: slideDown 0.18s ease;
+}
+.mobile-search-bar form {
+  display: flex;
+  height: 40px;
+  border: 1px solid #c8c8c8;
+  overflow: hidden;
+}
+.mobile-search-bar input {
+  flex: 1;
+  padding: 0 14px;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: #fff;
+  color: #111;
+}
+.mobile-search-bar input::placeholder { color: #bbb; }
+.mobile-search-bar button {
+  background: #000;
+  border: none;
+  color: #fff;
+  padding: 0 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive: on mobile hide the desktop search, show the toggle icon */
 @media (max-width: 768px) {
-  .navbar-cats      { display: none; }
-  .navbar-search    { display: none; }
-  .store-navbar     { padding: 0 4%; }
+  .navbar-cats        { display: none; }
+  .navbar-search      { display: none; }
+  .mobile-search-toggle { display: flex; }
+  .store-navbar       { padding: 0 4%; }
 }
 
 /* ── Step 35: Footer social icons ────────────────────────────────────────── */

@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Truck, Banknote, RefreshCcw, ArrowRight, Globe, Share2, Mail } from 'lucide-react';
-
+import { Truck, Banknote, RefreshCcw, ArrowRight, Instagram, Facebook, Mail } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL;
 
 const Footer = () => {
   const [categories, setCategories] = useState([]);
+  const [email, setEmail]           = useState('');
+  const [subscribed, setSubscribed] = useState(false);
 
-  // Step 35: Load real categories for the Explore column
   useEffect(() => {
     fetch(`${API}/api/categories`)
       .then(r => r.json())
       .then(d => setCategories(Array.isArray(d) ? d.slice(0, 5) : []))
       .catch(() => {});
   }, []);
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    // Store locally for now (no backend email service yet)
+    setSubscribed(true);
+    setEmail('');
+  };
 
   return (
     <footer className="store-footer">
@@ -51,54 +59,63 @@ const Footer = () => {
         {/* Col 1: Brand */}
         <div className="footer-col">
           <Link to="/" className="footer-brand-logo">WATCH VAULT</Link>
-          <p style={{ color: 'var(--store-text-light)', fontSize: '0.88rem', lineHeight: '1.7', marginTop: '14px', marginBottom: '20px' }}>
+          <p className="footer-brand-desc">
             Crafting timeless pieces for the modern individual. Designed with precision, worn with purpose.
           </p>
-          {/* Social icons */}
           <div className="footer-social">
-            <a href="#" aria-label="Email"   className="social-icon"><Mail   size={18} strokeWidth={1.5} /></a>
-            <a href="#" aria-label="Website" className="social-icon"><Globe  size={18} strokeWidth={1.5} /></a>
-            <a href="#" aria-label="Share"   className="social-icon"><Share2 size={18} strokeWidth={1.5} /></a>
+            <a href="mailto:hello@watchwault.com" aria-label="Email" className="social-icon"><Mail size={16} strokeWidth={1.5} /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="social-icon"><Instagram size={16} strokeWidth={1.5} /></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="social-icon"><Facebook size={16} strokeWidth={1.5} /></a>
           </div>
-
         </div>
 
-        {/* Col 2: Collections — Step 35: real dynamic categories */}
+        {/* Col 2: Collections */}
         <div className="footer-col">
           <h4>Collections</h4>
           <ul>
             <li><Link to="/category/all">All Watches</Link></li>
             {categories.map(c => (
-              <li key={c._id}>
-                <Link to={`/category/${c.slug}`}>{c.name}</Link>
-              </li>
+              <li key={c._id}><Link to={`/category/${c.slug}`}>{c.name}</Link></li>
             ))}
           </ul>
         </div>
 
-        {/* Col 3: Customer Care */}
+        {/* Col 3: Customer Care — link to real pages */}
         <div className="footer-col">
           <h4>Customer Care</h4>
           <ul>
             <li><Link to="/category/all">Shop All</Link></li>
-            <li><a href="#faq">FAQ</a></li>
-            <li><a href="#shipping">Shipping &amp; Returns</a></li>
-            <li><a href="#privacy">Privacy Policy</a></li>
-            <li><a href="#contact">Contact Us</a></li>
+            <li><Link to="/info/faq">FAQ</Link></li>
+            <li><Link to="/info/shipping">Shipping &amp; Returns</Link></li>
+            <li><Link to="/info/privacy">Privacy Policy</Link></li>
+            <li><Link to="/info/contact">Contact Us</Link></li>
           </ul>
         </div>
 
         {/* Col 4: Newsletter */}
         <div className="footer-col">
           <h4>The Atelier Journal</h4>
-          <p style={{ color: 'var(--store-text-light)', fontSize: '0.88rem', lineHeight: '1.6', margin: '0 0 16px 0' }}>
+          <p className="footer-newsletter-desc">
             Stay updated on new releases and exclusive offers.
           </p>
-          <div className="newsletter-form">
-            <input type="email" placeholder="Email address…" />
-            <button aria-label="Subscribe"><ArrowRight size={16} /></button>
-          </div>
-          <p style={{ color: 'var(--store-text-light)', fontSize: '0.75rem', marginTop: '10px', lineHeight: 1.4 }}>
+          {subscribed ? (
+            <p className="footer-subscribed">✓ You're subscribed! Thank you.</p>
+          ) : (
+            <form className="newsletter-form" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                placeholder="Email address…"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                aria-label="Email for newsletter"
+              />
+              <button type="submit" aria-label="Subscribe">
+                <ArrowRight size={16} />
+              </button>
+            </form>
+          )}
+          <p className="footer-privacy-note">
             By subscribing you agree to our privacy policy. No spam, ever.
           </p>
         </div>

@@ -38,7 +38,8 @@ const ProductCard = ({ product, sliderCard = false }) => {
   if (rawUrl) rawUrl = rawUrl.replace(/\\/g, '/');
   const imgSrc = resolveImg(rawUrl);
   
-  const cls = `product-card${sliderCard ? ' slider-card' : ''}`;
+  const isOutOfStock = product.stock === 0;
+  const cls = `product-card${sliderCard ? ' slider-card' : ''}${isOutOfStock ? ' out-of-stock-card' : ''}`;
 
   const handleAddToCart = () => {
     if (added) return;           // prevent spam during feedback window
@@ -51,10 +52,13 @@ const ProductCard = ({ product, sliderCard = false }) => {
     <div className={cls}>
       <Link to={`/product/${product._id}`} className="product-card-link">
         <div className="product-image-wrapper">
+          {/* Out-of-stock badge */}
+          {isOutOfStock && <div className="badge-oos">Out of Stock</div>}
+
           {/* Discount badge (takes priority over best-seller badge) */}
-          {savings ? (
+          {!isOutOfStock && savings ? (
             <div className="discount-badge">{savings}</div>
-          ) : product.isBestSeller ? (
+          ) : !isOutOfStock && product.isBestSeller ? (
             <div className="badge-bs">
               <Star size={10} /> Best Seller
             </div>
@@ -74,19 +78,21 @@ const ProductCard = ({ product, sliderCard = false }) => {
           )}
 
           {/* ── Hover action bar — lives inside image wrapper ── */}
-          <div className="card-actions" onClick={e => e.preventDefault()}>
-            <Link to={`/product/${product._id}`} className="btn-card-buy">
-              Buy Now
-            </Link>
-            <button
-              className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
-              aria-label={added ? 'Added to cart' : 'Add to cart'}
-              onClick={handleAddToCart}
-              disabled={added}
-            >
-              {added ? '✓' : <ShoppingCart size={15} />}
-            </button>
-          </div>
+          {!isOutOfStock && (
+            <div className="card-actions" onClick={e => e.preventDefault()}>
+              <Link to={`/product/${product._id}`} className="btn-card-buy">
+                Buy Now
+              </Link>
+              <button
+                className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
+                aria-label={added ? 'Added to cart' : 'Add to cart'}
+                onClick={handleAddToCart}
+                disabled={added}
+              >
+                {added ? '✓' : <ShoppingCart size={15} />}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="product-info">

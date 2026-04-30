@@ -227,7 +227,19 @@ const CategoryPage = () => {
           ) : error ? (
             <div className="error-message">{error}</div>
           ) : products.length === 0 ? (
-            <div className="empty-message">No watches found for these filters.</div>
+            <div className="empty-state">
+              <div className="empty-icon">⌚</div>
+              <h3>No watches found</h3>
+              <p>{searchText || movement || gender || maxPrice < 200000
+                ? 'Try adjusting or clearing your filters.'
+                : 'No products in this category yet.'}</p>
+              <div className="empty-actions">
+                {(movement || gender || maxPrice < 200000) && (
+                  <button className="btn-empty-clear" onClick={clearFilters}>Clear Filters</button>
+                )}
+                <Link to="/category/all" className="btn-empty-browse">Browse All Watches</Link>
+              </div>
+            </div>
           ) : (
             <>
               <div className="cat-product-grid">

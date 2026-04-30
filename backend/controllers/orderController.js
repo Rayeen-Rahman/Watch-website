@@ -43,20 +43,46 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Cannot create order: Cart is empty' });
     }
 
-    const order = new Order({
-      customerName,
-      phone,
-      address,
-      products,
-      total
-    });
+    // ── Stock Validation ────────────────────────────────────────────────────
+    const Product = require('../models/Product');
+    const stockErrors = [];
 
+    for (const item of products) {
+      const prod = await Product.findById(item.product).select('name stock');
+      if (!prod) {
+        stockErrors.push(`Product not found`);
+        continue;
+      }
+      if (prod.stock < item.quantity) {
+        stockErrors.push(
+          `"${prod.name}" only has ${prod.stock} unit${prod.stock !== 1 ? 's' : ''} in stock (you ordered ${item.quantity})`
+        );
+      }
+    }
+
+    if (stockErrors.length > 0) {
+      return res.status(400).json({
+        message: `Order failed due to stock issues:\n• ${stockErrors.join('\n• ')}`,
+      });
+    }
+
+    // ── Create Order ────────────────────────────────────────────────────────
+    const order = new Order({ customerName, phone, address, products, total });
     const createdOrder = await order.save();
+
+    // ── Decrement Stock ─────────────────────────────────────────────────────
+    await Promise.all(
+      products.map(item =>
+        Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } })
+      )
+    );
+
     res.status(201).json(createdOrder);
   } catch (error) {
     res.status(400).json({ message: error.message || 'Invalid order data. Ensure all required fields are filled.' });
   }
 };
+
 
 // @desc    Update order status
 // @route   PUT /api/orders/:id/status

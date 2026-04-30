@@ -390,6 +390,32 @@
   text-transform: uppercase;
 }
 
+/* Out-of-stock badge */
+.badge-oos {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 2px;
+  z-index: 3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.out-of-stock-card {
+  opacity: 0.65;
+  pointer-events: auto; /* Still allow clicking to view product detail */
+}
+
+.out-of-stock-card .product-image-wrapper img {
+  filter: grayscale(35%);
+}
+
+
 /* Image placeholder — large letter centered */
 .img-placeholder {
   width: 100%;

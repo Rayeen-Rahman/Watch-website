@@ -4,6 +4,9 @@ import { X, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './CartPanel.css';
 
+const API = import.meta.env.VITE_API_URL;
+const resolveImg = (url) => url?.replace(/\\/g, '/').startsWith('/uploads') ? `${API}${url.replace(/\\/g, '/')}` : url;
+
 const CartPanel = () => {
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
   const navigate = useNavigate();
@@ -25,7 +28,7 @@ const CartPanel = () => {
             cartItems.map(item => (
               <div key={item._id} className="cart-item">
                 <div className="cart-item-img">
-                  {item.images && item.images[0] ? <img src={item.images[0]} alt={item.name} /> : <div className="cart-no-img">No Img</div>}
+                  {item.images && item.images[0] ? <img src={resolveImg(item.images[0])} alt={item.name} /> : <div className="cart-no-img">{(item.name||'W').charAt(0)}</div>}
                 </div>
                 <div className="cart-item-details">
                   <div className="cart-item-top">
@@ -34,7 +37,7 @@ const CartPanel = () => {
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  <p className="cart-item-price">${item.price.toFixed(2)}</p>
+                  <p className="cart-item-price">৳{item.price.toLocaleString()}</p>
                   <div className="cart-item-qty">
                     <button onClick={() => updateQuantity(item._id, item.qty - 1)}>-</button>
                     <span>{item.qty}</span>
@@ -49,7 +52,7 @@ const CartPanel = () => {
         <div className="cart-footer">
           <div className="cart-total-row">
             <span>Subtotal</span>
-            <strong>${cartTotal.toFixed(2)}</strong>
+            <strong>৳{cartTotal.toLocaleString()}</strong>
           </div>
           <p className="cart-disclaimer">Shipping & taxes calculated at checkout</p>
           <button

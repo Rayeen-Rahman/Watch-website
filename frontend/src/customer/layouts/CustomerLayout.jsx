@@ -11,6 +11,7 @@ import Success from '../pages/Success';
 import OrderHistoryPage from '../pages/OrderHistoryPage';
 import ProfilePage from '../pages/ProfilePage';
 import NotFoundPage from '../pages/NotFoundPage';
+import InfoPage from '../pages/InfoPage';
 import CartPanel from '../components/CartPanel';
 import '../customerTheme.css';
 
@@ -37,6 +38,10 @@ const CustomerLayout = () => {
           <Route path="/success"         element={<Success />} />
           <Route path="/orders"          element={<OrderHistoryPage />} />
           <Route path="/profile"         element={<ProfilePage />} />
+          <Route path="/info/faq"        element={<InfoPage page="faq" />} />
+          <Route path="/info/shipping"   element={<InfoPage page="shipping" />} />
+          <Route path="/info/privacy"    element={<InfoPage page="privacy" />} />
+          <Route path="/info/contact"    element={<InfoPage page="contact" />} />
           <Route path="*"               element={<NotFoundPage />} />
         </Routes>
       </main>

@@ -12,9 +12,11 @@ const Navbar = () => {
   const { user, logout }             = useAuth();
   const navigate = useNavigate();
 
-  const [showLogin,    setShowLogin]    = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [searchQuery,  setSearchQuery]  = useState('');
+  const [showLogin,      setShowLogin]      = useState(false);
+  const [showUserMenu,   setShowUserMenu]   = useState(false);
+  const [searchQuery,    setSearchQuery]    = useState('');
+  const [mobileSearch,   setMobileSearch]   = useState(false);
+  const [mobileQuery,    setMobileQuery]    = useState('');
 
   const userMenuRef = useRef(null);
 
@@ -36,8 +38,17 @@ const Navbar = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/category/all?search=${encodeURIComponent(searchQuery.trim())}`);
+    const q = searchQuery.trim();
+    if (q) navigate(`/category/all?search=${encodeURIComponent(q)}`);
+  };
+
+  const handleMobileSearch = (e) => {
+    e.preventDefault();
+    const q = mobileQuery.trim();
+    if (q) {
+      navigate(`/category/all?search=${encodeURIComponent(q)}`);
+      setMobileSearch(false);
+      setMobileQuery('');
     }
   };
 
@@ -78,6 +89,15 @@ const Navbar = () => {
 
         {/* ── Right icons ── */}
         <div className="navbar-icons">
+
+          {/* Mobile only: Search toggle icon */}
+          <button
+            className="icon-btn mobile-search-toggle"
+            aria-label="Search"
+            onClick={() => setMobileSearch(s => !s)}
+          >
+            <Search size={20} strokeWidth={1.5} />
+          </button>
 
           {/* User icon or Login */}
           {!user ? (
@@ -129,7 +149,26 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ── Login Modal ── */}
+      {/* \u2500\u2500 Mobile Search Bar (slides below navbar) \u2500\u2500 */}
+      {mobileSearch && (
+        <div className="mobile-search-bar">
+          <form onSubmit={handleMobileSearch} role="search">
+            <input
+              type="search"
+              placeholder="Search watches…"
+              value={mobileQuery}
+              onChange={e => setMobileQuery(e.target.value)}
+              autoFocus
+              aria-label="Mobile search"
+            />
+            <button type="submit" aria-label="Submit search">
+              <Search size={16} />
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* \u2500\u2500 Login Modal \u2500\u2500 */}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
   );
