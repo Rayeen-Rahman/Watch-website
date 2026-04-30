@@ -1,5 +1,6 @@
 const express    = require('express');
 const mongoose   = require('mongoose');
+const path       = require('path');
 const cors       = require('cors');
 const dotenv     = require('dotenv');
 const helmet     = require('helmet');
@@ -84,7 +85,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs
 
 // ── STEP 12: Serve uploaded product images statically ─────────────────────────
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
 // ── Database Connection ───────────────────────────────────────────────────────

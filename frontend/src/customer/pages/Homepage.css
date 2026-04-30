@@ -151,37 +151,49 @@
   100% { transform: translateY(-8px); }
 }
 
-/* ── COLLECTION SECTION (Step 36) ── */
+/* ── COLLECTION SECTION ── */
 .collection-section {
-  padding: 90px 5%;
-  background-color: var(--store-bg);
+  padding: 80px 5%;
+  background-color: #fff;
 }
 
 .best-sellers-section {
   padding-top: 40px;
-  background-color: #f8f8f8;
+  background-color: #f9f9f9;
 }
 
-/* Step 36: Centered header */
+/* Section header */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
 .centered-header {
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 50px;
+  align-items: flex-start;
+  text-align: left;
+  margin-bottom: 40px;
 }
 
 .section-header h2 {
-  font-size: 2.2rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #999;
+  margin: 0 0 8px 0;
+}
+
+/* Large editorial title below the label */
+.section-title-lg {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #111;
   margin: 0;
-  letter-spacing: -0.5px;
+  line-height: 1.15;
 }
 
 /* Step 36: subtitle */
@@ -247,11 +259,11 @@
   color: #fff;
 }
 
-/* ── PRODUCT GRID (4-col) ── */
+/* ── PRODUCT GRID — Stitch: 4-col, tight gap ── */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 16px;
 }
 
 @media (max-width: 1200px) {
@@ -259,14 +271,14 @@
 }
 
 @media (max-width: 768px) {
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .hero-section { flex-direction: column; padding: 40px 5%; }
   .hero-content h1 { font-size: 2.8rem; }
   .hero-watch-img { max-width: 90%; }
 }
 
 @media (max-width: 480px) {
-  .product-grid { grid-template-columns: 1fr; }
+  .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
 
 /* ── PRODUCT SLIDER (Best Sellers) ── */
@@ -288,19 +300,22 @@
   scroll-snap-align: start;
 }
 
-/* ── PRODUCT CARD ── */
+/* ── PRODUCT CARD — Stitch Minimalist / 'No-Line' rule ── */
 .product-card {
   display: flex;
   flex-direction: column;
-  background-color: var(--store-bg);
-  border: 1px solid var(--store-border);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px; /* Slightly rounded for the hover effect */
+  overflow: visible;
+  transition: background-color 0.3s ease;
+  position: relative;
+  padding: 8px; /* Breathing room for hover state */
+  margin: -8px; /* Offset padding so grid aligns perfectly */
 }
 
 .product-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  background-color: #f3f3f4; /* surface_container_low */
 }
 
 .product-card-link {
@@ -310,137 +325,204 @@
   flex-direction: column;
 }
 
+/* 4:5 portrait ratio — matches luxury watch photography */
 .product-image-wrapper {
-  aspect-ratio: 1 / 1;
-  background-color: var(--store-surface);
+  aspect-ratio: 4 / 5;
+  background-color: #f4f4f4;
   overflow: hidden;
-  position: relative;
+  position: relative;  /* card-actions are absolute inside here */
 }
 
 .product-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  object-fit: cover;  /* FIX: was missing on some paths causing small icon */
+  object-position: center;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card:hover .product-image-wrapper img {
-  transform: scale(1.05); /* strict 1.05 max */
+  transform: scale(1.04);
 }
 
-/* Step 38: Discount badge — "৳X OFF" */
+/* Discount badge */
 .discount-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  background-color: #22C55E;
+  background-color: #111;
   color: white;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   z-index: 2;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
+/* Image placeholder — large letter centered */
 .img-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #bbb;
-  font-size: 0.85rem;
+  color: #ccc;
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -2px;
+  background: #f4f4f4;
 }
 
+/* Product info — below image, generous spacing */
 .product-info {
-  padding: 14px 14px 10px;
+  padding: 24px 8px 8px; /* 24px vertical gap from image as per design */
 }
 
+/* Brand — small uppercase tracking */
+.product-brand {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+
+/* Title — clean, single line */
 .truncate-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
+  font-family: 'Manrope', 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  color: #111;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.product-spec {
+  display: block;
+  font-size: 0.7rem;
+  color: #bbb;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
 .price-row {
   display: flex;
   gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: baseline;
 }
 
 .product-price {
-  color: var(--store-text);
+  color: #111;
   margin: 0;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.88rem;
 }
 
 .old-price {
   margin: 0;
   text-decoration: line-through;
-  color: #aaa;
-  font-size: 0.85rem;
+  color: #ccc;
+  font-size: 0.78rem;
 }
 
-/* Step 37: Always-visible Buy Now + Cart button row */
+/* ── Card actions — slide up on hover from BOTTOM of image wrapper ── */
 .card-actions {
+  position: absolute;        /* inside .product-image-wrapper */
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
-  gap: 0;
-  border-top: 1px solid var(--store-border);
-  margin-top: auto;
+  background: rgba(255,255,255,0.97);
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.product-card:hover .card-actions {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .btn-card-buy {
   flex: 1;
-  padding: 12px 0;
+  padding: 11px 0;
   text-align: center;
-  font-size: 0.88rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   background: transparent;
-  color: var(--store-text);
+  color: #111;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
-  letter-spacing: 0.5px;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .btn-card-buy:hover {
-  background-color: #000;
+  background-color: #111;
   color: #fff;
 }
 
 .btn-card-cart {
-  width: 46px;
+  width: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-left: 1px solid var(--store-border);
+  border-left: 1px solid rgba(0,0,0,0.08);
   cursor: pointer;
-  color: var(--store-text);
-  transition: background-color 0.2s;
+  color: #111;
+  transition: background-color 0.2s, color 0.2s;
+  flex-shrink: 0;
 }
 
 .btn-card-cart:hover {
-  background-color: #000;
+  background-color: #111;
   color: #fff;
 }
 
-/* C-05: Visual feedback when product added to cart */
+/* C-05: Cart added feedback */
 .btn-card-cart.btn-cart-added {
   background-color: #22c55e;
   color: #fff;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: default;
 }
+
+/* Best-seller badge */
+.badge-bs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #111;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
 
 /* ── SKELETON LOADING ── */
 .skeleton-card {

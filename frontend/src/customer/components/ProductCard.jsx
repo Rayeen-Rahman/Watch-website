@@ -26,14 +26,19 @@ export const getSavingsLabel = (product) => {
 
 const ProductCard = ({ product, sliderCard = false }) => {
   const { addToCart } = useCart();
-  // C-05: cart button feedback — prevents spam and gives visual confirmation
   const [added, setAdded] = React.useState(false);
+  const [imgError, setImgError] = React.useState(false);
 
   if (!product) return null;
 
   const savings = getSavingsLabel(product);
-  const imgSrc  = resolveImg(product.images?.[0]);
-  const cls     = `product-card${sliderCard ? ' slider-card' : ''}`;
+  
+  // Resolve image and normalize backslashes from Windows paths
+  let rawUrl = product.images?.[0] || product.image;
+  if (rawUrl) rawUrl = rawUrl.replace(/\\/g, '/');
+  const imgSrc = resolveImg(rawUrl);
+  
+  const cls = `product-card${sliderCard ? ' slider-card' : ''}`;
 
   const handleAddToCart = () => {
     if (added) return;           // prevent spam during feedback window
@@ -55,13 +60,33 @@ const ProductCard = ({ product, sliderCard = false }) => {
             </div>
           ) : null}
 
-          {imgSrc ? (
-            <img src={imgSrc} alt={product.name} loading="lazy" />
+          {imgSrc && !imgError ? (
+            <img 
+              src={imgSrc} 
+              alt={product.name} 
+              loading="lazy" 
+              onError={() => setImgError(true)}
+            />
           ) : (
             <div className="img-placeholder">
-              {(product.brand || product.name || 'W').charAt(0)}
+              {(product.brand || product.name || 'W').charAt(0).toUpperCase()}
             </div>
           )}
+
+          {/* ── Hover action bar — lives inside image wrapper ── */}
+          <div className="card-actions" onClick={e => e.preventDefault()}>
+            <Link to={`/product/${product._id}`} className="btn-card-buy">
+              Buy Now
+            </Link>
+            <button
+              className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
+              aria-label={added ? 'Added to cart' : 'Add to cart'}
+              onClick={handleAddToCart}
+              disabled={added}
+            >
+              {added ? '✓' : <ShoppingCart size={15} />}
+            </button>
+          </div>
         </div>
 
         <div className="product-info">
@@ -87,21 +112,6 @@ const ProductCard = ({ product, sliderCard = false }) => {
           </div>
         </div>
       </Link>
-
-      {/* Action buttons — always visible below card */}
-      <div className="card-actions">
-        <Link to={`/product/${product._id}`} className="btn-card-buy">
-          Buy Now
-        </Link>
-        <button
-          className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
-          aria-label={added ? 'Added to cart' : 'Add to cart'}
-          onClick={handleAddToCart}
-          disabled={added}
-        >
-          {added ? '✓' : <ShoppingCart size={16} />}
-        </button>
-      </div>
     </div>
   );
 };

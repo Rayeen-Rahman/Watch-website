@@ -47,11 +47,11 @@ body.customer-view {
   position: sticky;
   top: 0;
   width: 100%;
-  height: 80px;
-  background-color: var(--store-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -167,7 +167,7 @@ body.customer-view {
 .navbar-icons {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 }
 
 .icon-btn {
@@ -374,20 +374,34 @@ body.customer-view {
   background: none;
   border: none;
   font-family: inherit;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--store-text-light);
+  color: #474747;
   text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 20px;
+  padding: 4px 0;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  position: relative;
+}
+.nav-cat-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #000;
+  transition: width 0.3s ease;
 }
 .nav-cat-link:hover {
-  color: var(--store-accent);
-  background: rgba(0,0,0,0.04);
+  color: #000;
+  background: transparent;
+}
+.nav-cat-link:hover::after {
+  width: 100%;
 }
 .nav-cat-more {
   display: flex;
@@ -498,16 +512,11 @@ body.customer-view {
 .mobile-nav-links a:last-child { border-bottom: none; }
 .mobile-nav-links a:hover { color: var(--store-accent); }
 
-/* Responsive: collapse category row + show hamburger on tablet/mobile */
-@media (max-width: 900px) {
+/* Responsive: hide categories on small screens — no hamburger */
+@media (max-width: 768px) {
   .navbar-cats      { display: none; }
-  .mobile-menu-btn  { display: flex !important; }
-  .mobile-menu      { display: block; }
-  .navbar-search    { margin: 0 16px; }
-}
-@media (max-width: 600px) {
-  .navbar-search { display: none; }
-  .store-navbar  { padding: 0 4%; }
+  .navbar-search    { display: none; }
+  .store-navbar     { padding: 0 4%; }
 }
 
 /* ── Step 35: Footer social icons ────────────────────────────────────────── */
@@ -535,22 +544,37 @@ body.customer-view {
 
 /* ── Navbar Auth Elements (Step 6) ─────────────────────────────────────────── */
 
-/* Login pill button */
+/* Login pill — ghost outline style, matching Stitch minimal nav */
 .btn-navbar-login {
-  background: var(--store-accent);
-  color: var(--store-bg);
+  background: transparent;
+  color: #1a1c1c;
   border: none;
-  border-radius: 50px;
-  padding: 8px 20px;
+  padding: 4px 0;
   font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   cursor: pointer;
   font-family: inherit;
-  transition: opacity 0.2s, transform 0.15s;
+  transition: color 0.2s;
   white-space: nowrap;
+  position: relative;
 }
-.btn-navbar-login:hover { opacity: 0.8; transform: translateY(-1px); }
+.btn-navbar-login::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #1a1c1c;
+  transition: width 0.2s ease;
+}
+.btn-navbar-login:hover {
+  color: #000;
+}
+.btn-navbar-login:hover::after {
+  width: 100%;
+}
 
 /* User avatar button */
 .user-menu-wrap { position: relative; }
@@ -558,18 +582,17 @@ body.customer-view {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: var(--store-surface);
-  border: 1px solid var(--store-border);
-  border-radius: 50px;
-  padding: 6px 14px 6px 10px;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
   cursor: pointer;
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--store-text);
-  transition: border-color 0.2s;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1a1c1c;
+  transition: color 0.2s;
 }
-.btn-user-avatar:hover { border-color: var(--store-accent); }
+.btn-user-avatar:hover { color: #555; }
 .navbar-username { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* User dropdown */

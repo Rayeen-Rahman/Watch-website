@@ -128,11 +128,16 @@ const Homepage = () => {
 
       {/* ── WATCH COLLECTION ──────────────────────────────────────────────── */}
       <section id="collection" className="collection-section">
-        <div className="section-header centered-header">
-          <h2>Watch Collection</h2>
-          <p className="section-subtitle">
-            Explore our full range of meticulously crafted pieces, designed to stand the test of time.
-          </p>
+        <div className="section-header">
+          <div>
+            <h2>The Collection</h2>
+            <p className="section-title-lg">Crafted for Every Occasion</p>
+          </div>
+          {collection.length > 0 && (
+            <Link to="/category/all" className="link-view-all-centered">
+              View All →
+            </Link>
+          )}
         </div>
 
         {loading ? (
@@ -152,14 +157,6 @@ const Homepage = () => {
             ))}
           </div>
         )}
-
-        {collection.length > 0 && (
-          <div className="view-all-wrap">
-            <Link to="/category/all" className="link-view-all-centered">
-              VIEW ALL WATCHES
-            </Link>
-          </div>
-        )}
       </section>
 
       {/* ── BEST SELLERS ──────────────────────────────────────────────────── */}
@@ -168,9 +165,7 @@ const Homepage = () => {
           <div className="section-header best-sellers-header">
             <div>
               <h2>Best Sellers</h2>
-              <p className="section-subtitle" style={{ marginTop: 6, marginBottom: 0 }}>
-                Our most sought-after timepieces, curated by enthusiasts.
-              </p>
+              <p className="section-title-lg">Most Loved Timepieces</p>
             </div>
             <div className="slider-nav-buttons">
               <button
@@ -178,14 +173,14 @@ const Homepage = () => {
                 onClick={() => scrollBestSellers(-1)}
                 aria-label="Previous"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
               <button
                 className="slider-nav-btn"
                 onClick={() => scrollBestSellers(1)}
                 aria-label="Next"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
