@@ -433,6 +433,15 @@
   color: #fff;
 }
 
+/* C-05: Visual feedback when product added to cart */
+.btn-card-cart.btn-cart-added {
+  background-color: #22c55e;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: default;
+}
+
 /* ── SKELETON LOADING ── */
 .skeleton-card {
   aspect-ratio: 1 / 1;

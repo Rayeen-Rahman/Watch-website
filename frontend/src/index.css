@@ -55,11 +55,10 @@ body {
 }
 
 #root {
-  width: 1126px;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
+  margin: 0;
+  text-align: left;
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -108,4 +107,57 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+/* ── BUG-02: Admin form input visibility fix ───────────────────────────────
+   Admin uses a dark theme (#0d0d14 bg). Without explicit color overrides,
+   inputs inherit a dark text color and become invisible on dark backgrounds.
+─────────────────────────────────────────────────────────────────────────── */
+.admin-page input[type="text"],
+.admin-page input[type="number"],
+.admin-page input[type="email"],
+.admin-page input[type="url"],
+.admin-page input[type="password"],
+.admin-page input[type="search"],
+.admin-page select,
+.admin-page textarea {
+  background-color: #1e1e2e !important;
+  color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+  border: 1px solid #2d2d44 !important;
+  border-radius: 8px;
+}
+.admin-page input::placeholder,
+.admin-page textarea::placeholder {
+  color: #4b5563 !important;
+}
+.admin-page input:focus,
+.admin-page select:focus,
+.admin-page textarea:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* Also fix the slide-panel form inputs (AddProductPanel, AddUserPanel etc.) */
+.slide-panel input[type="text"],
+.slide-panel input[type="number"],
+.slide-panel input[type="email"],
+.slide-panel input[type="url"],
+.slide-panel input[type="password"],
+.slide-panel select,
+.slide-panel textarea {
+  background-color: #1e1e2e !important;
+  color: #f3f4f6 !important;
+  caret-color: #f3f4f6 !important;
+  border: 1px solid #2d2d44 !important;
+}
+.slide-panel input::placeholder,
+.slide-panel textarea::placeholder {
+  color: #4b5563 !important;
+}
+.slide-panel input:focus,
+.slide-panel select:focus,
+.slide-panel textarea:focus {
+  border-color: #6366f1 !important;
 }

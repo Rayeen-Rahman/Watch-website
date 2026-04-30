@@ -26,12 +26,21 @@ export const getSavingsLabel = (product) => {
 
 const ProductCard = ({ product, sliderCard = false }) => {
   const { addToCart } = useCart();
+  // C-05: cart button feedback — prevents spam and gives visual confirmation
+  const [added, setAdded] = React.useState(false);
 
   if (!product) return null;
 
   const savings = getSavingsLabel(product);
   const imgSrc  = resolveImg(product.images?.[0]);
   const cls     = `product-card${sliderCard ? ' slider-card' : ''}`;
+
+  const handleAddToCart = () => {
+    if (added) return;           // prevent spam during feedback window
+    addToCart(product, 1);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   return (
     <div className={cls}>
@@ -79,17 +88,18 @@ const ProductCard = ({ product, sliderCard = false }) => {
         </div>
       </Link>
 
-      {/* Action buttons always visible */}
+      {/* Action buttons — always visible below card */}
       <div className="card-actions">
         <Link to={`/product/${product._id}`} className="btn-card-buy">
           Buy Now
         </Link>
         <button
-          className="btn-card-cart"
-          aria-label="Add to cart"
-          onClick={() => addToCart(product, 1)}
+          className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
+          aria-label={added ? 'Added to cart' : 'Add to cart'}
+          onClick={handleAddToCart}
+          disabled={added}
         >
-          <ShoppingCart size={16} />
+          {added ? '✓' : <ShoppingCart size={16} />}
         </button>
       </div>
     </div>

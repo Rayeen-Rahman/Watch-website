@@ -19,6 +19,8 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     caseSize:         '',
     waterResistance:  '',
     gender:           '',
+    isBestSeller:     false,
+    isFeatured:       false,
   });
 
   const [images, setImages]           = useState([]);   // array of URL strings
@@ -28,8 +30,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
 
   if (!isOpen) return null;
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+  };
 
   // ── Image upload from computer ──────────────────────────────────────────────
   const handleFileUpload = async (e) => {
@@ -115,6 +119,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
         description: '', category: '650a3f9e9d1a1b1c3d4e5f6a', tag: '',
         stock: '', dialColor: '', strapMaterial: '', movementType: '',
         caseSize: '', waterResistance: '', gender: '',
+        isBestSeller: false, isFeatured: false,
       });
       setImages([]);
       onClose();
@@ -308,6 +313,37 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
               <input type="text" name="category" value={formData.category}
                 onChange={handleChange} placeholder="MongoDB ObjectId" />
             </div>
+          </div>
+
+          {/* ── Status Flags ── */}
+          <div className="form-section-label">Visibility Flags</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--admin-text-primary)' }}>
+              <input
+                type="checkbox"
+                name="isBestSeller"
+                checked={formData.isBestSeller}
+                onChange={handleChange}
+                style={{ width: '16px', height: '16px', accentColor: '#6366f1', cursor: 'pointer' }}
+              />
+              <span>
+                <strong>Best Seller</strong>
+                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Shows in the Best Sellers slider on the homepage</span>
+              </span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--admin-text-primary)' }}>
+              <input
+                type="checkbox"
+                name="isFeatured"
+                checked={formData.isFeatured}
+                onChange={handleChange}
+                style={{ width: '16px', height: '16px', accentColor: '#6366f1', cursor: 'pointer' }}
+              />
+              <span>
+                <strong>Featured Product</strong>
+                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Displayed in the hero section spotlight card</span>
+              </span>
+            </label>
           </div>
 
           <div className="panel-footer">
