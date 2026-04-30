@@ -1,85 +1,108 @@
-const express = require('express');
-const router  = express.Router();
+// backend/routes/adminRoutes.js
+// Powers every data point in DashboardHome.jsx
+// All routes are protected by protect + isAdmin middleware
 
-const Order   = require('../models/Order');
-const Product = require('../models/Product');
-const User    = require('../models/User');
+const express  = require('express');
+const router   = express.Router();
+const mongoose = require('mongoose');
+const Order    = require('../models/Order');
+const Product  = require('../models/Product');
+const User     = require('../models/User');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-// ── STEP 14: Dashboard KPI Stats ─────────────────────────────────────────────
-// GET /api/admin/dashboard-stats
+// Apply auth to every route in this file
+router.use(protect, isAdmin);
+
+/* ─────────────────────────────────────────────
+   GET /api/admin/dashboard-stats
+   Returns all 6 KPI card values in one call
+───────────────────────────────────────────── */
 router.get('/dashboard-stats', async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
     const [
-      revenueResult,
+      revenueAgg,
       todayOrders,
       totalUsers,
       totalProducts,
       pendingOrders,
-      lowStock,
+      lowStockCount,
     ] = await Promise.all([
-      // Total revenue from delivered orders
+      // Sum total of all delivered orders
       Order.aggregate([
         { $match: { status: 'delivered' } },
         { $group: { _id: null, total: { $sum: '$total' } } },
       ]),
-      // Orders placed today
-      Order.countDocuments({ createdAt: { $gte: today } }),
-      // All users
+      // Count today's orders (any status)
+      Order.countDocuments({ createdAt: { $gte: todayStart } }),
+      // Count all registered users
       User.countDocuments({}),
-      // Active products only
-      Product.countDocuments({ isActive: true }),
-      // Pending orders needing attention
+      // Count active products only
+      Product.countDocuments({ isActive: { $ne: false } }),
+      // Count orders waiting to be processed
       Order.countDocuments({ status: 'pending' }),
-      // Low stock items (≤ 5 units)
-      Product.countDocuments({ stock: { $lte: 5 }, isActive: true }),
+      // Products with stock at or below 5
+      Product.countDocuments({
+        stock: { $lte: 5 },
+        isActive: { $ne: false },
+      }),
     ]);
 
     res.json({
-      totalRevenue:  revenueResult[0]?.total || 0,
+      totalRevenue:  revenueAgg[0]?.total  || 0,
       todayOrders,
       totalUsers,
       totalProducts,
       pendingOrders,
-      lowStockCount: lowStock,
+      lowStockCount,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ── STEP 15: Recent Orders ────────────────────────────────────────────────────
-// GET /api/admin/recent-orders?limit=8
+/* ─────────────────────────────────────────────
+   GET /api/admin/recent-orders?limit=8
+   Returns latest N orders with customer info
+───────────────────────────────────────────── */
 router.get('/recent-orders', async (req, res) => {
   try {
-    const limit  = parseInt(req.query.limit) || 8;
+    const limit = Math.min(parseInt(req.query.limit) || 8, 50);
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ── STEP 16a: Popular Products (by units sold) ───────────────────────────────
-// GET /api/admin/popular-products?limit=5
+/* ─────────────────────────────────────────────
+   GET /api/admin/popular-products?limit=5
+   Returns top N products by units sold
+───────────────────────────────────────────── */
 router.get('/popular-products', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = Math.min(parseInt(req.query.limit) || 5, 20);
 
-    const popular = await Order.aggregate([
+    const products = await Order.aggregate([
+      // Flatten order items (your schema uses 'products' array)
       { $unwind: '$products' },
+      // Group by product and sum quantities
       {
         $group: {
           _id:       '$products.product',
           totalSold: { $sum: '$products.quantity' },
         },
       },
+      // Sort by most sold first
       { $sort: { totalSold: -1 } },
       { $limit: limit },
+      // Join product details
       {
         $lookup: {
           from:         'products',
@@ -89,10 +112,11 @@ router.get('/popular-products', async (req, res) => {
         },
       },
       { $unwind: '$product' },
+      // Project only the fields needed by the frontend
       {
         $project: {
+          _id:       '$product._id',
           name:      '$product.name',
-          brand:     '$product.brand',
           price:     '$product.price',
           image:     { $arrayElemAt: ['$product.images', 0] },
           totalSold: 1,
@@ -100,17 +124,20 @@ router.get('/popular-products', async (req, res) => {
       },
     ]);
 
-    res.json(popular);
+    res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ── STEP 16b: Revenue Chart (last N days) ────────────────────────────────────
-// GET /api/admin/revenue-chart?days=7
+/* ─────────────────────────────────────────────
+   GET /api/admin/revenue-chart?days=7
+   Returns daily revenue + order count for chart
+   Supports: ?days=7  ?days=14  ?days=30
+───────────────────────────────────────────── */
 router.get('/revenue-chart', async (req, res) => {
   try {
-    const days   = parseInt(req.query.days) || 7;
+    const days   = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
     const result = [];
 
     for (let i = days - 1; i >= 0; i--) {
@@ -118,12 +145,13 @@ router.get('/revenue-chart', async (req, res) => {
       start.setDate(start.getDate() - i);
       start.setHours(0, 0, 0, 0);
 
-      const end = new Date();
-      end.setDate(end.getDate() - i);
+      const end = new Date(start);
       end.setHours(23, 59, 59, 999);
 
-      const [orderCount, revenueResult] = await Promise.all([
+      const [ordersCount, revAgg] = await Promise.all([
+        // All orders on that day (any status)
         Order.countDocuments({ createdAt: { $gte: start, $lte: end } }),
+        // Revenue only from delivered orders
         Order.aggregate([
           {
             $match: {
@@ -136,9 +164,67 @@ router.get('/revenue-chart', async (req, res) => {
       ]);
 
       result.push({
-        name:    start.toLocaleDateString('en-BD', { weekday: 'short' }),
-        orders:  orderCount,
-        revenue: revenueResult[0]?.total || 0,
+        name:    start.toLocaleDateString('en-BD', { weekday: 'short', month: 'short', day: 'numeric' }),
+        orders:  ordersCount,
+        revenue: revAgg[0]?.total || 0,
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────
+   GET /api/admin/revenue-chart-fast
+   Single aggregation version — faster for large DBs
+   Use this instead if you have 10k+ orders
+───────────────────────────────────────────── */
+router.get('/revenue-chart-fast', async (req, res) => {
+  try {
+    const days      = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (days - 1));
+    startDate.setHours(0, 0, 0, 0);
+
+    const raw = await Order.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: {
+            year:  { $year:  '$createdAt' },
+            month: { $month: '$createdAt' },
+            day:   { $dayOfMonth: '$createdAt' },
+          },
+          orders:  { $sum: 1 },
+          revenue: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'delivered'] }, '$total', 0],
+            },
+          },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } },
+    ]);
+
+    // Fill in missing days with 0s
+    const dataMap = {};
+    raw.forEach(r => {
+      const key = `${r._id.year}-${r._id.month}-${r._id.day}`;
+      dataMap[key] = r;
+    });
+
+    const result = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key   = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      const entry = dataMap[key];
+      result.push({
+        name:    d.toLocaleDateString('en-BD', { weekday: 'short', month: 'short', day: 'numeric' }),
+        orders:  entry?.orders  || 0,
+        revenue: entry?.revenue || 0,
       });
     }
 

@@ -79,8 +79,9 @@ app.use(
   })
 );
 
-// Body parser
+// Body parsers
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs
 
 // ── STEP 12: Serve uploaded product images statically ─────────────────────────
 app.use('/uploads', express.static('uploads'));
@@ -97,8 +98,6 @@ const connectDB = async () => {
     process.exit(1);
   }
 };
-
-connectDB();
 
 // ── Route imports ─────────────────────────────────────────────────────────────
 const productRoutes  = require('./routes/productRoutes');
@@ -140,18 +139,23 @@ app.use(errorHandler);
 // ── STEP 8: Start server + graceful SIGTERM shutdown ─────────────────────────
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  console.log('Backend successfully auto-restarted to load local database credentials!');
-});
+const startServer = async () => {
+  await connectDB();   // wait for DB before accepting requests
+  const server = app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+    console.log('Backend successfully started after MongoDB connection!');
+  });
 
-// Graceful shutdown — handles Docker stop, PM2 restart, deployment restarts
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed. Process exiting.');
-      process.exit(0);
+  // Graceful shutdown — handles Docker stop, PM2 restart, deployment restarts
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+      mongoose.connection.close(false, () => {
+        console.log('MongoDB connection closed. Process exiting.');
+        process.exit(0);
+      });
     });
   });
-});
+};
+
+startServer();
