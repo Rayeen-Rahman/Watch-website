@@ -8,6 +8,7 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 const {
   getUsers,
   getUserById,
+  createUser,
   updateUser,
   deleteUser,
 } = require('../controllers/userController');
@@ -48,6 +49,10 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.status(401).json({ message: 'Invalid email or password' });
+
+    // Reject banned accounts before issuing a token
+    if (user.status === 'Banned')
+      return res.status(403).json({ message: 'Your account has been suspended. Please contact support.' });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -105,7 +110,7 @@ router.put('/profile', protect, async (req, res) => {
 });
 
 // ── ADMIN: list / get / update / delete (all require admin auth) ─────────────
-router.route('/').get(protect, isAdmin, getUsers);
+router.route('/').get(protect, isAdmin, getUsers).post(protect, isAdmin, createUser);
 router.route('/:id')
   .get(protect, isAdmin, getUserById)
   .put(protect, isAdmin, updateUser)

@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, Clock, ArrowRight, ShoppingBag } from 'lucide-react';
 import './Success.css';
 
 const Success = () => {
   const [animate, setAnimate] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Guard: only show if the user just placed an order
+    const placed = sessionStorage.getItem('orderPlaced');
+    if (!placed) {
+      navigate('/', { replace: true });
+      return;
+    }
+    sessionStorage.removeItem('orderPlaced');
     // Trigger entrance animation after mount
     requestAnimationFrame(() => setAnimate(true));
     // Scroll to top

@@ -31,9 +31,9 @@ router.route('/')
   .get(protect, isAdmin, getOrders)
   .post(createOrder);
 
-// Detail view — accessible with auth token (admin or order lookup)
+// Detail view — requires auth token
 router.route('/:id')
-  .get(getOrderById);
+  .get(protect, getOrderById);
 
 // Update status — admin only
 router.route('/:id/status')

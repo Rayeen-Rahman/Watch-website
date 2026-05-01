@@ -85,6 +85,7 @@ const Checkout = () => {
 
       // ── Step 32: Clear cart after successful order ─────────────────────────
       clearCart();
+      sessionStorage.setItem('orderPlaced', 'true');
       navigate('/success');
     } catch (err) {
       setError(err.message);
@@ -228,12 +229,14 @@ const Checkout = () => {
                 <span>৳{cartTotal.toLocaleString()}</span>
               </div>
               <div className="total-row">
-                <span>Shipping</span>
-                <span className="free-shipping">Free</span>
+                <span>Delivery</span>
+                <span className={cartTotal >= 2000 ? "free-shipping" : ""}>
+                  {cartTotal >= 2000 ? 'FREE' : '৳80'}
+                </span>
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
-                <span>৳{cartTotal.toLocaleString()}</span>
+                <span>৳{(cartTotal + (cartTotal >= 2000 ? 0 : 80)).toLocaleString()}</span>
               </div>
             </div>
 
