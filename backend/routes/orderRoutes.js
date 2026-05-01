@@ -16,10 +16,7 @@ router.get('/lookup', async (req, res) => {
     if (!phone || !phone.trim()) {
       return res.status(400).json({ message: 'Phone number is required' });
     }
-    const Order = require('../controllers/orderController');
-    // Direct mongoose query — lightweight and doesn't expose all orders
-    const mongoose = require('mongoose');
-    const OrderModel = mongoose.model('Order');
+    const OrderModel = require('../models/Order');
     const orders = await OrderModel.find({ phone: phone.trim() })
       .sort({ createdAt: -1 })
       .lean();

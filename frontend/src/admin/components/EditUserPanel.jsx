@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './EditUserPanel.css';
 
 const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -43,7 +45,7 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
       
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           name: fullName,
           email: formData.email,

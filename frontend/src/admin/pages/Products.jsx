@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Trash2, MoreHorizontal, Star, Zap, Search, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
 import './Products.css';
 
 const API = import.meta.env.VITE_API_URL;
 
 const Products = ({ showToast }) => {
+  const { token } = useAuth();
   const [products,    setProducts]    = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -50,7 +52,7 @@ const Products = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/products/${product._id}`, {
         method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ [flag]: !product[flag] }),
       });
       if (!res.ok) throw new Error('Update failed');
@@ -64,7 +66,7 @@ const Products = ({ showToast }) => {
   const handleDeleteOne = async (id) => {
     if (!window.confirm('Delete this product permanently?')) return;
     try {
-      const res = await fetch(`${API}/api/products/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/api/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) {
         setOpenKebab(null);
         fetchProducts();
@@ -83,7 +85,7 @@ const Products = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/products/bulk-delete`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ productIds: selectedIds }),
       });
       if (res.ok) {

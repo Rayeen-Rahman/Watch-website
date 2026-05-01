@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css'; // reuse panel styles
 
 const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', username: '', password: ''
   });
@@ -24,7 +26,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
       const data = await res.json();

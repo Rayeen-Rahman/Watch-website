@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MoreHorizontal, X, Search, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Orders.css';
 
@@ -58,6 +59,7 @@ const OrderModal = ({ order, onClose }) => {
 
 // ── Main Orders Page ──────────────────────────────────────────────────────────
 const Orders = ({ showToast }) => {
+  const { token } = useAuth();
   const [orders,      setOrders]      = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -76,7 +78,9 @@ const Orders = ({ showToast }) => {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const res  = await fetch(`${API}/api/orders`);
+      const res  = await fetch(`${API}/api/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch orders');
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
@@ -85,7 +89,7 @@ const Orders = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -95,7 +99,7 @@ const Orders = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/orders/${id}/status`, {
         method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error('Status update failed');

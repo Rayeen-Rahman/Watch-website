@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './AddCategoryPanel.css';
 
 const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
+  const { token } = useAuth();
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -13,7 +15,7 @@ const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name })
       });
 

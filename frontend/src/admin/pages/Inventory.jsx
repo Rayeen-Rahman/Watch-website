@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, AlertTriangle, Save, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Inventory.css';
 
@@ -7,6 +8,7 @@ const API = import.meta.env.VITE_API_URL;
 const LOW_STOCK_THRESHOLD = 5;
 
 const Inventory = ({ showToast }) => {
+  const { token } = useAuth();
   const [products,  setProducts]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState(null);
@@ -46,7 +48,7 @@ const Inventory = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/products/${product._id}`, {
         method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ stock: newStock }),
       });
       if (!res.ok) throw new Error('Update failed');

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MoreHorizontal, Search, RefreshCw, ShieldCheck, ShieldOff } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import EditUserPanel from '../components/EditUserPanel';
 import AddUserPanel from '../components/AddUserPanel';
 import './Products.css';
@@ -7,6 +8,7 @@ import './Products.css';
 const API = import.meta.env.VITE_API_URL;
 
 const Users = ({ showToast }) => {
+  const { token } = useAuth();
   const [users,        setUsers]        = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
@@ -32,7 +34,9 @@ const Users = ({ showToast }) => {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res  = await fetch(`${API}/api/users`);
+      const res  = await fetch(`${API}/api/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error('Failed to fetch users');
       const data = await res.json();
       setUsers(Array.isArray(data) ? data : []);
@@ -41,7 +45,7 @@ const Users = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
@@ -49,7 +53,7 @@ const Users = ({ showToast }) => {
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Permanently delete this user?')) return;
     try {
-      const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.ok) { setOpenKebab(null); fetchUsers(); toast('User deleted.'); }
       else { const d = await res.json(); toast(d.message || 'Delete failed', true); }
     } catch (err) { toast(err.message, true); }
@@ -61,7 +65,7 @@ const Users = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/users/${user._id}`, {
         method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error('Status update failed');

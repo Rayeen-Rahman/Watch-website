@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Tag, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './Categories.css';
 import './Products.css';  /* reuse table/page/badge shared styles */
 
@@ -7,6 +8,7 @@ import './Products.css';  /* reuse table/page/badge shared styles */
 const API = import.meta.env.VITE_API_URL;
 
 const Categories = ({ showToast }) => {
+  const { token } = useAuth();
   const [categories,  setCategories]  = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -63,7 +65,7 @@ const Categories = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/categories`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ name: newName.trim(), slug: newSlug || toSlug(newName) }),
       });
       const data = await res.json();
@@ -92,7 +94,7 @@ const Categories = ({ showToast }) => {
     try {
       const res = await fetch(`${API}/api/categories/${id}`, {
         method:  'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ name: editName.trim(), slug: editSlug || toSlug(editName) }),
       });
       const data = await res.json();
@@ -111,7 +113,7 @@ const Categories = ({ showToast }) => {
   const handleDelete = async (cat) => {
     if (!window.confirm(`Delete "${cat.name}"? Products in this category will lose their category assignment.`)) return;
     try {
-      const res = await fetch(`${API}/api/categories/${cat._id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/api/categories/${cat._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) { const d = await res.json(); throw new Error(d.message || 'Delete failed'); }
       fetchCategories();
       toast(`"${cat.name}" deleted.`);

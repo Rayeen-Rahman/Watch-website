@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css';
 
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
+  const { token } = useAuth();
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name:             '',
@@ -55,7 +57,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/products/upload-image`,
-        { method: 'POST', body: formPayload }
+        { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formPayload }
       );
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
@@ -115,7 +117,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
         `${import.meta.env.VITE_API_URL}/api/products`,
         {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body:    JSON.stringify(payload),
         }
       );

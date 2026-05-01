@@ -106,7 +106,7 @@ const ProfilePage = () => {
             </div>
             <div className="profile-field">
               <label><Lock size={14} /> Confirm New Password</label>
-              <input type="password" value={newPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Repeat new password" />
+              <input type="password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} placeholder="Repeat new password" />
             </div>
           </div>
 
