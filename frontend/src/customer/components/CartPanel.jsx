@@ -8,7 +8,7 @@ const API = import.meta.env.VITE_API_URL;
 const resolveImg = (url) => url?.replace(/\\/g, '/').startsWith('/uploads') ? `${API}${url.replace(/\\/g, '/')}` : url;
 
 const CartPanel = () => {
-  const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const navigate = useNavigate();
 
   if (!isCartOpen) return null;
@@ -17,7 +17,7 @@ const CartPanel = () => {
     <div className="cart-overlay" onClick={() => setIsCartOpen(false)}>
       <div className="cart-slide-panel" onClick={e => e.stopPropagation()}>
         <div className="cart-header">
-          <h3>Your Bag ({cartItems.length})</h3>
+          <h3>Your Bag ({cartCount})</h3>
           <button className="cart-close-btn" onClick={() => setIsCartOpen(false)}><X size={20} /></button>
         </div>
 

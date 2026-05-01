@@ -7,7 +7,7 @@
  *  sliderCard  {bool}    — adds .slider-card class for horizontal scroll use
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
@@ -26,6 +26,7 @@ export const getSavingsLabel = (product) => {
 
 const ProductCard = ({ product, sliderCard = false }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [added, setAdded] = React.useState(false);
   const [imgError, setImgError] = React.useState(false);
 
@@ -80,9 +81,9 @@ const ProductCard = ({ product, sliderCard = false }) => {
           {/* ── Hover action bar — lives inside image wrapper ── */}
           {!isOutOfStock && (
             <div className="card-actions" onClick={e => e.preventDefault()}>
-              <Link to={`/product/${product._id}`} className="btn-card-buy">
+              <button onClick={() => navigate(`/product/${product._id}`)} className="btn-card-buy" style={{ fontFamily: 'inherit', fontSize: '0.8rem' }}>
                 Buy Now
-              </Link>
+              </button>
               <button
                 className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
                 aria-label={added ? 'Added to cart' : 'Add to cart'}

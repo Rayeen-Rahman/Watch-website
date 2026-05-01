@@ -71,7 +71,7 @@ const Checkout = () => {
         quantity: item.qty,
         price: item.price,
       })),
-      total: cartTotal,
+      total: cartTotal + (cartTotal >= 2000 ? 0 : 80),
     };
 
     try {

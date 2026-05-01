@@ -4,6 +4,9 @@ import { ShoppingBag, ChevronDown, ChevronUp, Heart, Truck, Banknote, RefreshCcw
 import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
+const API = import.meta.env.VITE_API_URL;
+const resolveImg = (url) => url?.startsWith('/uploads') ? `${API}${url}` : url;
+
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,9 +24,6 @@ const ProductDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
-    const API = import.meta.env.VITE_API_URL;
-    const resolveImg = (url) => url?.startsWith('/uploads') ? `${API}${url}` : url;
 
     const fetchProduct = async () => {
       try {
@@ -206,21 +206,27 @@ const ProductDetail = () => {
           {/* Step 41: Quantity on own row */}
           <div className="quantity-row">
             <div className="quantity-selector">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
+              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={product.stock === 0}>−</button>
               <span>{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)}>+</button>
+              <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} disabled={product.stock === 0}>+</button>
             </div>
+            {product.stock > 0 && product.stock <= 5 && (
+              <span style={{ fontSize: '0.78rem', color: '#e05c00', marginLeft: '12px' }}>Only {product.stock} left!</span>
+            )}
           </div>
 
-          {/* Step 41: ADD TO CART — full width, own row */}
-          <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
-            <ShoppingBag size={20} /> ADD TO CART
-          </button>
-
-          {/* Step 41: BUY NOW — full width outline, below Add to Cart */}
-          <button className="btn-buy-now" onClick={handleBuyNow}>
-            BUY NOW
-          </button>
+          {product.stock === 0 ? (
+            <div className="badge-oos" style={{ textAlign: 'center', padding: '14px', fontSize: '0.9rem', borderRadius: '4px', marginBottom: '12px' }}>Out of Stock</div>
+          ) : (
+            <>
+              <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
+                <ShoppingBag size={20} /> ADD TO CART
+              </button>
+              <button className="btn-buy-now" onClick={handleBuyNow}>
+                BUY NOW
+              </button>
+            </>
+          )}
 
           {/* Step 42: COD / Delivery / Exchange trust lines */}
           <div className="trust-lines">

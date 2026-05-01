@@ -17,8 +17,17 @@ const Navbar = () => {
   const [searchQuery,    setSearchQuery]    = useState('');
   const [mobileSearch,   setMobileSearch]   = useState(false);
   const [mobileQuery,    setMobileQuery]    = useState('');
+  const [categories,     setCategories]     = useState([]);
 
   const userMenuRef = useRef(null);
+
+  // Fetch categories for nav links
+  useEffect(() => {
+    fetch(`${API}/api/categories`)
+      .then(r => r.json())
+      .then(d => setCategories(Array.isArray(d) ? d.slice(0, 6) : []))
+      .catch(() => {});
+  }, []);
 
   // Close user menu on outside click
   useEffect(() => {
@@ -72,6 +81,22 @@ const Navbar = () => {
           </svg>
           WATCH
         </Link>
+
+        {/* ── Category Links ── */}
+        {categories.length > 0 && (
+          <div className="navbar-cats">
+            <Link to="/category/all" className="nav-cat-link">All</Link>
+            {categories.map(cat => (
+              <Link
+                key={cat._id}
+                to={`/category/${cat.slug}`}
+                className="nav-cat-link"
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* ── Center Search Bar ── */}
         <form className="navbar-search" onSubmit={handleSearch} role="search">

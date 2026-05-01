@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import './CartPage.css';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQty, cartTotal, cartCount } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
 
   const API = import.meta.env.VITE_API_URL;
 
@@ -59,7 +59,7 @@ const CartPage = () => {
                     <div className="qty-control">
                       <button
                         className="qty-btn"
-                        onClick={() => updateQty(item._id, item.qty - 1)}
+                        onClick={() => updateQuantity(item._id, item.qty - 1)}
                         disabled={item.qty <= 1}
                         aria-label="Decrease"
                       >
@@ -68,7 +68,7 @@ const CartPage = () => {
                       <span className="qty-value">{item.qty}</span>
                       <button
                         className="qty-btn"
-                        onClick={() => updateQty(item._id, item.qty + 1)}
+                        onClick={() => updateQuantity(item._id, item.qty + 1)}
                         aria-label="Increase"
                       >
                         <Plus size={13} />

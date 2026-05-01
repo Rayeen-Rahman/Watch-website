@@ -4,7 +4,7 @@ const router  = express.Router();
 const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
 const User    = require('../models/User');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 const {
   getUsers,
   getUserById,
@@ -104,8 +104,11 @@ router.put('/profile', protect, async (req, res) => {
   }
 });
 
-// ── ADMIN: list / get / update / delete ──────────────────────────────────────
-router.route('/').get(getUsers);
-router.route('/:id').get(getUserById).put(updateUser).delete(deleteUser);
+// ── ADMIN: list / get / update / delete (all require admin auth) ─────────────
+router.route('/').get(protect, isAdmin, getUsers);
+router.route('/:id')
+  .get(protect, isAdmin, getUserById)
+  .put(protect, isAdmin, updateUser)
+  .delete(protect, isAdmin, deleteUser);
 
 module.exports = router;

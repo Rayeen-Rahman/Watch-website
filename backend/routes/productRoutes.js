@@ -14,10 +14,11 @@ const {
 } = require('../controllers/productController');
 
 const upload = require('../middleware/uploadMiddleware');
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // ── Step 12: Image upload route ──────────────────────────────────────────────
 // POST /api/products/upload-image
-router.post('/upload-image', upload.single('image'), (req, res) => {
+router.post('/upload-image', protect, isAdmin, upload.single('image'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
@@ -32,7 +33,7 @@ router.get('/featured', getFeaturedProduct);
 
 // ── Bulk delete before /:id ──────────────────────────────────────────────────
 // POST /api/products/bulk-delete
-router.post('/bulk-delete', deleteBulkProducts);
+router.post('/bulk-delete', protect, isAdmin, deleteBulkProducts);
 
 // ── Standard routes ──────────────────────────────────────────────────────────
 // GET  /api/products  (supports ?bestSeller=true, ?category=, ?search=, ?limit=, ?pageNumber=)
@@ -53,12 +54,12 @@ const validateProduct = [
 
 router.route('/')
   .get(getProducts)
-  .post(validateProduct, createProduct);
+  .post(protect, isAdmin, validateProduct, createProduct);
 
 // ── ID-based routes ──────────────────────────────────────────────────────────
 router.route('/:id')
   .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
+  .put(protect, isAdmin, updateProduct)
+  .delete(protect, isAdmin, deleteProduct);
 
 module.exports = router;
