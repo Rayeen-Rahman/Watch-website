@@ -105,8 +105,9 @@ const Homepage = () => {
                 <span className="floating-label">⚡ Featured</span>
                 <strong>{featuredProd.name}</strong>
                 <span>
-                  {[featuredProd.movementType, featuredProd.caseSize]
-                    .filter(Boolean).join(' · ')}
+                  {featuredProd.shortDescription ||
+                    [featuredProd.movementType, featuredProd.caseSize]
+                      .filter(Boolean).join(' · ')}
                 </span>
                 <span className="floating-price">
                   ৳{(featuredProd.price ?? 0).toLocaleString()}

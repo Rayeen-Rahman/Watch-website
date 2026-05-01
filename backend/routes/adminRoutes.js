@@ -234,4 +234,39 @@ router.get('/revenue-chart-fast', async (req, res) => {
   }
 });
 
+/* ─────────────────────────────────────────────
+   GET /api/admin/featured-product
+   Returns current hero-featured product
+───────────────────────────────────────────── */
+router.get('/featured-product', async (req, res) => {
+  try {
+    const product = await Product.findOne({ isFeatured: true, isActive: true })
+      .select('name shortDescription price images _id movementType caseSize');
+    res.json(product || null);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────
+   PUT /api/admin/set-featured/:id
+   Atomically swaps the hero featured product
+───────────────────────────────────────────── */
+router.put('/set-featured/:id', async (req, res) => {
+  try {
+    // Unset all featured products first
+    await Product.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });
+    // Set the chosen product as featured
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: { isFeatured: true } },
+      { new: true, select: 'name shortDescription price images _id movementType caseSize' }
+    );
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
