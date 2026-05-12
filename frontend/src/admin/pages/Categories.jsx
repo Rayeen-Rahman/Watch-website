@@ -5,7 +5,7 @@ import './Categories.css';
 import './Products.css';  /* reuse table/page/badge shared styles */
 
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Categories = ({ showToast }) => {
   const { token } = useAuth();

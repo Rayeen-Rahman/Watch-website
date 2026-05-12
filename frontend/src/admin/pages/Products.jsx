@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
 import './Products.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Products = ({ showToast }) => {
   const { token } = useAuth();

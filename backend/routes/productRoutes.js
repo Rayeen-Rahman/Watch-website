@@ -22,10 +22,14 @@ router.post('/upload-image', protect, isAdmin, upload.single('image'), (req, res
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
-  // Return the relative URL — served statically by server.js
-  const imageUrl = `/uploads/products/${req.file.filename}`;
+  // Cloudinary returns a full URL in req.file.path
+  // Local disk returns a filename — build a relative URL
+  const imageUrl = req.file.path
+    ? req.file.path                                        // Cloudinary URL (https://...)
+    : `/uploads/products/${req.file.filename}`;           // Local fallback
   res.json({ imageUrl });
 });
+
 
 // ── Step 10: /featured before /:id ──────────────────────────────────────────
 // GET /api/products/featured

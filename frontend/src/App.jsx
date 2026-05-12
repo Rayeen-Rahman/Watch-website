@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLayout from './admin/layouts/AdminLayout';
+import AdminLogin from './admin/pages/AdminLogin';
 import CustomerLayout from './customer/layouts/CustomerLayout';
 import ProtectedAdminRoute from './admin/components/ProtectedAdminRoute';
 
@@ -10,7 +11,10 @@ function App() {
         {/* Customer Site Routes */}
         <Route path="/*" element={<CustomerLayout />} />
 
-        {/* Admin Dashboard Routes — Step 18: protected */}
+        {/* Admin Login — public, no auth required */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+
+        {/* Admin Dashboard — protected, admin role required */}
         <Route
           path="/admin/*"
           element={

@@ -4,8 +4,7 @@ import { ShoppingBag, ChevronDown, ChevronUp, Heart, Truck, Banknote, RefreshCcw
 import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
-const API = import.meta.env.VITE_API_URL;
-const resolveImg = (url) => url?.startsWith('/uploads') ? `${API}${url}` : url;
+import { API, resolveImg } from '../../utils/api';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -129,7 +128,7 @@ const ProductDetail = () => {
           {product.images && product.images.length > 1 && (
             <div className="thumbnail-list">
               {product.images.map((img, index) => {
-                const resolved = img?.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${img}` : img;
+                const resolved = resolveImg(img);
                 return (
                   <div
                     key={index}
@@ -342,7 +341,7 @@ const ProductDetail = () => {
                   <div className="related-img-wrap">
                     {rel.images?.[0] ? (
                       <img
-                        src={rel.images[0].startsWith('/uploads') ? `${import.meta.env.VITE_API_URL}${rel.images[0]}` : rel.images[0]}
+                        src={resolveImg(rel.images[0])}
                         alt={rel.name}
                       />
                     ) : (

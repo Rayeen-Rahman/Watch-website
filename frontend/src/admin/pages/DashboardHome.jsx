@@ -594,8 +594,6 @@ const DashboardHome = () => {
         </div>
       </div>
 
-    </div>
-
       {/* ── HERO PRODUCT PICKER MODAL ─────────────────────── */}
       {showHeroPicker && (
         <div className="hero-picker-overlay" onClick={() => setShowHeroPicker(false)}>
@@ -654,6 +652,7 @@ const DashboardHome = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };

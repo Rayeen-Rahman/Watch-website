@@ -11,7 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 /** Resolve /uploads paths to absolute backend URL */
 export const resolveImg = (url) =>

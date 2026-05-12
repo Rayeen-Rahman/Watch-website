@@ -17,8 +17,8 @@ const ProtectedAdminRoute = ({ children }) => {
     );
   }
 
-  // Not logged in at all → send to homepage
-  if (!user) return <Navigate to="/" replace />;
+  // Not logged in at all → send to admin login page
+  if (!user) return <Navigate to="/admin/login" replace />;
 
   // Logged in but not admin → send to homepage
   if (user.role !== 'admin') return <Navigate to="/" replace />;

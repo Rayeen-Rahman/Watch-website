@@ -4,7 +4,7 @@ import { X, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './CartPanel.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const resolveImg = (url) => url?.replace(/\\/g, '/').startsWith('/uploads') ? `${API}${url.replace(/\\/g, '/')}` : url;
 
 const CartPanel = () => {

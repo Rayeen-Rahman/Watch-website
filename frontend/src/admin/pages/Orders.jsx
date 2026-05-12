@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Orders.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const STATUS_OPTIONS = ['pending', 'delivered', 'failed'];
 

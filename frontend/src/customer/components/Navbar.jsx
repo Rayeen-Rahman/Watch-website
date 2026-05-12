@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from './LoginModal';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Navbar = () => {
   const { cartCount, setIsCartOpen } = useCart();

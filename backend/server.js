@@ -5,11 +5,16 @@ const cors       = require('cors');
 const dotenv     = require('dotenv');
 const helmet     = require('helmet');
 const rateLimit  = require('express-rate-limit');
-const morgan     = require('morgan');        // Step 5 — request logging
-const compression = require('compression'); // Step 6 — gzip compression
+const morgan     = require('morgan');
+const compression = require('compression');
+const dns        = require('dns');
 
 // Load environment variables
 dotenv.config();
+
+// Force Google DNS so MongoDB Atlas SRV records resolve correctly
+// (some home routers block SRV queries — this bypasses them)
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const app = express();
 
@@ -20,14 +25,28 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(compression());
 
 // ── STEP 3: Helmet security headers ──────────────────────────────────────────
-app.use(helmet());
+// Single helmet() call — avoids duplicate CSP headers that browsers treat as
+// the most-restrictive intersection (which was blocking cross-origin images).
 app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      imgSrc:     ["'self'", 'data:', 'https:', 'http://localhost:5000', 'http://localhost:5173'],
-      connectSrc: ["'self'", 'http://localhost:5000'],
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc:  ["'self'"],
+        scriptSrc:   ["'self'", "'unsafe-inline'"],
+        styleSrc:    ["'self'", "'unsafe-inline'", 'https:'],
+        fontSrc:     ["'self'", 'https:', 'data:'],
+        imgSrc:      ["'self'", 'data:', 'blob:', 'https:', 'http:'],
+        connectSrc:  ["'self'", 'http://localhost:5000', 'http://localhost:5173', 'ws:'],
+        mediaSrc:    ["'self'"],
+        objectSrc:   ["'none'"],
+        upgradeInsecureRequests: null,
+      },
     },
+    // CRITICAL: 'same-origin' (helmet default) blocks <img> tags from loading
+    // files served by a different origin (port 5000 vs port 5173).
+    // 'cross-origin' allows any origin to embed these resources.
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
   })
 );
 
@@ -86,13 +105,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs
 
 // ── STEP 12: Serve uploaded product images statically ─────────────────────────
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Placed BEFORE the rate limiter (rate limiter is scoped to /api/ only, but
+// being explicit keeps intent clear). Extra headers ensure cross-origin
+// embedding works in all browsers regardless of Helmet's global CORP setting.
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    next();
+  },
+  express.static(path.join(__dirname, 'uploads'), {
+    maxAge: '1y',
+    etag:   true,
+  })
+);
 
 
 // ── Database Connection ───────────────────────────────────────────────────────
 const connectDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/watch-store';
+    // Priority: MONGODB_URI (Atlas/production) → MONGO_URI (local) → hardcoded local
+    const mongoUri =
+      process.env.MONGODB_URI ||
+      process.env.MONGO_URI ||
+      'mongodb://127.0.0.1:27017/watch-store';
+
+    const isAtlas = mongoUri.includes('mongodb+srv');
+    console.log(`Connecting to ${isAtlas ? 'MongoDB Atlas ☁️' : 'Local MongoDB 🖥️'}...`);
+
     const conn = await mongoose.connect(mongoUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

@@ -3,7 +3,7 @@ import { User, Mail, Phone, Lock, Save, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './ProfilePage.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const ProfilePage = () => {
   const { user, token, login } = useAuth();

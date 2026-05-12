@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { ArrowLeft, CheckCircle, ShoppingBag } from 'lucide-react';
 import './Checkout.css';
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 /** Resolve /uploads paths to absolute backend URL */
 const resolveImg = (url) =>

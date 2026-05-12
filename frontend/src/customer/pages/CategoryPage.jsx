@@ -28,7 +28,7 @@ const CategoryPage = () => {
   const [totalCount,  setTotalCount]  = useState(0);
   const [page,        setPage]        = useState(1);
   const [pages,       setPages]       = useState(1);
-  const API   = import.meta.env.VITE_API_URL;
+  const API   = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const LIMIT  = 12;
 
   const [sort,       setSort]        = useState('newest');
