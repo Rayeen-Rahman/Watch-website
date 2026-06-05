@@ -73,7 +73,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <img src="/logo.png" alt="Artifact BD Logo" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
+          <img src="/logo.png" alt="Artifact BD Logo" style={{ width: '26px', height: '26px', objectFit: 'contain', marginRight: '8px' }} />
           Artifact BD
         </Link>
 
