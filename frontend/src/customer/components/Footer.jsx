@@ -127,7 +127,7 @@ const Footer = () => {
       </div>
 
       <div className="footer-bottom">
-        &copy; {new Date().getFullYear()} Watch Vault. All rights reserved. Made with ❤️ in Bangladesh.
+        &copy; {new Date().getFullYear()} Artifact BD. All rights reserved. Made with ❤️ in Bangladesh.
       </div>
     </footer>
   );

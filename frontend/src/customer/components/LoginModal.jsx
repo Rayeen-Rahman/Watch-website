@@ -78,7 +78,15 @@ const LoginModal = ({ onClose }) => {
         </button>
 
         {/* Brand mark */}
-        <div className="modal-brand">⌚ Watch Vault</div>
+        <div className="modal-brand">
+          <svg width="18" height="18" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{display:'inline',verticalAlign:'middle',marginRight:'6px'}}>
+            <polygon points="50,4 96,50 50,96 4,50" stroke="currentColor" strokeWidth="7" fill="none"/>
+            <polygon points="50,16 20,74 50,57" fill="currentColor"/>
+            <polygon points="50,16 80,74 50,57" fill="currentColor"/>
+            <polygon points="34,63 50,57 66,63 61,74 39,74" fill="var(--store-surface,#16161e)"/>
+          </svg>
+          Artifact BD
+        </div>
 
         {/* Tab switcher */}
         <div className="modal-tabs">
