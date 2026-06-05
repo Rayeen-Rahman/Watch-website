@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './InfoPage.css';
 
@@ -14,7 +14,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'How long does delivery take?',
-          a: 'Inside Dhaka: 24â€“48 hours. Outside Dhaka: 3â€“5 business days via standard courier.',
+          a: 'Inside Dhaka: 24–48 hours. Outside Dhaka: 3–5 business days via standard courier.',
         },
         {
           q: 'What is your return/exchange policy?',
@@ -39,11 +39,11 @@ const InfoPage = ({ page }) => {
       sections: [
         {
           q: 'Delivery Areas & Timelines',
-          a: 'We deliver across Bangladesh.\n\nâ€¢ Inside Dhaka: 24â€“48 hours\nâ€¢ Outside Dhaka: 3â€“5 business days\n\nFree delivery on orders above à§³2,000.',
+          a: 'We deliver across Bangladesh.\n\n• Inside Dhaka: 24–48 hours\n• Outside Dhaka: 3–5 business days\n\nFree delivery on orders above ৳2,000.',
         },
         {
           q: 'Shipping Costs',
-          a: 'Inside Dhaka: Free on orders above à§³2,000 â€” otherwise à§³60.\nOutside Dhaka: à§³120 flat rate.',
+          a: 'Inside Dhaka: Free on orders above ৳2,000 — otherwise ৳60.\nOutside Dhaka: ৳120 flat rate.',
         },
         {
           q: 'Exchange Policy',
@@ -72,7 +72,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Data Security',
-          a: 'Your data is stored securely. Passwords are hashed and never stored in plain text. Payment information is processed via secure COD â€” we do not store any card or bKash credentials.',
+          a: 'Your data is stored securely. Passwords are hashed and never stored in plain text. Payment information is processed via secure COD — we do not store any card or bKash credentials.',
         },
         {
           q: 'Cookies',
@@ -89,7 +89,7 @@ const InfoPage = ({ page }) => {
       sections: [
         {
           q: 'Customer Support',
-          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-XXXXXXXXX\nEmail: support@artifactbd.com\nHours: Satâ€“Thu, 10:00 AM â€“ 8:00 PM (BD Time)',
+          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-XXXXXXXXX\nEmail: support@artifactbd.com\nHours: Sat–Thu, 10:00 AM – 8:00 PM (BD Time)',
         },
         {
           q: 'Business Inquiries',
@@ -110,7 +110,7 @@ const InfoPage = ({ page }) => {
     <div className="info-page">
       <nav className="breadcrumb-trail">
         <Link to="/">Home</Link>
-        <span className="bc-sep">â€º</span>
+        <span className="bc-sep">›</span>
         <span className="bc-current">{pageData.title}</span>
       </nav>
 
@@ -127,7 +127,7 @@ const InfoPage = ({ page }) => {
         </div>
 
         <div className="info-back">
-          <Link to="/" className="btn-info-back">â† Back to Store</Link>
+          <Link to="/" className="btn-info-back">← Back to Store</Link>
         </div>
       </div>
     </div>
@@ -135,4 +135,3 @@ const InfoPage = ({ page }) => {
 };
 
 export default InfoPage;
-
