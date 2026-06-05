@@ -24,14 +24,17 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, quantity = 1) => {
     setCartItems(prev => {
       const existing = prev.find(item => item._id === product._id);
+      const maxStock = product.stock ?? Infinity;
       if (existing) {
-        return prev.map(item => 
-          item._id === product._id ? { ...item, qty: item.qty + quantity } : item
+        // Clamp at available stock
+        const newQty = Math.min(existing.qty + quantity, maxStock);
+        return prev.map(item =>
+          item._id === product._id ? { ...item, qty: newQty } : item
         );
       }
-      return [...prev, { ...product, qty: quantity }];
+      return [...prev, { ...product, qty: Math.min(quantity, maxStock) }];
     });
-    setIsCartOpen(true); // Open the cart strictly for immediate feedback
+    setIsCartOpen(true);
   };
 
   const removeFromCart = (id) => {
@@ -40,9 +43,12 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = (id, quantity) => {
     if (quantity < 1) return removeFromCart(id);
-    setCartItems(prev => prev.map(item => 
-      item._id === id ? { ...item, qty: quantity } : item
-    ));
+    setCartItems(prev => prev.map(item => {
+      if (item._id !== id) return item;
+      // Clamp at available stock
+      const maxStock = item.stock ?? Infinity;
+      return { ...item, qty: Math.min(quantity, maxStock) };
+    }));
   };
 
   const clearCart = () => {

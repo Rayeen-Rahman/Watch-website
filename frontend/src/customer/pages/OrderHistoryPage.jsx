@@ -79,7 +79,7 @@ const OrderHistoryPage = () => {
   useEffect(() => {
     if (!token || !user) { setLoading(false); return; }
 
-    // Admins see all orders; regular customers use phone lookup below
+    // Admins see all orders
     if (user.role === 'admin') {
       fetch(`${API}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -88,7 +88,17 @@ const OrderHistoryPage = () => {
         .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
         .catch(() => { setError('Failed to load orders'); setLoading(false); });
     } else {
+      // Regular customers: orders are guest-based (phone lookup).
+      // Pre-fill their phone from profile and auto-search if available.
       setLoading(false);
+      if (user.phone) {
+        setPhone(user.phone);
+        // Auto-trigger search with stored phone
+        fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(user.phone)}`)
+          .then(r => r.json())
+          .then(data => { setOrders(Array.isArray(data) ? data : []); setSearched(true); })
+          .catch(() => setError('Failed to load orders'));
+      }
     }
   }, [token, user]);
 

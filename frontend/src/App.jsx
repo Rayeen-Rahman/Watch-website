@@ -8,10 +8,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Customer Site Routes */}
-        <Route path="/*" element={<CustomerLayout />} />
-
-        {/* Admin Login — public, no auth required */}
+        {/* Admin Login — public, must be BEFORE the wildcard customer route */}
         <Route path="/admin/login" element={<AdminLogin />} />
 
         {/* Admin Dashboard — protected, admin role required */}
@@ -23,6 +20,9 @@ function App() {
             </ProtectedAdminRoute>
           }
         />
+
+        {/* Customer Site Routes — wildcard MUST come last */}
+        <Route path="/*" element={<CustomerLayout />} />
       </Routes>
     </Router>
   );

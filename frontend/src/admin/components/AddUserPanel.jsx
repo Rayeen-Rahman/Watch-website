@@ -6,7 +6,7 @@ import './AddProductPanel.css'; // reuse panel styles
 const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', username: '', password: ''
+    firstName: '', lastName: '', email: '', password: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,7 +20,6 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
     const payload = {
       name: `${formData.firstName} ${formData.lastName}`.trim(),
       email: formData.email,
-      username: formData.username || formData.email.split('@')[0],
       password: formData.password,
     };
     try {
@@ -32,7 +31,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to add user');
       showToast('User added successfully');
-      setFormData({ firstName: '', lastName: '', email: '', username: '', password: '' });
+      setFormData({ firstName: '', lastName: '', email: '', password: '' });
       onSave && onSave();
       onClose();
     } catch (err) {
@@ -65,11 +64,6 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
           <div className="form-group">
             <label>Email</label>
             <input type="email" name="email" required value={formData.email} onChange={handleChange} placeholder="user@example.com" />
-          </div>
-
-          <div className="form-group">
-            <label>Username <span style={{ color: 'var(--admin-text-secondary)', fontSize: '0.8rem' }}>(optional)</span></label>
-            <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="auto-generated from email" />
           </div>
 
           <div className="form-group">

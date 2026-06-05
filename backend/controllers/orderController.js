@@ -92,7 +92,7 @@ const updateOrderStatus = async (req, res) => {
     const { status } = req.body;
     
     // EDGE CASE: Validate status strictly against schema ENUM to prevent fatal Mongoose validation crash
-    const validStatuses = ['pending', 'delivered', 'failed'];
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'failed'];
     if (!validStatuses.includes(status)) {
        return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     }

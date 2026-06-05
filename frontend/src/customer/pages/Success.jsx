@@ -71,7 +71,7 @@ const Success = () => {
       </div>
 
       <p className="success-note">
-        Questions? Contact us at <strong>support@watchvault.com</strong>
+        Questions? Contact us at <strong>support@yourdomain.com</strong> or call us directly.
       </p>
     </div>
   );
