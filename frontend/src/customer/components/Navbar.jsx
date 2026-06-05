@@ -73,12 +73,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <svg width="26" height="26" viewBox="0 0 100 100" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="50,4 96,50 50,96 4,50" stroke="currentColor" stroke-width="7" fill="none"/>
-            <polygon points="50,16 20,74 50,57" fill="currentColor"/>
-            <polygon points="50,16 80,74 50,57" fill="currentColor"/>
-            <polygon points="34,63 50,57 66,63 61,74 39,74" fill="var(--store-bg, #0a0a0f)"/>
-          </svg>
+          <img src="/logo.png" alt="Artifact BD Logo" style={{ width: '26px', height: '26px', objectFit: 'contain' }} />
           Artifact BD
         </Link>
 

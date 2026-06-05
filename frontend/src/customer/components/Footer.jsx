@@ -58,7 +58,10 @@ const Footer = () => {
 
         {/* Col 1: Brand */}
         <div className="footer-col">
-          <Link to="/" className="footer-brand-logo">WATCH VAULT</Link>
+          <Link to="/" className="footer-brand-logo" style={{ display: 'flex', alignItems: 'center' }}>
+            <img src="/logo.png" alt="Artifact BD Logo" style={{ height: '30px', marginRight: '10px', filter: 'brightness(0) invert(1)' }} />
+            Artifact BD
+          </Link>
           <p className="footer-brand-desc">
             Crafting timeless pieces for the modern individual. Designed with precision, worn with purpose.
           </p>

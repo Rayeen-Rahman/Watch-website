@@ -52,8 +52,8 @@ const AdminLogin = () => {
       <div className="login-card">
         {/* Logo */}
         <div className="login-logo">
-          <span className="logo-icon">⌚</span>
-          <h1>Watch Vault</h1>
+          <img src="/logo.png" alt="Artifact BD Logo" style={{ height: '40px', marginBottom: '10px' }} />
+          <h1>Artifact BD</h1>
           <p>Admin Dashboard</p>
         </div>
 
@@ -72,7 +72,7 @@ const AdminLogin = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="admin@watchvault.com"
+              placeholder="admin@artifactbd.com"
               required
               autoComplete="email"
             />
@@ -106,7 +106,7 @@ const AdminLogin = () => {
         </form>
 
         <p className="login-footer">
-          Watch Vault © {new Date().getFullYear()} — Secure Admin Access
+          Artifact BD © {new Date().getFullYear()} — Secure Admin Access
         </p>
       </div>
     </div>
