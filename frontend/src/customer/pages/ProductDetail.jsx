@@ -197,9 +197,11 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {/* Product short description */}
-          {product.description && (
-            <p className="detail-description">{product.description}</p>
+          {/* Product short description — shows shortDescription at top, full description stays in accordion */}
+          {(product.shortDescription || product.description) && (
+            <p className="detail-description">
+              {product.shortDescription || product.description}
+            </p>
           )}
 
           {/* Step 41: Quantity on own row */}
@@ -321,8 +323,8 @@ const ProductDetail = () => {
         <div className="related-products-section">
           <div className="related-header">
             <div>
-              <h2>Best Sellers</h2>
-              <p className="related-subtitle">Our most sought-after timepieces, curated by enthusiasts.</p>
+              <h2>You May Also Like</h2>
+              <p className="related-subtitle">More from the same collection, handpicked for you.</p>
             </div>
             <div className="slider-nav-buttons">
               <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous">

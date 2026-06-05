@@ -290,6 +290,34 @@ body.customer-view {
   }
 }
 
+/* Trust features — responsive stacking */
+@media (max-width: 900px) {
+  .trust-features-section {
+    flex-wrap: wrap;
+    margin: 20px 5% 40px;
+    padding: 20px 0;
+  }
+  .trust-feature {
+    flex: 1 1 45%;
+    padding: 16px 10px;
+    border-right: none;
+    border-bottom: 1px solid var(--store-border);
+  }
+  .trust-feature:nth-child(even) { border-right: none; }
+}
+
+@media (max-width: 600px) {
+  .trust-features-section {
+    flex-direction: column;
+    margin: 16px 4% 32px;
+  }
+  .trust-feature {
+    flex: 1 1 100%;
+    border-bottom: 1px solid var(--store-border);
+  }
+  .trust-feature:last-child { border-bottom: none; }
+}
+
 .footer-col h4 {
   font-size: 0.8rem;
   font-weight: 700;

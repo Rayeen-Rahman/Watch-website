@@ -103,6 +103,14 @@
   100% { transform: translateY(0px); }
 }
 
+/* Respect user motion preferences — prevents GPU drain on mobile */
+@media (prefers-reduced-motion: reduce) {
+  .hero-image-container,
+  .floating-spec-card {
+    animation: none;
+  }
+}
+
 .hero-watch-img {
   max-width: 480px;
   width: 100%;
@@ -300,9 +308,15 @@
 
 @media (max-width: 768px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .hero-section { flex-direction: column; padding: 40px 5%; }
-  .hero-content h1 { font-size: 2.8rem; }
-  .hero-watch-img { max-width: 90%; }
+  .hero-section {
+    flex-direction: column;
+    padding: 32px 5%;
+    min-height: 50vh;
+    gap: 30px;
+  }
+  .hero-content h1 { font-size: 2.4rem; letter-spacing: -1px; }
+  .hero-watch-img { max-width: 80%; }
+  .floating-spec-card { display: none; }
 }
 
 @media (max-width: 480px) {

@@ -36,7 +36,11 @@ app.use(
         styleSrc:    ["'self'", "'unsafe-inline'", 'https:'],
         fontSrc:     ["'self'", 'https:', 'data:'],
         imgSrc:      ["'self'", 'data:', 'blob:', 'https:', 'http:'],
-        connectSrc:  ["'self'", 'http://localhost:5000', 'http://localhost:5173', 'ws:'],
+        connectSrc:  ["'self'",
+                      process.env.FRONTEND_URL || 'http://localhost:5173',
+                      'http://localhost:5000',
+                      'http://localhost:5173',
+                      'ws:', 'wss:'],
         mediaSrc:    ["'self'"],
         objectSrc:   ["'none'"],
         upgradeInsecureRequests: null,
@@ -179,6 +183,23 @@ app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
 // Error Handling Middlewares (must be below routes)
 app.use(notFound);
 app.use(errorHandler);
+
+// ── STEP 9: Serve React SPA build in production ──────────────────────────────
+// On Hostinger Managed Node.js, one process handles both API + frontend.
+// Run `npm run build` in /frontend first, then this serves dist/ for all
+// non-API routes (SPA client-side routing is preserved via the catch-all).
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/dist');
+  app.use(express.static(frontendBuildPath, {
+    maxAge: '1y',
+    etag:   true,
+  }));
+  // SPA fallback — send index.html for all non-API GET requests
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+  console.log(`Serving React build from: ${frontendBuildPath}`);
+}
 
 // ── STEP 8: Start server + graceful SIGTERM shutdown ─────────────────────────
 const PORT = process.env.PORT || 5000;

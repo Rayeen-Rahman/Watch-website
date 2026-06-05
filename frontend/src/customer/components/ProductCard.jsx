@@ -66,10 +66,12 @@ const ProductCard = ({ product, sliderCard = false }) => {
           ) : null}
 
           {imgSrc && !imgError ? (
-            <img 
-              src={imgSrc} 
-              alt={product.name} 
-              loading="lazy" 
+            <img
+              src={imgSrc}
+              alt={product.name}
+              loading="lazy"
+              width="400"
+              height="500"
               onError={() => setImgError(true)}
             />
           ) : (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
+import heroFallback from '../../assets/hero_watch.png';
 import './Homepage.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -78,13 +79,19 @@ const Homepage = () => {
               src={resolveImg(featuredProd.images[0])}
               alt={featuredProd.name}
               className="hero-watch-img"
+              width="480"
+              height="480"
+              fetchpriority="high"
             />
           ) : (
-            // Fallback to local asset
+            // Fallback to local asset (static import — works correctly in production builds)
             <img
-              src={new URL('../../assets/hero_watch.png', import.meta.url).href}
+              src={heroFallback}
               alt="Premium Chronograph Watch"
               className="hero-watch-img"
+              width="480"
+              height="480"
+              fetchpriority="high"
             />
           )}
 

@@ -1,11 +1,12 @@
-const User = require('../models/User');
+const User    = require('../models/User');
+const bcrypt  = require('bcryptjs');
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.find({}).select('-password');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
@@ -17,7 +18,7 @@ const getUsers = async (req, res) => {
 // @access  Private/Admin
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
     if (user) {
       res.json(user);
     } else {
@@ -33,12 +34,21 @@ const getUserById = async (req, res) => {
 // @access  Private/Admin
 const createUser = async (req, res) => {
   try {
-    const { name, email, phone, role, status } = req.body;
-    
-    // EDGE CASE HANDLE: Verify user doesn't already exist to prevent E11000 Mongo error
+    const { name, email, phone, role, status, password } = req.body;
+
+    // EDGE CASE: Verify user doesn't already exist (prevent E11000 Mongo error)
     const userExists = await User.findOne({ email: email.toLowerCase() });
     if (userExists) {
       return res.status(400).json({ message: 'A user with this email already exists' });
+    }
+
+    // Hash password if provided, otherwise use a random secure default
+    // (admin-created users should receive a "Set Password" email in a future feature)
+    let hashedPassword = '';
+    if (password && password.trim().length >= 6) {
+      hashedPassword = await bcrypt.hash(password.trim(), 10);
+    } else if (password) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
     const user = new User({
@@ -46,11 +56,14 @@ const createUser = async (req, res) => {
       email: email.toLowerCase(),
       phone,
       role,
-      status
+      status,
+      password: hashedPassword,
     });
 
     const createdUser = await user.save();
-    res.status(201).json(createdUser);
+    // Never return the password hash
+    const { password: _pw, ...safeUser } = createdUser.toObject();
+    res.status(201).json(safeUser);
   } catch (error) {
     res.status(400).json({ message: error.message || 'Invalid user data' });
   }
