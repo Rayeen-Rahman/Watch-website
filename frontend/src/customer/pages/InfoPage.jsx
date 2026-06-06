@@ -14,7 +14,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'How long does delivery take?',
-          a: 'Inside Dhaka: 24–48 hours. Outside Dhaka: 3–5 business days via standard courier.',
+          a: 'Inside Dhaka: 24-48 hours. Outside Dhaka: 3-5 business days via standard courier.',
         },
         {
           q: 'What is your return/exchange policy?',
@@ -39,7 +39,7 @@ const InfoPage = ({ page }) => {
       sections: [
         {
           q: 'Delivery Areas & Timelines',
-          a: 'We deliver across Bangladesh.\n\n• Inside Dhaka: 24–48 hours\n• Outside Dhaka: 3–5 business days\n\nFree delivery on orders above ৳2,000.',
+          a: 'We deliver across Bangladesh.\n\n• Inside Dhaka: 24-48 hours\n• Outside Dhaka: 3-5 business days\n\nFree delivery on orders above ৳2,000.',
         },
         {
           q: 'Shipping Costs',
@@ -55,7 +55,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'How to Request an Exchange',
-          a: 'Email us at support@artifactbd.com or call +880-XXXXXXXXX with your order number and a description of the issue. We will respond within 24 hours.',
+          a: 'Email us at rayeenrahman1@gmail.com or call +880-1716950416 with your order number and a description of the issue. We will respond within 24 hours.',
         },
       ],
     },
@@ -80,7 +80,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Your Rights',
-          a: 'You may request deletion of your account and associated data at any time by contacting us at support@artifactbd.com.',
+          a: 'You may request deletion of your account and associated data at any time by contacting us at rayeenrahman1@gmail.com.',
         },
       ],
     },
@@ -89,11 +89,11 @@ const InfoPage = ({ page }) => {
       sections: [
         {
           q: 'Customer Support',
-          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-XXXXXXXXX\nEmail: support@artifactbd.com\nHours: Sat–Thu, 10:00 AM – 8:00 PM (BD Time)',
+          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-1716950416\nEmail: rayeenrahman1@gmail.com\nHours: Sat-Thu, 10:00 AM - 8:00 PM (BD Time)',
         },
         {
           q: 'Business Inquiries',
-          a: 'For wholesale, brand partnerships, or business collaborations:\n\nEmail: business@artifactbd.com',
+          a: 'For wholesale, brand partnerships, or business collaborations:\n\nEmail: rayeenrahman1@gmail.com',
         },
         {
           q: 'Social Media',
