@@ -3,6 +3,8 @@ import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = null }) => {
   const { token } = useAuth();
   const [categories, setCategories] = useState([]);
@@ -29,7 +31,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
   // Fetch categories when panel opens
   useEffect(() => {
     if (!isOpen) return;
-    fetch(`${import.meta.env.VITE_API_URL}/api/categories`)
+    fetch(`${API}/api/categories`)
       .then(r => r.json())
       .then(d => setCategories(Array.isArray(d) ? d : []))
       .catch(() => {});
@@ -60,7 +62,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
     setUploading(true);
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/products/upload-image`,
+        `${API}/api/products/upload-image`,
         { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formPayload }
       );
       if (!res.ok) throw new Error('Upload failed');
@@ -99,7 +101,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
     setIsSubmitting(true);
     const payload = {
       name:             formData.name,
-      brand:            formData.brand || 'WATCH',
+      brand:            formData.brand || '',
       price:            Number(formData.price),
       oldPrice:         formData.oldPrice ? Number(formData.oldPrice) : null,
       shortDescription: formData.shortDescription,
@@ -119,8 +121,8 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
     try {
       const isEdit = Boolean(editProduct);
       const endpoint = isEdit
-        ? `${import.meta.env.VITE_API_URL}/api/products/${editProduct._id}`
-        : `${import.meta.env.VITE_API_URL}/api/products`;
+        ? `${API}/api/products/${editProduct._id}`
+        : `${API}/api/products`;
       const res = await fetch(
         endpoint,
         {
@@ -163,28 +165,8 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
     }
   };
 
-  // Derive display values: when editing, use editProduct values as defaults for
-  // the uncontrolled-to-controlled transition (only on first open).
-  const displayData = editProduct && !formData.name ? {
-    ...formData,
-    name:             editProduct.name             || '',
-    brand:            editProduct.brand            || '',
-    price:            editProduct.price            != null ? String(editProduct.price) : '',
-    oldPrice:         editProduct.oldPrice         != null ? String(editProduct.oldPrice) : '',
-    shortDescription: editProduct.shortDescription || '',
-    description:      editProduct.description      || '',
-    category:         editProduct.category?._id   || editProduct.category || '',
-    tag:              editProduct.tag              || '',
-    stock:            editProduct.stock            != null ? String(editProduct.stock) : '',
-    dialColor:        editProduct.dialColor        || '',
-    strapMaterial:    editProduct.strapMaterial    || '',
-    movementType:     editProduct.movementType     || '',
-    caseSize:         editProduct.caseSize         || '',
-    waterResistance:  editProduct.waterResistance  || '',
-    gender:           editProduct.gender           || '',
-    isBestSeller:     editProduct.isBestSeller     || false,
-    isFeatured:       editProduct.isFeatured       || false,
-  } : formData;
+  // NOTE: The form uses formData state directly. The useEffect below
+  // (line ~190) seeds formData from editProduct whenever the panel opens.
 
   // Seed state on edit open
   React.useEffect(() => {

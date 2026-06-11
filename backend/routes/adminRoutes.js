@@ -164,7 +164,7 @@ router.get('/revenue-chart', async (req, res) => {
       ]);
 
       result.push({
-        name:    start.toLocaleDateString('en-BD', { weekday: 'short', month: 'short', day: 'numeric' }),
+        name:    start.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' }),
         orders:  ordersCount,
         revenue: revAgg[0]?.total || 0,
       });
@@ -222,7 +222,7 @@ router.get('/revenue-chart-fast', async (req, res) => {
       const key   = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
       const entry = dataMap[key];
       result.push({
-        name:    d.toLocaleDateString('en-BD', { weekday: 'short', month: 'short', day: 'numeric' }),
+        name:    d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' }),
         orders:  entry?.orders  || 0,
         revenue: entry?.revenue || 0,
       });

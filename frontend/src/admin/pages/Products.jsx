@@ -51,6 +51,17 @@ const Products = ({ showToast }) => {
   // ── Toggle isBestSeller / isFeatured ──────────────────────────────────────
   const toggleFlag = async (product, flag) => {
     try {
+      // isFeatured ON: use the atomic admin endpoint to ensure only one featured product
+      if (flag === 'isFeatured' && !product.isFeatured) {
+        const res = await fetch(`${API}/api/admin/set-featured/${product._id}`, {
+          method:  'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('Update failed');
+        fetchProducts();
+        return;
+      }
+      // All other toggles (isBestSeller, isActive, isFeatured OFF): use regular PUT
       const res = await fetch(`${API}/api/products/${product._id}`, {
         method:  'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

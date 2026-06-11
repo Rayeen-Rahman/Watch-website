@@ -111,7 +111,10 @@ const Categories = ({ showToast }) => {
 
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async (cat) => {
-    if (!window.confirm(`Delete "${cat.name}"? Products in this category will lose their category assignment.`)) return;
+    const productWarning = cat.productCount > 0
+      ? ` This will remove the category from ${cat.productCount} product(s).`
+      : ' No products will be affected.';
+    if (!window.confirm(`Delete "${cat.name}"?${productWarning}`)) return;
     try {
       const res = await fetch(`${API}/api/categories/${cat._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) { const d = await res.json(); throw new Error(d.message || 'Delete failed'); }

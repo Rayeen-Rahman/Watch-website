@@ -8,7 +8,7 @@ import './Products.css';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Users = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, user: loggedInUser } = useAuth();
   const [users,        setUsers]        = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
@@ -51,6 +51,10 @@ const Users = ({ showToast }) => {
 
   // ── Delete ──────────────────────────────────────────────────────────────────
   const handleDeleteUser = async (id) => {
+    if (id === loggedInUser?._id) {
+      toast('You cannot delete your own account.', true);
+      return;
+    }
     if (!window.confirm('Permanently delete this user?')) return;
     try {
       const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
@@ -211,7 +215,11 @@ const Users = ({ showToast }) => {
                             ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
                             : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}
                         </button>
-                        <button className="kebab-danger" onClick={() => handleDeleteUser(user._id)}>
+                        <button className="kebab-danger" onClick={() => handleDeleteUser(user._id)}
+                          disabled={user._id === loggedInUser?._id}
+                          title={user._id === loggedInUser?._id ? 'Cannot delete your own account' : ''}
+                          style={user._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+                        >
                           🗑️ Delete
                         </button>
                       </div>
