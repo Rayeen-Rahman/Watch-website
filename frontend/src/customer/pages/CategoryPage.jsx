@@ -80,7 +80,8 @@ const CategoryPage = () => {
     setPage(1);
   }, [location.search]);
 
-  useEffect(() => { setPage(1); }, [slug, sort, movement, gender, maxPrice]);
+  useEffect(() => { setPage(1); setSearchText(''); }, [slug]);
+  useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   const clearFilters = () => {

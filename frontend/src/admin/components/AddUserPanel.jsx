@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css'; // reuse panel styles
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
@@ -16,6 +18,10 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password.length < 6) {
+      showToast('Password must be at least 6 characters.', true);
+      return;
+    }
     setIsSubmitting(true);
     const payload = {
       name: `${formData.firstName} ${formData.lastName}`.trim(),
@@ -24,7 +30,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       role: formData.role,
     };
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
+      const res = await fetch(`${API}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -69,7 +75,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
 
           <div className="form-group">
             <label>Password</label>
-            <input type="password" name="password" required value={formData.password} onChange={handleChange} placeholder="Min. 6 characters" />
+            <input type="password" name="password" required minLength={6} value={formData.password} onChange={handleChange} placeholder="Min. 6 characters" />
           </div>
 
           <div className="form-group">

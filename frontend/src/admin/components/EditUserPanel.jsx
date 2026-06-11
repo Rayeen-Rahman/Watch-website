@@ -3,6 +3,8 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './EditUserPanel.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
@@ -43,7 +45,7 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${user._id}`, {
+      const res = await fetch(`${API}/api/users/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
