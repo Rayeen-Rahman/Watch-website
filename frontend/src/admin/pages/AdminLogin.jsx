@@ -29,8 +29,8 @@ const AdminLogin = () => {
 
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      // Only allow admin/manager roles into the dashboard
-      if (data.user.role !== 'admin' && data.user.role !== 'manager') {
+      // Only allow admin role into the dashboard
+      if (data.user.role !== 'admin') {
         throw new Error('Access denied. Admin accounts only.');
       }
 

@@ -105,7 +105,7 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
               <label>Role</label>
               <select name="role" value={formData.role} onChange={handleChange}>
                 <option value="admin">Admin</option>
-                <option value="manager">Manager</option>
+                <option value="customer">Customer</option>
               </select>
             </div>
             <div className="form-group">

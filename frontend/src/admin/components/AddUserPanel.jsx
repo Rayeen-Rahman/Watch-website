@@ -6,7 +6,7 @@ import './AddProductPanel.css'; // reuse panel styles
 const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
   const { token } = useAuth();
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', password: ''
+    firstName: '', lastName: '', email: '', password: '', role: 'customer'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,6 +21,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       name: `${formData.firstName} ${formData.lastName}`.trim(),
       email: formData.email,
       password: formData.password,
+      role: formData.role,
     };
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`, {
@@ -31,7 +32,7 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to add user');
       showToast('User added successfully');
-      setFormData({ firstName: '', lastName: '', email: '', password: '' });
+      setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'customer' });
       onSave && onSave();
       onClose();
     } catch (err) {
@@ -69,6 +70,14 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
           <div className="form-group">
             <label>Password</label>
             <input type="password" name="password" required value={formData.password} onChange={handleChange} placeholder="Min. 6 characters" />
+          </div>
+
+          <div className="form-group">
+            <label>Role</label>
+            <select name="role" value={formData.role} onChange={handleChange}>
+              <option value="customer">Customer</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           <div className="panel-footer">

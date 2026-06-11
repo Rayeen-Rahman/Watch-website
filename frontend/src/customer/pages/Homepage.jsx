@@ -127,15 +127,7 @@ const Homepage = () => {
                       </span>
                     </div>
                   </Link>
-                ) : (
-                  <div className="floating-spec-card">
-                    <div className="floating-info">
-                      <strong>Chronograph Pro</strong>
-                      <span>Automatic Movement · 42mm</span>
-                      <span className="floating-price">৳45,000</span>
-                    </div>
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>

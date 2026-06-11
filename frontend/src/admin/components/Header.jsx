@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bell, MessageSquare, Moon, Sun, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = ({ onToggleSidebar }) => {
   const location = useLocation();
-  const [darkMode, setDarkMode] = useState(true);
+  const { user } = useAuth();
 
   const formatTitle = (pathname) => {
     if (pathname === '/admin') return 'Dashboard';
@@ -12,6 +13,11 @@ const Header = ({ onToggleSidebar }) => {
     const current = parts[parts.length - 1];
     return current.charAt(0).toUpperCase() + current.slice(1);
   };
+
+  // Derive avatar initial from logged-in user name
+  const avatarInitial = user?.name
+    ? user.name.trim().charAt(0).toUpperCase()
+    : 'A';
 
   return (
     <div className="admin-header">
@@ -30,23 +36,11 @@ const Header = ({ onToggleSidebar }) => {
         </div>
       </div>
 
-      {/* Right: actions */}
+      {/* Right: user avatar */}
       <div className="header-actions">
-        <button
-          className="header-icon-btn"
-          onClick={() => setDarkMode(d => !d)}
-          title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        >
-          {darkMode ? <Moon size={18} /> : <Sun size={18} />}
-        </button>
-        <button className="header-icon-btn" title="Messages">
-          <MessageSquare size={18} />
-        </button>
-        <button className="header-icon-btn" title="Notifications">
-          <Bell size={18} />
-        </button>
-        {/* User avatar */}
-        <div className="header-avatar" title="Admin User">J</div>
+        <div className="header-avatar" title={user?.name || 'Admin User'}>
+          {avatarInitial}
+        </div>
       </div>
     </div>
   );
