@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, ChevronDown, ChevronUp, Heart, Truck, Banknote, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ChevronUp, Truck, Banknote, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './ProductDetail.css';
 
@@ -17,7 +17,6 @@ const ProductDetail = () => {
   const [activeAccordion, setActiveAccordion] = useState('details');
   const [showStickyCart, setShowStickyCart] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [wishlisted, setWishlisted] = useState(false);
   const relatedSliderRef = useRef(null);
   const { addToCart } = useCart();
 
@@ -139,12 +138,6 @@ const ProductDetail = () => {
                   </div>
                 );
               })}
-              {/* Step 45: Video play thumb placeholder if 3+ images */}
-              {product.images.length >= 3 && (
-                <div className="thumbnail thumb-video">
-                  <div className="play-icon-wrap">▶</div>
-                </div>
-              )}
             </div>
           )}
 
@@ -154,14 +147,6 @@ const ProductDetail = () => {
             ) : (
               <div className="img-placeholder" style={{ color: '#999' }}>No Image Available</div>
             )}
-            {/* Step 45: Heart/wishlist icon on image */}
-            <button
-              className={`wishlist-btn ${wishlisted ? 'wishlisted' : ''}`}
-              onClick={() => setWishlisted(!wishlisted)}
-              aria-label="Add to wishlist"
-            >
-              <Heart size={20} fill={wishlisted ? '#e44' : 'none'} color={wishlisted ? '#e44' : '#555'} />
-            </button>
             {product.discount > 0 && (
               <div className="product-page-discount">-{product.discount}%</div>
             )}

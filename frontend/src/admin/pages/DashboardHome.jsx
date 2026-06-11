@@ -6,7 +6,7 @@ import {
   ResponsiveContainer, Legend
 } from 'recharts';
 import {
-  ShoppingBag, Users, DollarSign, TrendingUp,
+  ShoppingBag, Users, DollarSign,
   Package, AlertTriangle, Clock, ChevronRight,
   ArrowUpRight, ArrowDownRight, Star, Search, X, Check
 } from 'lucide-react';

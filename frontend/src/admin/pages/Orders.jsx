@@ -6,11 +6,13 @@ import './Orders.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const STATUS_OPTIONS = ['pending', 'delivered', 'failed'];
+const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'failed'];
 
 const statusClass = (s = '') => {
   const v = s.toLowerCase();
   if (v === 'delivered') return 'status-delivered';
+  if (v === 'shipped')    return 'status-shipped';
+  if (v === 'processing') return 'status-processing';
   if (v === 'failed')    return 'status-failed';
   return 'status-pending';
 };
@@ -158,7 +160,7 @@ const Orders = ({ showToast }) => {
           <RefreshCw size={14} />
         </button>
         <div className="status-filter-tabs">
-          {['all', 'pending', 'delivered', 'failed'].map(s => (
+          {['all', 'pending', 'processing', 'shipped', 'delivered', 'failed'].map(s => (
             <button
               key={s}
               className={`filter-tab ${statusFilter === s ? 'filter-tab-active' : ''}`}

@@ -69,7 +69,9 @@ const CartPage = () => {
                       <button
                         className="qty-btn"
                         onClick={() => updateQuantity(item._id, item.qty + 1)}
+                        disabled={item.stock != null && item.qty >= item.stock}
                         aria-label="Increase"
+                        title={item.stock != null && item.qty >= item.stock ? 'Max stock reached' : ''}
                       >
                         <Plus size={13} />
                       </button>

@@ -71,7 +71,8 @@ const Success = () => {
       </div>
 
       <p className="success-note">
-        Questions? Contact us at <strong>support@yourdomain.com</strong> or call us directly.
+        Questions? Email us at <strong>rayeenrahman1@gmail.com</strong> or call <strong>+880-1716950416</strong>.{' '}
+        <Link to="/info/contact" style={{ color: 'inherit', textDecoration: 'underline' }}>Contact page →</Link>
       </p>
     </div>
   );

@@ -3,7 +3,7 @@ import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css';
 
-const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
+const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = null }) => {
   const { token } = useAuth();
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
@@ -41,6 +41,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
+
+  // When editProduct changes (edit mode opened), seed form + images
+  // We use a key on the outer div to remount the form instead of useEffect
+  // because isOpen toggles too. The parent passes a new editProduct each time.
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -113,10 +117,14 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     };
 
     try {
+      const isEdit = Boolean(editProduct);
+      const endpoint = isEdit
+        ? `${import.meta.env.VITE_API_URL}/api/products/${editProduct._id}`
+        : `${import.meta.env.VITE_API_URL}/api/products`;
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/products`,
+        endpoint,
         {
-          method:  'POST',
+          method:  isEdit ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body:    JSON.stringify(payload),
         }
@@ -124,7 +132,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
       const data = await res.json();
       if (!res.ok) {
         // Translate technical errors into plain language
-        let msg = data.message || 'Failed to add product';
+        let msg = data.message || (isEdit ? 'Failed to update product' : 'Failed to add product');
         if (msg.includes('Cast to ObjectId')) {
           msg = 'Please select a valid category from the dropdown. The category field cannot be left empty or typed manually.';
         } else if (msg.includes('validation failed')) {
@@ -136,7 +144,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
         }
         throw new Error(msg);
       }
-      showToast('Product added successfully ✓');
+      showToast(isEdit ? 'Product updated successfully ✓' : 'Product added successfully ✓');
       onSave && onSave();
       // Reset form
       setFormData({
@@ -155,11 +163,73 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
     }
   };
 
+  // Derive display values: when editing, use editProduct values as defaults for
+  // the uncontrolled-to-controlled transition (only on first open).
+  const displayData = editProduct && !formData.name ? {
+    ...formData,
+    name:             editProduct.name             || '',
+    brand:            editProduct.brand            || '',
+    price:            editProduct.price            != null ? String(editProduct.price) : '',
+    oldPrice:         editProduct.oldPrice         != null ? String(editProduct.oldPrice) : '',
+    shortDescription: editProduct.shortDescription || '',
+    description:      editProduct.description      || '',
+    category:         editProduct.category?._id   || editProduct.category || '',
+    tag:              editProduct.tag              || '',
+    stock:            editProduct.stock            != null ? String(editProduct.stock) : '',
+    dialColor:        editProduct.dialColor        || '',
+    strapMaterial:    editProduct.strapMaterial    || '',
+    movementType:     editProduct.movementType     || '',
+    caseSize:         editProduct.caseSize         || '',
+    waterResistance:  editProduct.waterResistance  || '',
+    gender:           editProduct.gender           || '',
+    isBestSeller:     editProduct.isBestSeller     || false,
+    isFeatured:       editProduct.isFeatured       || false,
+  } : formData;
+
+  // Seed state on edit open
+  React.useEffect(() => {
+    if (!isOpen) return;
+    if (editProduct) {
+      setFormData({
+        name:             editProduct.name             || '',
+        brand:            editProduct.brand            || '',
+        price:            editProduct.price            != null ? String(editProduct.price) : '',
+        oldPrice:         editProduct.oldPrice         != null ? String(editProduct.oldPrice) : '',
+        shortDescription: editProduct.shortDescription || '',
+        description:      editProduct.description      || '',
+        category:         editProduct.category?._id   || editProduct.category || '',
+        tag:              editProduct.tag              || '',
+        stock:            editProduct.stock            != null ? String(editProduct.stock) : '',
+        dialColor:        editProduct.dialColor        || '',
+        strapMaterial:    editProduct.strapMaterial    || '',
+        movementType:     editProduct.movementType     || '',
+        caseSize:         editProduct.caseSize         || '',
+        waterResistance:  editProduct.waterResistance  || '',
+        gender:           editProduct.gender           || '',
+        isBestSeller:     editProduct.isBestSeller     || false,
+        isFeatured:       editProduct.isFeatured       || false,
+      });
+      setImages(editProduct.images || []);
+    } else {
+      setFormData({
+        name: '', brand: '', price: '', oldPrice: '', shortDescription: '',
+        description: '', category: '', tag: '',
+        stock: '', dialColor: '', strapMaterial: '', movementType: '',
+        caseSize: '', waterResistance: '', gender: '',
+        isBestSeller: false, isFeatured: false,
+      });
+      setImages([]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editProduct?._id]);
+
+  const isEdit = Boolean(editProduct);
+
   return (
     <div className="panel-overlay" onClick={onClose}>
       <div className="slide-panel" onClick={e => e.stopPropagation()}>
         <div className="panel-header">
-          <h3>Add New Watch</h3>
+          <h3>{isEdit ? 'Edit Watch' : 'Add New Watch'}</h3>
           <button className="btn-icon" onClick={onClose}><X size={20} /></button>
         </div>
 
@@ -177,15 +247,6 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
               <label>Brand *</label>
               <input type="text" name="brand" required value={formData.brand}
                 onChange={handleChange} placeholder="e.g. Seiko, Casio" />
-            </div>
-            <div className="form-group">
-              <label>Gender</label>
-              <select name="gender" value={formData.gender} onChange={handleChange}>
-                <option value="">Select...</option>
-                <option>Men</option>
-                <option>Women</option>
-                <option>Unisex</option>
-              </select>
             </div>
           </div>
 
@@ -423,7 +484,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave }) => {
           <div className="panel-footer">
             <button type="button" className="btn-outline" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={isSubmitting || uploading}>
-              {isSubmitting ? 'Saving...' : 'Save Watch'}
+              {isSubmitting ? 'Saving...' : (isEdit ? 'Save Changes' : 'Save Watch')}
             </button>
           </div>
         </form>

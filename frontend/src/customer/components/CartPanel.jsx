@@ -41,7 +41,11 @@ const CartPanel = () => {
                   <div className="cart-item-qty">
                     <button onClick={() => updateQuantity(item._id, item.qty - 1)}>-</button>
                     <span>{item.qty}</span>
-                    <button onClick={() => updateQuantity(item._id, item.qty + 1)}>+</button>
+                    <button
+                      onClick={() => updateQuantity(item._id, item.qty + 1)}
+                      disabled={item.stock != null && item.qty >= item.stock}
+                      title={item.stock != null && item.qty >= item.stock ? 'Max stock reached' : ''}
+                    >+</button>
                   </div>
                 </div>
               </div>

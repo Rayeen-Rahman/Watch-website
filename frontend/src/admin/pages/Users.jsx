@@ -130,7 +130,7 @@ const Users = ({ showToast }) => {
           <RefreshCw size={14} />
         </button>
         <div className="status-filter-tabs">
-          {['all', 'admin', 'manager'].map(r => (
+          {['all', 'admin', 'customer'].map(r => (
             <button
               key={r}
               className={`filter-tab ${roleFilter === r ? 'filter-tab-active' : ''}`}

@@ -43,7 +43,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Shipping Costs',
-          a: 'Inside Dhaka: Free on orders above ৳2,000 — otherwise ৳60.\nOutside Dhaka: ৳120 flat rate.',
+          a: 'Inside Dhaka: Free on orders above ৳2,000 — otherwise ৳80.\nOutside Dhaka: ৳120 flat rate.',
         },
         {
           q: 'Exchange Policy',
@@ -97,7 +97,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Social Media',
-          a: 'Follow us for new arrivals and exclusive offers:\n\nInstagram: @artifactbd\nFacebook: facebook.com/artifactbd',
+          a: 'Follow us for new arrivals and exclusive offers:\n\nInstagram: instagram.com/artifact.bd\nFacebook: facebook.com/profile.php?id=61590235957563',
         },
       ],
     },

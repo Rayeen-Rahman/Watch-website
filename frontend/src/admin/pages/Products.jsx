@@ -20,6 +20,7 @@ const Products = ({ showToast }) => {
   const [search,      setSearch]      = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [isAddOpen,   setIsAddOpen]   = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
 
   // Internal toast fallback
   const toast = showToast || ((msg, err) => err ? alert(msg) : null);
@@ -234,6 +235,9 @@ const Products = ({ showToast }) => {
                       </button>
                       {openKebab === p._id && (
                         <div className="kebab-menu">
+                          <button onClick={() => { setEditProduct(p); setIsAddOpen(true); setOpenKebab(null); }}>
+                            ✏️ Edit
+                          </button>
                           <button className="kebab-danger" onClick={() => handleDeleteOne(p._id)}>
                             🗑️ Delete
                           </button>
@@ -279,9 +283,10 @@ const Products = ({ showToast }) => {
 
       <AddProductPanel
         isOpen={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
+        onClose={() => { setIsAddOpen(false); setEditProduct(null); }}
         showToast={toast}
         onSave={fetchProducts}
+        editProduct={editProduct}
       />
     </div>
   );
