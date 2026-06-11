@@ -48,7 +48,10 @@ const Navbar = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     const q = searchQuery.trim();
-    if (q) navigate(`/category/all?search=${encodeURIComponent(q)}`);
+    if (q) {
+      navigate(`/category/all?search=${encodeURIComponent(q)}`);
+      setSearchQuery('');
+    }
   };
 
   const handleMobileSearch = (e) => {

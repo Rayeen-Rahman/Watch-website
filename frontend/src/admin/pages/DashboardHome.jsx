@@ -143,7 +143,7 @@ const DashboardHome = ({ showToast }) => {
   /* ── Fetch chart data when range changes ── */
   useEffect(() => {
     setChartLoading(true);
-    fetch(`${API}/api/admin/revenue-chart?days=${chartRange}`, { headers })
+    fetch(`${API}/api/admin/revenue-chart-fast?days=${chartRange}`, { headers })
       .then(r => r.json())
       .then(data => {
         setRevenueChart(Array.isArray(data) ? data : []);

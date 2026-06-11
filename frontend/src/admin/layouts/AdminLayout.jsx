@@ -71,6 +71,7 @@ const AdminLayout = () => {
         isOpen={isAddUserOpen}
         onClose={() => setIsAddUserOpen(false)}
         showToast={showToast}
+        onSave={() => showToast('User added! Go to Users page to see them.')}
       />
 
       {toast.message && (

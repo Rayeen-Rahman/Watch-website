@@ -45,7 +45,7 @@ const ProfilePage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
       // Update auth context with new name/email
-      login({ ...user, name: data.name || name, email: data.email || email }, token);
+      login({ ...user, name: data.name || name, email: data.email || email, phone: data.phone ?? phone }, token);
       setMsg({ text: 'Profile updated successfully!', err: false });
       setCurPass(''); setNewPass(''); setConfirmPass('');
     } catch (err) {

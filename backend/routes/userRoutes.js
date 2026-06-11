@@ -67,6 +67,7 @@ router.post('/login', async (req, res) => {
         name:  user.name,
         email: user.email,
         role:  user.role,
+        phone: user.phone || '',
       },
     });
   } catch (err) {
@@ -103,7 +104,7 @@ router.put('/profile', protect, async (req, res) => {
     if (phone !== undefined) user.phone = phone;
 
     const updated = await user.save();
-    res.json({ _id: updated._id, name: updated.name, email: updated.email, role: updated.role });
+    res.json({ _id: updated._id, name: updated.name, email: updated.email, role: updated.role, phone: updated.phone || '' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
