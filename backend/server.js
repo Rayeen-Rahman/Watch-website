@@ -195,7 +195,7 @@ if (process.env.NODE_ENV === 'production') {
     etag:   true,
   }));
   // SPA fallback — send index.html for all non-API GET requests
-  app.get('*', (req, res) => {
+  app.get('*any', (req, res) => {
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
   console.log(`Serving React build from: ${frontendBuildPath}`);

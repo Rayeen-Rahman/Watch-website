@@ -57,79 +57,89 @@ const Homepage = () => {
 
       {/* ── HERO SECTION ─────────────────────────────────────────────────── */}
       <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-label">THE 2025 COLLECTION</div>
-          <h1>Find Your Perfect Watch</h1>
-          <p>
-            Discover precision engineering paired with timeless design.
-            Elevate your presence with a timepiece crafted for the modern individual.
-          </p>
-          <a href="#collection" className="btn-shop-now">SHOP NOW</a>
-          <div className="hero-trust">
-            <span>✔ Cash on Delivery</span>
-            <span className="trust-divider">|</span>
-            <span>✔ Fast Delivery</span>
-          </div>
-        </div>
+        <div className="hero-inner">
 
-        <div className="hero-image-container">
-          {/* Hero image — uses the first featured product image if available */}
-          {featuredProd?.images?.[0] ? (
-            <img
-              src={resolveImg(featuredProd.images[0])}
-              alt={featuredProd.name}
-              className="hero-watch-img"
-              width="480"
-              height="480"
-              fetchpriority="high"
-            />
-          ) : (
-            // Fallback to local asset (static import — works correctly in production builds)
-            <img
-              src={heroFallback}
-              alt="Premium Chronograph Watch"
-              className="hero-watch-img"
-              width="480"
-              height="480"
-              fetchpriority="high"
-            />
-          )}
-
-          {/* Floating featured product card */}
-          {featuredProd ? (
-            <Link
-              to={`/product/${featuredProd._id}`}
-              className="floating-spec-card floating-spec-link"
-            >
-              {featuredProd.images?.[0] && (
-                <img
-                  src={resolveImg(featuredProd.images[0])}
-                  alt={featuredProd.name}
-                  className="floating-thumb"
-                />
-              )}
-              <div className="floating-info">
-                <span className="floating-label">⚡ Featured</span>
-                <strong>{featuredProd.name}</strong>
-                <span>
-                  {featuredProd.shortDescription ||
-                    [featuredProd.movementType, featuredProd.caseSize]
-                      .filter(Boolean).join(' · ')}
-                </span>
-                <span className="floating-price">
-                  ৳{(featuredProd.price ?? 0).toLocaleString()}
-                </span>
-              </div>
-            </Link>
-          ) : (
-            <div className="floating-spec-card">
-              <div className="floating-info">
-                <strong>Chronograph Pro</strong>
-                <span>Automatic Movement · 42mm</span>
-                <span className="floating-price">৳45,000</span>
+          {/* LEFT PANEL — text */}
+          <div className="hero-panel hero-panel-left">
+            <div className="hero-content">
+              <div className="hero-label">THE 2025 COLLECTION</div>
+              <h1>Find Your Perfect Watch</h1>
+              <p>
+                Discover precision engineering paired with timeless design.
+                Elevate your presence with a timepiece crafted for the modern individual.
+              </p>
+              <a href="#collection" className="btn-shop-now">SHOP NOW</a>
+              <div className="hero-trust">
+                <span>✔ Cash on Delivery</span>
+                <span className="trust-divider">|</span>
+                <span>✔ Fast Delivery</span>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* RIGHT PANEL — image + floating card */}
+          <div className="hero-panel hero-panel-right">
+            <div className="hero-image-container">
+              <div className="hero-watch-wrapper">
+                {featuredProd?.images?.[0] ? (
+                  <img
+                    src={resolveImg(featuredProd.images[0])}
+                    alt={featuredProd.name}
+                    className="hero-watch-img"
+                    width="480"
+                    height="480"
+                    fetchpriority="high"
+                  />
+                ) : (
+                  <img
+                    src={heroFallback}
+                    alt="Premium Chronograph Watch"
+                    className="hero-watch-img"
+                    width="480"
+                    height="480"
+                    fetchpriority="high"
+                  />
+                )}
+
+                {/* Floating featured product card */}
+                {featuredProd ? (
+                  <Link
+                    to={`/product/${featuredProd._id}`}
+                    className="floating-spec-card floating-spec-link"
+                  >
+                    {featuredProd.images?.[0] && (
+                      <img
+                        src={resolveImg(featuredProd.images[0])}
+                        alt={featuredProd.name}
+                        className="floating-thumb"
+                      />
+                    )}
+                    <div className="floating-info">
+                      <span className="floating-label">⚡ Featured</span>
+                      <strong>{featuredProd.name}</strong>
+                      <span>
+                        {featuredProd.shortDescription ||
+                          [featuredProd.movementType, featuredProd.caseSize]
+                            .filter(Boolean).join(' · ')}
+                      </span>
+                      <span className="floating-price">
+                        ৳{(featuredProd.price ?? 0).toLocaleString()}
+                      </span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className="floating-spec-card">
+                    <div className="floating-info">
+                      <strong>Chronograph Pro</strong>
+                      <span>Automatic Movement · 42mm</span>
+                      <span className="floating-price">৳45,000</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 

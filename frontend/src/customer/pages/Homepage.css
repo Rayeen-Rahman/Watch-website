@@ -7,11 +7,40 @@
   padding: 60px 5%;
   position: relative;
   overflow: hidden;
-  gap: 60px;
+}
+
+.hero-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
+}
+
+.hero-panel {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hero-panel-left {
+  align-items: flex-start;
+}
+
+.hero-panel-right {
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-content {
-  flex: 1;
+  width: 100%;
   z-index: 2;
   max-width: 520px;
   animation: fadeUp 0.8s ease-out;
@@ -89,12 +118,18 @@
 
 /* Step 34: Hero watch image */
 .hero-image-container {
-  flex: 1;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  position: relative;
+  width: 100%;
   animation: float 6s ease-in-out infinite;
+}
+
+.hero-watch-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 480px;
+  width: 100%;
 }
 
 @keyframes float {
@@ -112,8 +147,8 @@
 }
 
 .hero-watch-img {
-  max-width: 480px;
   width: 100%;
+  max-width: 480px;
   object-fit: contain;
   filter: drop-shadow(0 30px 60px rgba(0,0,0,0.18));
 }
@@ -121,8 +156,8 @@
 /* Step 35: Floating product spec card */
 .floating-spec-card {
   position: absolute;
-  bottom: 40px;
-  left: 0;
+  bottom: 8%;
+  left: -4%;
   background: #ffffff;
   border: 1px solid #e8e8e8;
   padding: 16px 22px;
@@ -309,10 +344,19 @@
 @media (max-width: 768px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .hero-section {
-    flex-direction: column;
     padding: 32px 5%;
     min-height: 50vh;
+  }
+  .hero-inner {
+    flex-direction: column;
     gap: 30px;
+  }
+  .hero-panel {
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+    width: 100%;
   }
   .hero-content h1 { font-size: 2.4rem; letter-spacing: -1px; }
   .hero-watch-img { max-width: 80%; }
