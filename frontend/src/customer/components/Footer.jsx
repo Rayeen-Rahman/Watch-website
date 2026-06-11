@@ -66,11 +66,11 @@ const Footer = () => {
             Crafting timeless pieces for the modern individual. Designed with precision, worn with purpose.
           </p>
           <div className="footer-social">
-            <a href="mailto:hello@watchvault.com" aria-label="Email" className="social-icon"><Mail size={16} strokeWidth={1.5} /></a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="social-icon">
+            <a href="mailto:hello@artifactbd.com" aria-label="Email" className="social-icon"><Mail size={16} strokeWidth={1.5} /></a>
+            <a href="https://www.instagram.com/artifact.bd/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="social-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="social-icon">
+            <a href="https://www.facebook.com/profile.php?id=61590235957563" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="social-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
             </a>
           </div>
@@ -101,7 +101,7 @@ const Footer = () => {
 
         {/* Col 4: Newsletter */}
         <div className="footer-col">
-          <h4>The Atelier Journal</h4>
+          <h4>The Artifact Journal</h4>
           <p className="footer-newsletter-desc">
             Stay updated on new releases and exclusive offers.
           </p>
