@@ -20,7 +20,7 @@ const Inventory = ({ showToast }) => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res  = await fetch(`${API}/api/products?limit=200`);
+      const res  = await fetch(`${API}/api/products?limit=1000`);
       const data = await res.json();
       setProducts(Array.isArray(data.products) ? data.products : []);
       setLoading(false);
@@ -83,6 +83,11 @@ const Inventory = ({ showToast }) => {
         {lowStockCount > 0 && (
           <span className="low-stock-badge">
             <AlertTriangle size={13} /> {lowStockCount} low stock
+          </span>
+        )}
+        {products.length >= 1000 && (
+          <span className="low-stock-badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.3)' }}>
+            <AlertTriangle size={13} /> Showing first 1,000 products
           </span>
         )}
       </div>

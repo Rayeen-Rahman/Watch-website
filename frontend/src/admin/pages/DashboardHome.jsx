@@ -91,7 +91,7 @@ const CustomTooltip = ({ active, payload, label, currency }) => {
 /* ─────────────────────────────────────────────
    MAIN DASHBOARD
 ───────────────────────────────────────────── */
-const DashboardHome = () => {
+const DashboardHome = ({ showToast }) => {
   const { token } = useAuth();
   const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -179,8 +179,11 @@ const DashboardHome = () => {
       if (!res.ok) throw new Error(data.message);
       setHeroProduct(data);
       setShowHeroPicker(false);
+      showToast && showToast('Hero product updated successfully ✓');
     } catch (err) {
-      alert(`Failed: ${err.message}`);
+      showToast
+        ? showToast(`Failed to update hero: ${err.message}`, true)
+        : alert(`Failed: ${err.message}`);
     } finally {
       setHeroSaving(false);
     }

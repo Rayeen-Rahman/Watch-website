@@ -57,12 +57,14 @@ const AdminLayout = () => {
         isOpen={isAddProductOpen}
         onClose={() => setIsAddProductOpen(false)}
         showToast={showToast}
+        onSave={() => showToast('Product added! Go to Products page to see it.')}
       />
 
       <AddCategoryPanel
         isOpen={isAddCategoryOpen}
         onClose={() => setIsAddCategoryOpen(false)}
         showToast={showToast}
+        onSave={() => showToast('Category added! Go to Categories page to see it.')}
       />
 
       <AddUserPanel

@@ -89,16 +89,17 @@ const OrderHistoryPage = () => {
         .catch(() => { setError('Failed to load orders'); setLoading(false); });
     } else {
       // Regular customers: orders are guest-based (phone lookup).
-      // Pre-fill their phone from profile and auto-search if available.
+      // Only auto-search if the user has a saved phone number.
       setLoading(false);
-      if (user.phone) {
-        setPhone(user.phone);
+      if (user.phone && user.phone.trim()) {
+        setPhone(user.phone.trim());
         // Auto-trigger search with stored phone
-        fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(user.phone)}`)
+        fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(user.phone.trim())}`)
           .then(r => r.json())
           .then(data => { setOrders(Array.isArray(data) ? data : []); setSearched(true); })
           .catch(() => setError('Failed to load orders'));
       }
+      // If no phone saved — the authenticated view renders the phone lookup form below
     }
   }, [token, user]);
 
@@ -167,11 +168,22 @@ const OrderHistoryPage = () => {
         {loading && <p className="orders-loading">Loading your orders…</p>}
         {error   && <p className="orders-error">{error}</p>}
 
-        {!loading && orders.length === 0 && (
+        {/* No phone saved — can't auto-lookup, prompt to add phone */}
+        {!loading && !searched && !user.phone?.trim() && (
           <div className="orders-empty-inner">
             <Package size={48} strokeWidth={1} />
-            <h3>No orders yet</h3>
-            <p>Your placed orders will appear here.</p>
+            <h3>No phone number saved</h3>
+            <p>Add a phone number to your profile to automatically load your orders, or enter it below.</p>
+            <Link to="/profile" className="btn-orders-shop" style={{ marginTop: '12px' }}>Go to Profile</Link>
+          </div>
+        )}
+
+        {/* Phone searched but no orders found */}
+        {!loading && searched && orders.length === 0 && (
+          <div className="orders-empty-inner">
+            <Package size={48} strokeWidth={1} />
+            <h3>No orders found</h3>
+            <p>No orders were found for that phone number.</p>
             <Link to="/category/all" className="btn-orders-shop">Start Shopping</Link>
           </div>
         )}

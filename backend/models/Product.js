@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Brand is required'],
     trim: true,
-    default: 'WATCH',
+    default: '',
   },
   price: {
     type: Number,
