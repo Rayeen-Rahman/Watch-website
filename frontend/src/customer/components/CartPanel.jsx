@@ -64,7 +64,7 @@ const CartPanel = () => {
             disabled={cartItems.length === 0}
             onClick={() => {
               setIsCartOpen(false);
-              navigate('/checkout'); // Ready for Step 15
+              navigate('/checkout');
             }}
           >
             GO TO CHECKOUT

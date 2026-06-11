@@ -18,7 +18,7 @@ const ProductDetail = () => {
   const [showStickyCart, setShowStickyCart] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const relatedSliderRef = useRef(null);
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -68,6 +68,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     addToCart(product, quantity);
+    setIsCartOpen(false);
     navigate('/checkout');
   };
 
