@@ -6,7 +6,7 @@
   align-items: center;
   padding: 60px 5%;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .hero-inner {
@@ -37,6 +37,7 @@
 .hero-panel-right {
   align-items: center;
   justify-content: center;
+  overflow: visible;
 }
 
 .hero-content {
@@ -156,8 +157,8 @@
 /* Step 35: Floating product spec card */
 .floating-spec-card {
   position: absolute;
-  bottom: 8%;
-  left: -4%;
+  bottom: 16px;
+  left: 12px;
   background: #ffffff;
   border: 1px solid #e8e8e8;
   padding: 14px 18px;
@@ -168,7 +169,7 @@
   gap: 12px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.12);
   animation: float-offset 5s ease-in-out infinite alternate;
-  z-index: 5;
+  z-index: 10;
   min-width: 220px;
   max-width: 280px;
   text-decoration: none;
