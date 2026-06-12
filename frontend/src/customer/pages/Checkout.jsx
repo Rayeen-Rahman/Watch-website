@@ -43,8 +43,8 @@ const Checkout = () => {
     if (!formData.customerName.trim()) errs.customerName = 'Name is required';
     if (!formData.phone.trim()) {
       errs.phone = 'Phone number is required';
-    } else if (!/^[+]?[\d\s\-()]{7,15}$/.test(formData.phone.trim())) {
-      errs.phone = 'Enter a valid phone number';
+    } else if (!/^(\+?880|0)[1-9]\d{8,9}$/.test(formData.phone.trim().replace(/[\s\-()]/g, ''))) {
+      errs.phone = 'Enter a valid Bangladeshi phone number (e.g. 01700000000)';
     }
     if (!formData.address.trim()) errs.address = 'Address is required';
     if (!formData.city.trim()) errs.city = 'City is required';

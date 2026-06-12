@@ -84,8 +84,7 @@ const CategoryPage = () => {
   // (prevents wiping the search term when navbar search navigates to /category/all?search=...)
   useEffect(() => {
     const q = new URLSearchParams(location.search).get('search') || '';
-    setPage(1);
-    if (!q) setSearchText('');
+    if (!q) { setPage(1); setSearchText(''); }
   }, [slug]);
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
   useEffect(() => { fetchProducts(); }, [fetchProducts]);

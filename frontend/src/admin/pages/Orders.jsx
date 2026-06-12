@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MoreHorizontal, X, Search, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Products.css';
@@ -77,6 +77,18 @@ const Orders = ({ showToast }) => {
   const [updatingId,   setUpdatingId]   = useState(null);
 
   const toast = showToast || ((msg, err) => err ? alert(msg) : null);
+
+  // Close kebab menu when clicking outside
+  const kebabRef = useRef(null);
+  useEffect(() => {
+    const handler = (e) => {
+      if (kebabRef.current && !kebabRef.current.contains(e.target)) {
+        setOpenKebab(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -167,7 +179,7 @@ const Orders = ({ showToast }) => {
               className={`filter-tab ${statusFilter === s ? 'filter-tab-active' : ''}`}
               onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {s === 'failed' ? 'Failed/Cancelled' : s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
@@ -225,7 +237,7 @@ const Orders = ({ showToast }) => {
                       ))}
                     </select>
                   </td>
-                  <td style={{ position: 'relative' }}>
+                  <td style={{ position: 'relative' }} ref={openKebab === order._id ? kebabRef : null}>
                     <button className="btn-icon kebab-btn"
                       onClick={() => setOpenKebab(openKebab === order._id ? null : order._id)}>
                       <MoreHorizontal size={16} />

@@ -68,7 +68,7 @@ const Navbar = () => {
     <>
       {/* ── Campaign Bar ── */}
       <div className="campaign-bar">
-        🚚 Free Delivery in Dhaka on orders above ৳2,000
+        🚚 Free Delivery in Dhaka on orders above ৳2,000 · 7-Day Easy Exchange
       </div>
 
       {/* ── Main Navbar ── */}
@@ -100,7 +100,7 @@ const Navbar = () => {
         <form className="navbar-search" onSubmit={handleSearch} role="search">
           <input
             type="search"
-            placeholder="Search Product"
+            placeholder="Search watches, brands…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search products"
