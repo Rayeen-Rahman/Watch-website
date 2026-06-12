@@ -96,8 +96,11 @@
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
+  border: none;
   border-radius: 6px;
   letter-spacing: 1px;
+  cursor: pointer;
+  font-family: inherit;
   transition: background-color 0.2s ease, transform 0.2s ease;
   margin-bottom: 30px;
 }

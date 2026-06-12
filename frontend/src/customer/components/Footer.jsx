@@ -106,7 +106,7 @@ const Footer = () => {
             Stay updated on new releases and exclusive offers.
           </p>
           {subscribed ? (
-            <p className="footer-subscribed">✓ Thanks for your interest! We'll be in touch soon.</p>
+            <p className="footer-subscribed">✓ You're on the list! We'll notify you of new arrivals and exclusive deals.</p>
           ) : (
             <form className="newsletter-form" onSubmit={handleSubscribe}>
               <input

@@ -11,6 +11,7 @@ const STATUS_CONFIG = {
   processing: { label: 'Processing', color: '#6366F1', Icon: Package },
   shipped:    { label: 'Shipped',    color: '#3B82F6', Icon: Truck },
   delivered:  { label: 'Delivered',  color: '#22C55E', Icon: CheckCircle },
+  cancelled:  { label: 'Cancelled',  color: '#EF4444', Icon: XCircle },
   failed:     { label: 'Cancelled',  color: '#EF4444', Icon: XCircle },
 };
 
@@ -168,13 +169,31 @@ const OrderHistoryPage = () => {
         {loading && <p className="orders-loading">Loading your orders…</p>}
         {error   && <p className="orders-error">{error}</p>}
 
-        {/* No phone saved — can't auto-lookup, prompt to add phone */}
+        {/* No phone saved — show inline lookup form instead of dead-end link */}
         {!loading && !searched && !user.phone?.trim() && (
           <div className="orders-empty-inner">
             <Package size={48} strokeWidth={1} />
-            <h3>No phone number saved</h3>
-            <p>Add a phone number to your profile to automatically load your orders, or enter it below.</p>
-            <Link to="/profile" className="btn-orders-shop" style={{ marginTop: '12px' }}>Go to Profile</Link>
+            <h3>Track your order</h3>
+            <p>Enter the phone number you used at checkout to find your orders, or add one to your <Link to="/profile" style={{ color: 'inherit', textDecoration: 'underline' }}>Profile</Link>.</p>
+            <form
+              onSubmit={handlePhoneLookup}
+              style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
+            >
+              <input
+                type="tel"
+                placeholder="+880 1700 000000"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
+              />
+              <button
+                type="submit"
+                style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <PhoneCall size={14} /> Find Orders
+              </button>
+            </form>
+            {error && <p style={{ marginTop: '16px', color: '#e44', fontSize: '0.9rem' }}>{error}</p>}
           </div>
         )}
 

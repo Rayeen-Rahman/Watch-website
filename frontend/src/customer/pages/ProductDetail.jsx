@@ -193,9 +193,12 @@ const ProductDetail = () => {
           {/* Step 41: Quantity on own row */}
           <div className="quantity-row">
             <div className="quantity-selector">
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={product.stock === 0}>−</button>
+              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!product.stock}>−</button>
               <span>{quantity}</span>
-              <button onClick={() => setQuantity(Math.min(product.stock, quantity + 1))} disabled={product.stock === 0}>+</button>
+              <button
+                onClick={() => setQuantity(q => Math.min(product.stock ?? 99, q + 1))}
+                disabled={!product.stock || quantity >= (product.stock ?? 99)}
+              >+</button>
             </div>
             {product.stock > 0 && product.stock <= 5 && (
               <span style={{ fontSize: '0.78rem', color: '#e05c00', marginLeft: '12px' }}>Only {product.stock} left!</span>

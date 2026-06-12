@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import './CategoryPage.css';
@@ -80,12 +80,22 @@ const CategoryPage = () => {
     setPage(1);
   }, [location.search]);
 
-  useEffect(() => { setPage(1); setSearchText(''); }, [slug]);
+  // Only clear searchText when navigating to a new slug without a ?search= param
+  // (prevents wiping the search term when navbar search navigates to /category/all?search=...)
+  useEffect(() => {
+    const q = new URLSearchParams(location.search).get('search') || '';
+    setPage(1);
+    if (!q) setSearchText('');
+  }, [slug]);
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
+  const navigate = useNavigate();
+
   const clearFilters = () => {
     setMovement(''); setGender(''); setMaxPrice(200000); setSort('newest'); setPage(1);
+    setSearchText('');
+    navigate(`/category/${slug || 'all'}`, { replace: true });
   };
 
   const pageTitle = slug === 'all' || !slug
@@ -181,7 +191,7 @@ const CategoryPage = () => {
               className="price-slider" />
             <div className="price-range-labels">
               <span>৳1,000</span>
-              <span>৳2,00,000</span>
+              <span>৳{(200000).toLocaleString()}</span>
             </div>
           </div>
         </aside>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import heroFallback from '../../assets/hero_watch.png';
 import './Homepage.css';
@@ -62,13 +63,18 @@ const Homepage = () => {
           {/* LEFT PANEL — text */}
           <div className="hero-panel hero-panel-left">
             <div className="hero-content">
-              <div className="hero-label">THE 2025 COLLECTION</div>
+              <div className="hero-label">THE {new Date().getFullYear()} COLLECTION</div>
               <h1>Find Your Perfect Watch</h1>
               <p>
                 Discover precision engineering paired with timeless design.
                 Elevate your presence with a timepiece crafted for the modern individual.
               </p>
-              <a href="#collection" className="btn-shop-now">SHOP NOW</a>
+              <button
+                className="btn-shop-now"
+                onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                SHOP NOW
+              </button>
               <div className="hero-trust">
                 <span>✔ Cash on Delivery</span>
                 <span className="trust-divider">|</span>
@@ -180,14 +186,14 @@ const Homepage = () => {
                 onClick={() => scrollBestSellers(-1)}
                 aria-label="Previous"
               >
-                −
+                <ChevronLeft size={18} />
               </button>
               <button
                 className="slider-nav-btn"
                 onClick={() => scrollBestSellers(1)}
                 aria-label="Next"
               >
-                +
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
