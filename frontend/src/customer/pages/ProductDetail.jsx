@@ -82,9 +82,11 @@ const ProductDetail = () => {
   if (loading) {
     return (
       <div className="product-detail-page">
-        <div className="detail-loading-skeleton">
-          <div className="skeleton-img"></div>
-          <div className="skeleton-content"></div>
+        <div className="detail-outer">
+          <div className="detail-loading-skeleton">
+            <div className="skeleton-img"></div>
+            <div className="skeleton-content"></div>
+          </div>
         </div>
       </div>
     );
@@ -104,208 +106,212 @@ const ProductDetail = () => {
   return (
     <div className="product-detail-page">
 
-      {/* Step 44: Breadcrumb trail — HOME > COLLECTIONS > [category] > [name] */}
-      <nav className="breadcrumb-trail" aria-label="breadcrumb">
-        <Link to="/">Home</Link>
-        <span className="bc-sep">›</span>
-        <Link to="/category/all">Collections</Link>
-        {product.category && (
-          <>
-            <span className="bc-sep">›</span>
-            <Link to={`/category/${product.category.slug || 'all'}`}>
-              {product.category.name || 'Category'}
-            </Link>
-          </>
-        )}
-        <span className="bc-sep">›</span>
-        <span className="bc-current">{product.name}</span>
-      </nav>
-
-      <div className="detail-container">
-
-        {/* ── LEFT: Image Gallery ── */}
-        <div className="gallery-section">
-          {product.images && product.images.length > 1 && (
-            <div className="thumbnail-list">
-              {product.images.map((img, index) => {
-                const resolved = resolveImg(img);
-                return (
-                  <div
-                    key={index}
-                    className={`thumbnail ${activeImage === resolved ? 'active' : ''}`}
-                    onClick={() => setActiveImage(resolved)}
-                  >
-                    <img src={resolved} alt={`${product.name} view ${index + 1}`} />
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          <div className="main-image">
-            {activeImage ? (
-              <img src={activeImage} alt={product.name} />
-            ) : (
-              <div className="img-placeholder" style={{ color: '#999' }}>No Image Available</div>
-            )}
-            {product.discount > 0 && (
-              <div className="product-page-discount">-{product.discount}%</div>
-            )}
-          </div>
-        </div>
-
-        {/* ── RIGHT: Product Info ── */}
-        <div className="info-section">
-
-          {/* Step 43: Category label + POPULAR ITEM badge */}
-          <div className="product-meta-row">
-            {product.category && (
-              <span className="product-category-label">
-                {product.category.name?.toUpperCase()} COLLECTION
-              </span>
-            )}
-            {product.tag === 'popular' && (
-              <span className="popular-badge">🔥 POPULAR ITEM</span>
-            )}
-          </div>
-
-          {product.brand && <span className="detail-brand">{product.brand}</span>}
-          <h1 className="detail-title">{product.name}</h1>
-
-          {/* Price row with SAVE badge */}
-          <div className="detail-price-row">
-            <span className="detail-price">৳{product.price.toLocaleString()}</span>
-            {product.oldPrice > product.price && (
-              <>
-                <span className="detail-old-price">৳{product.oldPrice.toLocaleString()}</span>
-                <span className="save-badge">SAVE ৳{(product.oldPrice - product.price).toLocaleString()}</span>
-              </>
-            )}
-          </div>
-
-          {/* Product short description — shows shortDescription at top, full description stays in accordion */}
-          {(product.shortDescription || product.description) && (
-            <p className="detail-description">
-              {product.shortDescription || product.description}
-            </p>
-          )}
-
-          {/* Step 41: Quantity on own row */}
-          <div className="quantity-row">
-            <div className="quantity-selector">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!product.stock}>−</button>
-              <span>{quantity}</span>
-              <button
-                onClick={() => setQuantity(q => Math.min(product.stock ?? 99, q + 1))}
-                disabled={!product.stock || quantity >= (product.stock ?? 99)}
-              >+</button>
-            </div>
-            {product.stock > 0 && product.stock <= 5 && (
-              <span style={{ fontSize: '0.78rem', color: '#e05c00', marginLeft: '12px' }}>Only {product.stock} left!</span>
-            )}
-          </div>
-
-          {product.stock === 0 ? (
-            <div className="badge-oos" style={{ textAlign: 'center', padding: '14px', fontSize: '0.9rem', borderRadius: '4px', marginBottom: '12px' }}>Out of Stock</div>
-          ) : (
+      <div className="detail-outer">
+        {/* Breadcrumb trail — HOME > COLLECTIONS > [category] > [name] */}
+        <nav className="breadcrumb-trail" aria-label="breadcrumb">
+          <Link to="/">Home</Link>
+          <span className="bc-sep">›</span>
+          <Link to="/category/all">Collections</Link>
+          {product.category && (
             <>
-              <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
-                <ShoppingBag size={20} /> ADD TO CART
-              </button>
-              <button className="btn-buy-now" onClick={handleBuyNow}>
-                BUY NOW
-              </button>
+              <span className="bc-sep">›</span>
+              <Link to={`/category/${product.category.slug || 'all'}`}>
+                {product.category.name || 'Category'}
+              </Link>
             </>
           )}
+          <span className="bc-sep">›</span>
+          <span className="bc-current">{product.name}</span>
+        </nav>
 
-          {/* Step 42: COD / Delivery / Exchange trust lines */}
-          <div className="trust-lines">
-            <div className="trust-line">
-              <Banknote size={16} strokeWidth={1.5} />
-              <span>Cash on Delivery Available</span>
-            </div>
-            <div className="trust-line">
-              <Truck size={16} strokeWidth={1.5} />
-              <span>Fast Delivery (3–5 days)</span>
-            </div>
-            <div className="trust-line">
-              <RefreshCcw size={16} strokeWidth={1.5} />
-              <span>Easy Exchange Policy</span>
-            </div>
-          </div>
+        <div className="detail-container">
 
-          {/* Accordion Sections */}
-          <div className="accordion-sections">
-            {/* Watch Specs */}
-            {(product.movementType || product.caseSize || product.dialColor || product.strapMaterial || product.waterResistance || product.gender) && (
-              <div className="accordion-item">
-                <button className="accordion-header" onClick={() => toggleAccordion('specs')}>
-                  Watch Specifications
-                  {activeAccordion === 'specs' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
-                {activeAccordion === 'specs' && (
-                  <div className="accordion-content">
-                    <table className="specs-table">
-                      <tbody>
-                        {product.movementType   && <tr><td>Movement</td><td>{product.movementType}</td></tr>}
-                        {product.caseSize       && <tr><td>Case Size</td><td>{product.caseSize}</td></tr>}
-                        {product.dialColor      && <tr><td>Dial Color</td><td>{product.dialColor}</td></tr>}
-                        {product.strapMaterial  && <tr><td>Strap</td><td>{product.strapMaterial}</td></tr>}
-                        {product.waterResistance && <tr><td>Water Resistance</td><td>{product.waterResistance}</td></tr>}
-                        {product.gender         && <tr><td>Gender</td><td>{product.gender}</td></tr>}
-                        {product.brand          && <tr><td>Brand</td><td>{product.brand}</td></tr>}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+          {/* ── LEFT: Image Gallery ── */}
+          <div className="gallery-section">
+            {product.images && product.images.length > 1 && (
+              <div className="thumbnail-list">
+                {product.images.map((img, index) => {
+                  const resolved = resolveImg(img);
+                  return (
+                    <div
+                      key={index}
+                      className={`thumbnail ${activeImage === resolved ? 'active' : ''}`}
+                      onClick={() => setActiveImage(resolved)}
+                    >
+                      <img src={resolved} alt={`${product.name} view ${index + 1}`} />
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* Product Details */}
-            <div className="accordion-item">
-              <button className="accordion-header" onClick={() => toggleAccordion('details')}>
-                Product Details
-                {activeAccordion === 'details' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-              {activeAccordion === 'details' && (
-                <div className="accordion-content">
-                  <p>{product.description || 'Premium design and superior build quality.'}</p>
-                </div>
+            <div className="main-image">
+              {activeImage ? (
+                <img src={activeImage} alt={product.name} />
+              ) : (
+                <div className="img-placeholder" style={{ color: '#999' }}>No Image Available</div>
               )}
-            </div>
-
-            {/* Delivery */}
-            <div className="accordion-item">
-              <button className="accordion-header" onClick={() => toggleAccordion('delivery')}>
-                Delivery
-                {activeAccordion === 'delivery' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-              {activeAccordion === 'delivery' && (
-                <div className="accordion-content">
-                  <p><strong>Inside Dhaka:</strong> Delivered within 24–48 hours. Free delivery on orders over ৳2,000.</p>
-                  <p><strong>Outside Dhaka:</strong> Delivered within 3–5 business days via standard courier.</p>
-                  <p>Cash on Delivery is available for all regions.</p>
-                </div>
-              )}
-            </div>
-
-            {/* Exchange & Return */}
-            <div className="accordion-item">
-              <button className="accordion-header" onClick={() => toggleAccordion('exchange')}>
-                Exchange &amp; Return
-                {activeAccordion === 'exchange' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-              {activeAccordion === 'exchange' && (
-                <div className="accordion-content">
-                  <p>We offer a 7-day easy exchange policy. If the product is defective or damaged, contact our support team.</p>
-                  <p>Items must be unused and in their original packaging.</p>
-                </div>
+              {product.discount > 0 && (
+                <div className="product-page-discount">-{product.discount}%</div>
               )}
             </div>
           </div>
 
-        </div>
-      </div>
+          {/* ── RIGHT: Product Info ── */}
+          <div className="info-section">
+
+            {/* Category label + POPULAR ITEM badge */}
+            <div className="product-meta-row">
+              {product.category && (
+                <span className="product-category-label">
+                  {product.category.name?.toUpperCase()} COLLECTION
+                </span>
+              )}
+              {product.tag === 'popular' && (
+                <span className="popular-badge">🔥 POPULAR ITEM</span>
+              )}
+            </div>
+
+            {product.brand && <span className="detail-brand">{product.brand}</span>}
+            <h1 className="detail-title">{product.name}</h1>
+
+            {/* Price row with SAVE badge */}
+            <div className="detail-price-row">
+              <span className="detail-price">৳{product.price.toLocaleString()}</span>
+              {product.oldPrice > product.price && (
+                <>
+                  <span className="detail-old-price">৳{product.oldPrice.toLocaleString()}</span>
+                  <span className="save-badge">SAVE ৳{(product.oldPrice - product.price).toLocaleString()}</span>
+                </>
+              )}
+            </div>
+
+            {/* Product short description */}
+            {(product.shortDescription || product.description) && (
+              <p className="detail-description">
+                {product.shortDescription || product.description}
+              </p>
+            )}
+
+            {/* Quantity row */}
+            <div className="quantity-row">
+              <div className="quantity-selector">
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!product.stock}>−</button>
+                <span>{quantity}</span>
+                <button
+                  onClick={() => setQuantity(q => Math.min(product.stock ?? 99, q + 1))}
+                  disabled={!product.stock || quantity >= (product.stock ?? 99)}
+                >+</button>
+              </div>
+              {product.stock > 0 && product.stock <= 5 && (
+                <span style={{ fontSize: '0.78rem', color: '#e05c00', marginLeft: '12px' }}>Only {product.stock} left!</span>
+              )}
+            </div>
+
+            {product.stock === 0 ? (
+              <div className="badge-oos" style={{ textAlign: 'center', padding: '14px', fontSize: '0.9rem', borderRadius: '4px', marginBottom: '12px' }}>Out of Stock</div>
+            ) : (
+              <>
+                <button className="btn-add-to-cart" onClick={() => addToCart(product, quantity)}>
+                  <ShoppingBag size={20} /> ADD TO CART
+                </button>
+                <button className="btn-buy-now" onClick={handleBuyNow}>
+                  BUY NOW
+                </button>
+              </>
+            )}
+
+            {/* Trust lines */}
+            <div className="trust-lines">
+              <div className="trust-line">
+                <Banknote size={16} strokeWidth={1.5} />
+                <span>Cash on Delivery Available</span>
+              </div>
+              <div className="trust-line">
+                <Truck size={16} strokeWidth={1.5} />
+                <span>Fast Delivery (3–5 days)</span>
+              </div>
+              <div className="trust-line">
+                <RefreshCcw size={16} strokeWidth={1.5} />
+                <span>Easy Exchange Policy</span>
+              </div>
+            </div>
+
+            {/* Accordion Sections */}
+            <div className="accordion-sections">
+              {/* Watch Specs */}
+              {(product.movementType || product.caseSize || product.dialColor || product.strapMaterial || product.waterResistance || product.gender) && (
+                <div className="accordion-item">
+                  <button className="accordion-header" onClick={() => toggleAccordion('specs')}>
+                    Watch Specifications
+                    {activeAccordion === 'specs' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </button>
+                  {activeAccordion === 'specs' && (
+                    <div className="accordion-content">
+                      <table className="specs-table">
+                        <tbody>
+                          {product.movementType   && <tr><td>Movement</td><td>{product.movementType}</td></tr>}
+                          {product.caseSize       && <tr><td>Case Size</td><td>{product.caseSize}</td></tr>}
+                          {product.dialColor      && <tr><td>Dial Color</td><td>{product.dialColor}</td></tr>}
+                          {product.strapMaterial  && <tr><td>Strap</td><td>{product.strapMaterial}</td></tr>}
+                          {product.waterResistance && <tr><td>Water Resistance</td><td>{product.waterResistance}</td></tr>}
+                          {product.gender         && <tr><td>Gender</td><td>{product.gender}</td></tr>}
+                          {product.brand          && <tr><td>Brand</td><td>{product.brand}</td></tr>}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Product Details */}
+              <div className="accordion-item">
+                <button className="accordion-header" onClick={() => toggleAccordion('details')}>
+                  Product Details
+                  {activeAccordion === 'details' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+                {activeAccordion === 'details' && (
+                  <div className="accordion-content">
+                    <p>{product.description || 'Premium design and superior build quality.'}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Delivery */}
+              <div className="accordion-item">
+                <button className="accordion-header" onClick={() => toggleAccordion('delivery')}>
+                  Delivery
+                  {activeAccordion === 'delivery' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+                {activeAccordion === 'delivery' && (
+                  <div className="accordion-content">
+                    <p><strong>Inside Dhaka:</strong> Delivered within 24–48 hours. Free delivery on orders over ৳2,000.</p>
+                    <p><strong>Outside Dhaka:</strong> Delivered within 3–5 business days via standard courier.</p>
+                    <p>Cash on Delivery is available for all regions.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Exchange & Return */}
+              <div className="accordion-item">
+                <button className="accordion-header" onClick={() => toggleAccordion('exchange')}>
+                  Exchange &amp; Return
+                  {activeAccordion === 'exchange' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
+                {activeAccordion === 'exchange' && (
+                  <div className="accordion-content">
+                    <p>We offer a 7-day easy exchange policy. If the product is defective or damaged, contact our support team.</p>
+                    <p>Items must be unused and in their original packaging.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>{/* end info-section */}
+
+        </div>{/* end detail-container */}
+
+      </div>{/* end detail-outer */}
 
       {/* ── RELATED PRODUCTS — Step 45: with prev/next arrows ── */}
       {relatedProducts.length > 0 && (

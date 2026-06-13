@@ -141,67 +141,71 @@ const Homepage = () => {
         </div>
       </section>
 
-      {/* ── WATCH COLLECTION ──────────────────────────────────────────────── */}
+      {/* ── WATCH COLLECTION ───────────────────────────────────────────────── */}
       <section id="collection" className="collection-section">
-        <div className="section-header centered-header">
-          <h2>Watch Collection</h2>
-          <p className="section-subtitle-center">Explore our full range of meticulously crafted pieces, designed to stand the test of time.</p>
-        </div>
+        <div className="section-inner">
+          <div className="section-header centered-header">
+            <h2>Watch Collection</h2>
+            <p className="section-subtitle-center">Explore our full range of meticulously crafted pieces, designed to stand the test of time.</p>
+          </div>
 
-        {loading ? (
-          <div className="product-grid">
-            {[...Array(4)].map((_, i) => <div key={i} className="skeleton-card" />)}
-          </div>
-        ) : error ? (
-          <div className="error-message">Failed to load collection: {error}</div>
-        ) : collection.length === 0 ? (
-          <div className="empty-message">
-            No watches yet. Head to the Admin Dashboard to add products!
-          </div>
-        ) : (
-          <>
+          {loading ? (
             <div className="product-grid">
-              {collection.slice(0, 8).map(p => (
-                <ProductCard key={p._id} product={p} />
-              ))}
+              {[...Array(4)].map((_, i) => <div key={i} className="skeleton-card" />)}
             </div>
-            <div className="view-all-wrap">
-              <Link to="/category/all" className="link-view-all-centered">VIEW ALL WATCHES</Link>
+          ) : error ? (
+            <div className="error-message">Failed to load collection: {error}</div>
+          ) : collection.length === 0 ? (
+            <div className="empty-message">
+              No watches yet. Head to the Admin Dashboard to add products!
             </div>
-          </>
-        )}
+          ) : (
+            <>
+              <div className="product-grid">
+                {collection.slice(0, 8).map(p => (
+                  <ProductCard key={p._id} product={p} />
+                ))}
+              </div>
+              <div className="view-all-wrap">
+                <Link to="/category/all" className="link-view-all-centered">VIEW ALL WATCHES</Link>
+              </div>
+            </>
+          )}
+        </div>
       </section>
 
-      {/* ── BEST SELLERS ──────────────────────────────────────────────────── */}
+      {/* ── BEST SELLERS ───────────────────────────────────────────────────── */}
       {!loading && bestSellers.length > 0 && (
         <section className="collection-section best-sellers-section">
-          <div className="section-header best-sellers-header">
-            <div>
-              <h2 className="section-label">Best Sellers</h2>
-              <p className="section-subtitle-sm">Our most sought-after timepieces, curated by connoisseurs.</p>
+          <div className="section-inner">
+            <div className="section-header best-sellers-header">
+              <div>
+                <h2 className="section-label">Best Sellers</h2>
+                <p className="section-subtitle-sm">Our most sought-after timepieces, curated by connoisseurs.</p>
+              </div>
+              <div className="slider-nav-buttons">
+                <button
+                  className="slider-nav-btn"
+                  onClick={() => scrollBestSellers(-1)}
+                  aria-label="Previous"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  className="slider-nav-btn"
+                  onClick={() => scrollBestSellers(1)}
+                  aria-label="Next"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
-            <div className="slider-nav-buttons">
-              <button
-                className="slider-nav-btn"
-                onClick={() => scrollBestSellers(-1)}
-                aria-label="Previous"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                className="slider-nav-btn"
-                onClick={() => scrollBestSellers(1)}
-                aria-label="Next"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
 
-          <div className="product-slider" ref={bestSellersRef}>
-            {bestSellers.map(p => (
-              <ProductCard key={`bs-${p._id}`} product={p} sliderCard />
-            ))}
+            <div className="product-slider" ref={bestSellersRef}>
+              {bestSellers.map(p => (
+                <ProductCard key={`bs-${p._id}`} product={p} sliderCard />
+              ))}
+            </div>
           </div>
         </section>
       )}

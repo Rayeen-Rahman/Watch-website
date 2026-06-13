@@ -1,9 +1,16 @@
 /* ── PAGE WRAPPER ── */
 .product-detail-page {
-  padding: 28px 5% 120px 5%;
+  padding: 28px 0 120px 0;
   background-color: var(--store-bg);
   min-height: 80vh;
   animation: fadeUp 0.5s ease-out;
+}
+
+/* ── INNER CONSTRAINT ── */
+.product-detail-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5%;
 }
 
 @keyframes fadeUp {
@@ -17,7 +24,7 @@
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   font-size: 0.8rem;
   color: var(--store-text-light);
   text-decoration: none;
@@ -48,18 +55,29 @@
   letter-spacing: 0.5px;
 }
 
+/* ── OUTER CONSTRAINT (holds breadcrumb + container) ── */
+.detail-outer {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
 /* ── LAYOUT GRID ── */
 .detail-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 70px;
+  grid-template-columns: 45% 55%;
+  gap: 0;
   align-items: start;
+  border: 1px solid var(--store-border);
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: var(--store-bg);
 }
 
 @media (max-width: 900px) {
   .detail-container {
     grid-template-columns: 1fr;
-    gap: 40px;
+    border-radius: 12px;
   }
 }
 
@@ -67,9 +85,13 @@
 .gallery-section {
   display: flex;
   flex-direction: row;
-  gap: 16px;
+  gap: 12px;
   position: sticky;
-  top: 100px;
+  top: 90px;
+  align-self: start;
+  background-color: var(--store-surface, #f7f7f7);
+  padding: 28px 20px;
+  min-height: 100%;
 }
 
 .thumbnail-list {
@@ -83,14 +105,14 @@
 .thumbnail-list::-webkit-scrollbar { display: none; }
 
 .thumbnail {
-  width: 76px;
-  height: 76px;
-  border-radius: 6px;
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
   opacity: 0.55;
-  background-color: var(--store-surface);
+  background-color: var(--store-bg);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
@@ -132,26 +154,30 @@
 
 .main-image {
   flex: 1;
-  background-color: var(--store-surface);
-  border-radius: 10px;
+  background-color: var(--store-surface, #f7f7f7);
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: zoom-in;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
+  max-height: 440px;
 }
 
 .main-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition: transform 0.5s ease;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .main-image:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 /* Step 45: Wishlist heart icon */
@@ -198,6 +224,9 @@
 .info-section {
   display: flex;
   flex-direction: column;
+  padding: 36px 36px 36px 40px;
+  border-left: 1px solid var(--store-border);
+  background-color: var(--store-bg);
 }
 
 /* Step 43: Category label + popular badge */
@@ -433,8 +462,14 @@
 /* ── SKELETON LOADING ── */
 .detail-loading-skeleton {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: 45% 55%;
+  gap: 0;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 5%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--store-border);
 }
 
 .skeleton-img,
@@ -450,14 +485,19 @@
   100% { background-position: -200% 0; }
 }
 
-.skeleton-img { aspect-ratio: 4 / 5; }
+.skeleton-img { aspect-ratio: 1 / 1; border-radius: 12px; }
 .skeleton-content { height: 500px; }
 
-/* ── RELATED PRODUCTS (Step 45: prev/next arrows) ── */
+/* ── RELATED PRODUCTS ── */
 .related-products-section {
-  margin-top: 80px;
-  padding-top: 50px;
+  margin-top: 60px;
+  padding-top: 48px;
   border-top: 1px solid var(--store-border);
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 .related-header {
@@ -700,10 +740,28 @@
   font-size: 0.85rem;
 }
 
+@media (max-width: 900px) {
+  .detail-outer {
+    padding: 0 4%;
+  }
+  .gallery-section {
+    padding: 20px 20px;
+    min-height: auto;
+  }
+  .info-section {
+    padding: 24px 20px 32px 20px;
+    border-left: none;
+    border-top: 1px solid var(--store-border);
+  }
+}
+
 @media (max-width: 600px) {
+  .detail-outer { padding: 0 4%; }
   .detail-title { font-size: 1.9rem; }
   .sticky-product-info h4 { display: none; }
   .related-card { min-width: 200px; }
+  .detail-container { border-radius: 8px; }
+  .info-section { padding: 20px 16px 28px 16px; }
 }
 
 /* ── Step 30: Brand label + Watch Specs accordion ───────────────────────── */

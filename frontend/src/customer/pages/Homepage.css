@@ -244,6 +244,12 @@
   background-color: #fff;
 }
 
+/* Inner content constraint — mirrors .hero-inner max-width */
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .best-sellers-section {
   padding-top: 40px;
   background-color: #f9f9f9;
