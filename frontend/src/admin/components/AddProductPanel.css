@@ -18,7 +18,7 @@
 }
 
 .slide-panel {
-  width: 450px;
+  width: clamp(500px, 42vw, 780px);
   max-width: 100%;
   background-color: var(--admin-sidebar-bg);
   height: 100vh;
