@@ -42,12 +42,6 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
   const [uploading, setUploading]     = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!isOpen) return null;
-
-  // When editProduct changes (edit mode opened), seed form + images
-  // We use a key on the outer div to remount the form instead of useEffect
-  // because isOpen toggles too. The parent passes a new editProduct each time.
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
@@ -206,6 +200,9 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
   }, [isOpen, editProduct?._id]);
 
   const isEdit = Boolean(editProduct);
+
+  // All hooks must be called before any early return (Rules of Hooks)
+  if (!isOpen) return null;
 
   return (
     <div className="panel-overlay" onClick={onClose}>

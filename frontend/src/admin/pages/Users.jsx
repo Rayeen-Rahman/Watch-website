@@ -17,6 +17,7 @@ const Users = ({ showToast }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedIds,  setSelectedIds]  = useState([]);
   const [openKebab,    setOpenKebab]    = useState(null);
+  const [menuPos,      setMenuPos]      = useState({ top: 0, right: 16 });
   const [emailSort,    setEmailSort]    = useState('none');
   const [rowsPerPage,  setRowsPerPage]  = useState(10);
   const [currentPage,  setCurrentPage]  = useState(1);
@@ -48,6 +49,20 @@ const Users = ({ showToast }) => {
   }, [token]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  // ── Close kebab when clicking outside ────────────────────────────────────
+  useEffect(() => {
+    if (!openKebab) return;
+    const handler = (e) => {
+      if (e.target.closest('.kebab-menu') || e.target.closest('.kebab-btn')) return;
+      setOpenKebab(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openKebab]);
+
+  // ── Close kebab on page change ────────────────────────────────────────────
+  useEffect(() => { setOpenKebab(null); }, [currentPage, search]);
 
   // ── Delete ──────────────────────────────────────────────────────────────────
   const handleDeleteUser = async (id) => {
@@ -107,6 +122,20 @@ const Users = ({ showToast }) => {
   const emailSortIcon = emailSort === 'asc' ? ' ↑' : emailSort === 'desc' ? ' ↓' : ' ↕';
   const toggleEmailSort = () =>
     setEmailSort(p => p === 'none' ? 'asc' : p === 'asc' ? 'desc' : 'none');
+
+  // ── Kebab: open with smart up/down positioning ────────────────────────────
+  const handleKebabClick = (e, id) => {
+    e.stopPropagation();
+    if (openKebab === id) { setOpenKebab(null); return; }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const MENU_H = 120;
+    const openUp = window.innerHeight - rect.bottom < MENU_H + 8;
+    setMenuPos({
+      top:   openUp ? rect.top - MENU_H - 4 : rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+    });
+    setOpenKebab(id);
+  };
 
   return (
     <div className="admin-page">
@@ -200,30 +229,11 @@ const Users = ({ showToast }) => {
                       {user.status || 'Active'}
                     </span>
                   </td>
-                  <td style={{ position: 'relative' }}>
+                  <td>
                     <button className="btn-icon kebab-btn"
-                      onClick={() => setOpenKebab(openKebab === user._id ? null : user._id)}>
+                      onClick={(e) => handleKebabClick(e, user._id)}>
                       <MoreHorizontal size={16} />
                     </button>
-                    {openKebab === user._id && (
-                      <div className="kebab-menu">
-                        <button onClick={() => { setSelectedUser(user); setIsEditOpen(true); setOpenKebab(null); }}>
-                          ✏️ Edit
-                        </button>
-                        <button onClick={() => toggleBan(user)}>
-                          {user.status === 'Active'
-                            ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
-                            : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}
-                        </button>
-                        <button className="kebab-danger" onClick={() => handleDeleteUser(user._id)}
-                          disabled={user._id === loggedInUser?._id}
-                          title={user._id === loggedInUser?._id ? 'Cannot delete your own account' : ''}
-                          style={user._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
-                        >
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -253,6 +263,32 @@ const Users = ({ showToast }) => {
           </div>
         </div>
       )}
+
+      {/* ── Fixed-position kebab menu ── */}
+      {openKebab && (() => {
+        const user = pageRows.find(u => u._id === openKebab);
+        if (!user) return null;
+        return (
+          <div className="kebab-menu kebab-menu-fixed" style={{ top: menuPos.top, right: menuPos.right }}>
+            <button onClick={() => { setSelectedUser(user); setIsEditOpen(true); setOpenKebab(null); }}>
+              ✏️ Edit
+            </button>
+            <button onClick={() => { toggleBan(user); setOpenKebab(null); }}>
+              {user.status === 'Active'
+                ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
+                : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}
+            </button>
+            <button className="kebab-danger"
+              onClick={() => handleDeleteUser(user._id)}
+              disabled={user._id === loggedInUser?._id}
+              title={user._id === loggedInUser?._id ? 'Cannot delete your own account' : ''}
+              style={user._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+            >
+              🗑️ Delete
+            </button>
+          </div>
+        );
+      })()}
 
       {localToast && <div className="local-toast">{localToast}</div>}
 

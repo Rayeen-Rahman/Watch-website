@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MoreHorizontal, X, Search, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './Products.css';
@@ -76,19 +76,40 @@ const Orders = ({ showToast }) => {
   const [search,       setSearch]       = useState('');
   const [updatingId,   setUpdatingId]   = useState(null);
 
+  const [menuPos,     setMenuPos]     = useState({ top: 0, right: 16 });
+
   const toast = showToast || ((msg, err) => err ? alert(msg) : null);
 
-  // Close kebab menu when clicking outside
-  const kebabRef = useRef(null);
+  // ── Close kebab when clicking outside ────────────────────────────────────
   useEffect(() => {
+    if (!openKebab) return;
     const handler = (e) => {
-      if (kebabRef.current && !kebabRef.current.contains(e.target)) {
-        setOpenKebab(null);
-      }
+      if (e.target.closest('.kebab-menu') || e.target.closest('.kebab-btn')) return;
+      setOpenKebab(null);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, []);
+  }, [openKebab]);
+
+  // ── Close kebab on page/filter change ───────────────────────────────────
+  useEffect(() => { setOpenKebab(null); }, [currentPage, statusFilter, search]);
+
+  // ── Kebab: open with smart up/down positioning ────────────────────────────
+  const handleKebabClick = (e, id) => {
+    e.stopPropagation();
+    if (openKebab === id) { setOpenKebab(null); return; }
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Orders menu can have up to 7 status options + View Details (8 items ~= 280px)
+    const MENU_H = Math.min(280, (STATUS_OPTIONS.length + 1) * 38 + 16);
+    const openUp = window.innerHeight - rect.bottom < MENU_H + 8;
+    setMenuPos({
+      top:   openUp ? rect.top - MENU_H - 4 : rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+    });
+    setOpenKebab(id);
+  };
+
+  // Remove old kebabRef (replaced by document listener above)
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -237,23 +258,11 @@ const Orders = ({ showToast }) => {
                       ))}
                     </select>
                   </td>
-                  <td style={{ position: 'relative' }} ref={openKebab === order._id ? kebabRef : null}>
+                  <td>
                     <button className="btn-icon kebab-btn"
-                      onClick={() => setOpenKebab(openKebab === order._id ? null : order._id)}>
+                      onClick={(e) => handleKebabClick(e, order._id)}>
                       <MoreHorizontal size={16} />
                     </button>
-                    {openKebab === order._id && (
-                      <div className="kebab-menu">
-                        <button onClick={() => { setViewOrder(order); setOpenKebab(null); }}>
-                          👁️ View Details
-                        </button>
-                        {STATUS_OPTIONS.filter(s => s !== order.status).map(s => (
-                          <button key={s} onClick={() => updateStatus(order._id, s)}>
-                            → Mark as {s.charAt(0).toUpperCase() + s.slice(1)}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </td>
                 </tr>
               ))}
@@ -287,6 +296,24 @@ const Orders = ({ showToast }) => {
           </div>
         </div>
       )}
+
+      {/* ── Fixed-position kebab menu ── */}
+      {openKebab && (() => {
+        const order = pageRows.find(o => o._id === openKebab);
+        if (!order) return null;
+        return (
+          <div className="kebab-menu kebab-menu-fixed" style={{ top: menuPos.top, right: menuPos.right }}>
+            <button onClick={() => { setViewOrder(order); setOpenKebab(null); }}>
+              👁️ View Details
+            </button>
+            {STATUS_OPTIONS.filter(s => s !== order.status).map(s => (
+              <button key={s} onClick={() => { updateStatus(order._id, s); }}>
+                → Mark as {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        );
+      })()}
 
       {viewOrder && <OrderModal order={viewOrder} onClose={() => setViewOrder(null)} />}
     </div>
