@@ -166,10 +166,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({ message: 'Watch Store API is running...' });
-});
+// Root route — only in development (production serves the React SPA from /)
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (req, res) => {
+    res.json({ message: 'Watch Store API is running...' });
+  });
+}
 
 // API Routes
 app.use('/api/products',   productRoutes);
@@ -180,14 +182,10 @@ app.use('/api/admin',      adminRoutes);    // Steps 14-16: dashboard stats/orde
 app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
 
 
-// Error Handling Middlewares (must be below routes)
-app.use(notFound);
-app.use(errorHandler);
-
 // ── STEP 9: Serve React SPA build in production ──────────────────────────────
-// On Hostinger Managed Node.js, one process handles both API + frontend.
-// Run `npm run build` in /frontend first, then this serves dist/ for all
-// non-API routes (SPA client-side routing is preserved via the catch-all).
+// MUST be registered BEFORE the error handlers so that:
+//   - Static assets (JS/CSS/images) are served from frontend/dist
+//   - All non-API routes fall back to index.html (SPA client-side routing)
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../frontend/dist');
   app.use(express.static(frontendBuildPath, {
@@ -200,6 +198,10 @@ if (process.env.NODE_ENV === 'production') {
   });
   console.log(`Serving React build from: ${frontendBuildPath}`);
 }
+
+// Error Handling Middlewares (must be LAST — below routes AND static serving)
+app.use(notFound);
+app.use(errorHandler);
 
 // ── STEP 8: Start server + graceful SIGTERM shutdown ─────────────────────────
 const PORT = process.env.PORT || 5000;
