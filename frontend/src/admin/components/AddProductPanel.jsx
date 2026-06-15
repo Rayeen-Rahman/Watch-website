@@ -3,7 +3,7 @@ import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
 
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = null }) => {
   const { token } = useAuth();

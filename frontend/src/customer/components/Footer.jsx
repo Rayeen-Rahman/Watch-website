@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Banknote, RefreshCcw, ArrowRight, Mail } from 'lucide-react';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
 
 const Footer = () => {
   const [categories, setCategories] = useState([]);

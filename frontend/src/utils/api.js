@@ -9,7 +9,7 @@
  *   which silently 404s and shows placeholder images site-wide.
  */
 
-export const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
 
 /**
  * Resolve a stored image path to a fully-qualified URL.

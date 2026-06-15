@@ -5,7 +5,7 @@ import EditUserPanel from '../components/EditUserPanel';
 import AddUserPanel from '../components/AddUserPanel';
 import './Products.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
 
 const Users = ({ showToast }) => {
   const { token, user: loggedInUser } = useAuth();

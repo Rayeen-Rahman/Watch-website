@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { ArrowLeft, CheckCircle, ShoppingBag } from 'lucide-react';
 import './Checkout.css';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
 
 /** Resolve /uploads paths to absolute backend URL */
 const resolveImg = (url) =>
