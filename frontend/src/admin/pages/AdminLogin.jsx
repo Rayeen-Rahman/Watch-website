@@ -20,7 +20,8 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const res  = await fetch(`${import.meta.env.VITE_API_URL}/api/users/login`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+      const res  = await fetch(`${apiUrl}/api/users/login`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(formData),
