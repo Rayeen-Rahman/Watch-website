@@ -58,6 +58,8 @@ app.use(
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'https://artifactbd.com',
+  'https://www.artifactbd.com',
   process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null,
 ].filter(Boolean);
 
