@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Trash2, MoreHorizontal, Star, Zap, Search, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
@@ -16,11 +16,15 @@ const Products = ({ showToast }) => {
   const [total,       setTotal]       = useState(0);
   const [selectedIds, setSelectedIds] = useState([]);
   const [openKebab,   setOpenKebab]   = useState(null);
+  const [menuPos,     setMenuPos]     = useState({ top: 0, right: 16, openUp: false });
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [search,      setSearch]      = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [isAddOpen,   setIsAddOpen]   = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+
+  // Ref used to skip the initial click event that opened the menu
+  const kebabOpenId = useRef(null);
 
   // Internal toast fallback
   const toast = showToast || ((msg, err) => err ? alert(msg) : null);
@@ -47,6 +51,20 @@ const Products = ({ showToast }) => {
   }, [page, rowsPerPage, search]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  // ── Close kebab when clicking outside ────────────────────────────────────
+  useEffect(() => {
+    if (!openKebab) return;
+    const handler = (e) => {
+      if (e.target.closest('.kebab-menu') || e.target.closest('.kebab-btn')) return;
+      setOpenKebab(null);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [openKebab]);
+
+  // ── Close kebab on page/search change ────────────────────────────────────
+  useEffect(() => { setOpenKebab(null); }, [page, search]);
 
   // ── Toggle isBestSeller / isFeatured ──────────────────────────────────────
   const toggleFlag = async (product, flag) => {
@@ -117,6 +135,22 @@ const Products = ({ showToast }) => {
 
   const handleSearch = () => { setSearch(searchInput); setPage(1); };
   const handleSearchKey = (e) => { if (e.key === 'Enter') handleSearch(); };
+
+  // ── Kebab: open with smart up/down positioning ────────────────────────────
+  const handleKebabClick = (e, id) => {
+    e.stopPropagation();
+    if (openKebab === id) { setOpenKebab(null); return; }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const MENU_H = 118; // ~3 items × 38px + padding
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < MENU_H + 8;
+    setMenuPos({
+      top:  openUp ? rect.top  - MENU_H - 4 : rect.bottom + 4,
+      right: window.innerWidth - rect.right,
+      openUp,
+    });
+    setOpenKebab(id);
+  };
 
   return (
     <div className="admin-page">
@@ -239,24 +273,13 @@ const Products = ({ showToast }) => {
                         <Zap size={14} />
                       </button>
                     </td>
-                    <td style={{ position: 'relative' }}>
-                      <button className="btn-icon kebab-btn"
-                        onClick={() => setOpenKebab(openKebab === p._id ? null : p._id)}>
+                    <td>
+                      <button
+                        className="btn-icon kebab-btn"
+                        onClick={(e) => handleKebabClick(e, p._id)}
+                      >
                         <MoreHorizontal size={16} />
                       </button>
-                      {openKebab === p._id && (
-                        <div className="kebab-menu">
-                          <button onClick={() => { setEditProduct(p); setIsAddOpen(true); setOpenKebab(null); }}>
-                            ✏️ Edit
-                          </button>
-                          <button className="kebab-danger" onClick={() => handleDeleteOne(p._id)}>
-                            🗑️ Delete
-                          </button>
-                          <button onClick={() => toggleFlag(p, 'isActive')}>
-                            {p.isActive !== false ? '🙈 Hide' : '👁️ Show'}
-                          </button>
-                        </div>
-                      )}
                     </td>
                   </tr>
                 );
@@ -291,6 +314,28 @@ const Products = ({ showToast }) => {
           </div>
         </div>
       )}
+
+      {/* ── Fixed-position kebab menu — escapes overflow:hidden ── */}
+      {openKebab && (() => {
+        const p = products.find(x => x._id === openKebab);
+        if (!p) return null;
+        return (
+          <div
+            className="kebab-menu kebab-menu-fixed"
+            style={{ top: menuPos.top, right: menuPos.right }}
+          >
+            <button onClick={() => { setEditProduct(p); setIsAddOpen(true); setOpenKebab(null); }}>
+              ✏️ Edit
+            </button>
+            <button className="kebab-danger" onClick={() => handleDeleteOne(p._id)}>
+              🗑️ Delete
+            </button>
+            <button onClick={() => { toggleFlag(p, 'isActive'); setOpenKebab(null); }}>
+              {p.isActive !== false ? '🙈 Hide' : '👁️ Show'}
+            </button>
+          </div>
+        );
+      })()}
 
       <AddProductPanel
         isOpen={isAddOpen}

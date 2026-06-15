@@ -187,7 +187,20 @@
   z-index: 999;
   box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   overflow: hidden;
+  animation: kebabIn 0.12s ease-out;
 }
+
+/* Fixed variant — escapes overflow:hidden on .table-container */
+.kebab-menu-fixed {
+  position: fixed !important;
+  z-index: 9999;
+}
+
+@keyframes kebabIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);     }
+}
+
 .kebab-menu button {
   display: block;
   width: 100%;
