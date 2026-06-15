@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
 import './Products.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const Products = ({ showToast }) => {
   const { token } = useAuth();

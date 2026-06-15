@@ -93,7 +93,8 @@ const CustomTooltip = ({ active, payload, label, currency }) => {
 ───────────────────────────────────────────── */
 const DashboardHome = ({ showToast }) => {
   const { token } = useAuth();
-  const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+  const _raw = import.meta.env.VITE_API_URL || '';
+  const API = _raw.includes('localhost') ? '' : _raw;
 
   /* ── State ── */
   const [stats,         setStats]         = useState(null);

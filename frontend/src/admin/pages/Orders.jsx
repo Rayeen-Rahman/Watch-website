@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Orders.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
 

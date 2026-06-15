@@ -9,7 +9,8 @@
  *   which silently 404s and shows placeholder images site-wide.
  */
 
-export const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+const _envUrl = import.meta.env.VITE_API_URL || '';
+export const API = _envUrl.includes('localhost') ? '' : _envUrl;
 
 /**
  * Resolve a stored image path to a fully-qualified URL.

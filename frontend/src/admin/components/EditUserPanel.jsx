@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './EditUserPanel.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
   const { token } = useAuth();

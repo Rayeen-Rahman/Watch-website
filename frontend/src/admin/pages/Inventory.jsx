@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Inventory.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 const LOW_STOCK_THRESHOLD = 5;
 
 const Inventory = ({ showToast }) => {

@@ -13,7 +13,9 @@ const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/categories`, {
+      const _raw = import.meta.env.VITE_API_URL || '';
+      const _api = _raw.includes('localhost') ? '' : _raw;
+      const res = await fetch(`${_api}/api/categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name })

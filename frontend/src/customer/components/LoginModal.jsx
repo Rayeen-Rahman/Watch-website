@@ -16,7 +16,8 @@ const LoginModal = ({ onClose }) => {
   const [error,       setError]       = useState('');
   const [success,     setSuccess]     = useState('');
 
-  const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+  const _raw = import.meta.env.VITE_API_URL || '';
+  const API = _raw.includes('localhost') ? '' : _raw;
 
   const resetForm = () => {
     setEmail(''); setPassword(''); setName('');

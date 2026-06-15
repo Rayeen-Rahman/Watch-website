@@ -28,7 +28,8 @@ const CategoryPage = () => {
   const [totalCount,  setTotalCount]  = useState(0);
   const [page,        setPage]        = useState(1);
   const [pages,       setPages]       = useState(1);
-  const API   = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+  const _raw  = import.meta.env.VITE_API_URL || '';
+  const API   = _raw.includes('localhost') ? '' : _raw;
   const LIMIT  = 12;
 
   const [sort,       setSort]        = useState('newest');

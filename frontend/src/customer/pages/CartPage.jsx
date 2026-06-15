@@ -7,7 +7,8 @@ import './CartPage.css';
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
 
-  const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+  const _raw = import.meta.env.VITE_API_URL || '';
+  const API = _raw.includes('localhost') ? '' : _raw;
 
   if (!cartItems || cartItems.length === 0) {
     return (

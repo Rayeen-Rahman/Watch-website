@@ -5,7 +5,7 @@ import ProductCard from '../components/ProductCard';
 import heroFallback from '../../assets/hero_watch.png';
 import './Homepage.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const Homepage = () => {
   const [collection,   setCollection]   = useState([]);

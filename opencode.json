@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "mongodb": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "mongodb-mcp-server@<3"
+      ],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://rayeenrahman1_db_user:KMxuRiXDwwsb6El8@rayeen.zwcd5j6.mongodb.net/watch-store?appName=Rayeen"
+      },
+      "enabled": true
+    },
+    "cloudinary": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "cloudinary-mcp-server"
+      ],
+      "env": {
+        "CLOUDINARY_CLOUD_NAME": "dqhjomvql",
+        "CLOUDINARY_API_KEY": "232123675282333",
+        "CLOUDINARY_API_SECRET": "5eVCAgnRbKku1XqAEDwBwLhiriA"
+      },
+      "enabled": true
+    },
+    "hostinger": {
+      "type": "local",
+      "command": [
+        "hostinger-api-mcp"
+      ],
+      "env": {
+        "HOSTINGER_API_TOKEN": "T8zlX0WGexV1coABq9FlZakHkcHQjcNX7nH9il1q5162ef30"
+      },
+      "enabled": true
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { Package, Clock, CheckCircle, XCircle, Truck, PhoneCall } from 'lucide-r
 import { useAuth } from '../../context/AuthContext';
 import './OrderHistoryPage.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const STATUS_CONFIG = {
   pending:    { label: 'Pending',    color: '#F59E0B', Icon: Clock },

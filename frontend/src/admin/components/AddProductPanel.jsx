@@ -3,7 +3,7 @@ import { X, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './AddProductPanel.css';
 
-const API = import.meta.env.VITE_API_URL || 'https://artifactbd.com';
+import { API } from '../../utils/api';
 
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = null }) => {
   const { token } = useAuth();
@@ -318,7 +318,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
                   <div key={i} className="img-preview-item">
                     <img
                       src={url.startsWith('/uploads')
-                        ? `${import.meta.env.VITE_API_URL}${url}`
+                        ? `${API}${url}`
                         : url}
                       alt={`Product ${i + 1}`}
                       onError={e => { e.target.style.opacity = 0.3; }}
