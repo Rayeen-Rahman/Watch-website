@@ -192,12 +192,38 @@ app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
 //   - All non-API routes fall back to index.html (SPA client-side routing)
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../frontend/dist');
-  app.use(express.static(frontendBuildPath, {
-    maxAge: '1y',
-    etag:   true,
-  }));
+
+  // ── Hashed assets: cache forever (filename changes on every build) ──────
+  app.use(
+    '/assets',
+    express.static(path.join(frontendBuildPath, 'assets'), {
+      maxAge: '1y',
+      immutable: true,
+      etag: false,
+    })
+  );
+
+  // ── index.html: NEVER cache — always fetch fresh so new bundles load ────
+  // All other static files (favicon, robots.txt etc): short revalidation
+  app.use(
+    express.static(frontendBuildPath, {
+      maxAge: 0,
+      etag: true,
+      setHeaders(res, filePath) {
+        if (filePath.endsWith('index.html')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        }
+      },
+    })
+  );
+
   // SPA fallback — send index.html for all non-API GET requests
   app.get('*any', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
   console.log(`Serving React build from: ${frontendBuildPath}`);
