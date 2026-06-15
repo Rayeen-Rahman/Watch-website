@@ -56,7 +56,7 @@ const ProductCard = ({ product, sliderCard = false }) => {
           {/* Out-of-stock badge */}
           {isOutOfStock && <div className="badge-oos">Out of Stock</div>}
 
-          {/* Discount badge (takes priority over best-seller badge) */}
+          {/* Discount / Best-seller badge */}
           {!isOutOfStock && savings ? (
             <div className="discount-badge">{savings}</div>
           ) : !isOutOfStock && product.isBestSeller ? (
@@ -71,7 +71,7 @@ const ProductCard = ({ product, sliderCard = false }) => {
               alt={product.name}
               loading="lazy"
               width="400"
-              height="500"
+              height="400"
               onError={() => setImgError(true)}
             />
           ) : (
@@ -79,48 +79,42 @@ const ProductCard = ({ product, sliderCard = false }) => {
               {(product.brand || product.name || 'W').charAt(0).toUpperCase()}
             </div>
           )}
-
-          {/* ── Hover action bar — lives inside image wrapper ── */}
-          {!isOutOfStock && (
-            <div className="card-actions" onClick={e => e.preventDefault()}>
-              <button onClick={() => navigate(`/product/${product._id}`)} className="btn-card-buy" style={{ fontFamily: 'inherit', fontSize: '0.8rem' }}>
-                Buy Now
-              </button>
-              <button
-                className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
-                aria-label={added ? 'Added to cart' : 'Add to cart'}
-                onClick={handleAddToCart}
-                disabled={added}
-              >
-                {added ? '✓' : <ShoppingCart size={15} />}
-              </button>
-            </div>
-          )}
         </div>
 
         <div className="product-info">
-          {product.brand && (
-            <span className="product-brand">{product.brand}</span>
-          )}
           <h3 className="truncate-title">{product.name}</h3>
-          {product.movementType && (
-            <span className="product-spec">
-              {product.movementType}
-              {product.caseSize ? ` · ${product.caseSize}` : ''}
-            </span>
-          )}
           <div className="price-row">
-            <p className="product-price">
-              ৳{(product.price ?? 0).toLocaleString()}
-            </p>
+            <p className="product-price">৳{(product.price ?? 0).toLocaleString()}</p>
             {product.oldPrice > product.price && (
-              <p className="old-price">
-                ৳{product.oldPrice.toLocaleString()}
-              </p>
+              <div className="old-price-row">
+                <p className="old-price">৳{product.oldPrice.toLocaleString()}</p>
+                {savings && <span className="savings-label">{savings}</span>}
+              </div>
             )}
           </div>
         </div>
       </Link>
+
+      {/* Always-visible action bar */}
+      {!isOutOfStock && (
+        <div className="card-actions">
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate(`/product/${product._id}`); }}
+            className="btn-card-buy"
+            style={{ fontFamily: 'inherit' }}
+          >
+            Shop Now
+          </button>
+          <button
+            className={`btn-card-cart${added ? ' btn-cart-added' : ''}`}
+            aria-label={added ? 'Added to cart' : 'Add to cart'}
+            onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
+            disabled={added}
+          >
+            {added ? '✓' : <ShoppingCart size={15} />}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

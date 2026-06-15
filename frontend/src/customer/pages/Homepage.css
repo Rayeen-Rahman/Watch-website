@@ -384,7 +384,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 @media (max-width: 1200px) {
@@ -431,27 +431,27 @@
 .product-slider::-webkit-scrollbar { display: none; }
 
 .slider-card {
-  min-width: 260px;
+  min-width: 220px;
   flex: 0 0 auto;
   scroll-snap-align: start;
 }
 
-/* ── PRODUCT CARD — Stitch Minimalist / 'No-Line' rule ── */
+/* ── PRODUCT CARD — Clean white card, always-visible actions ── */
 .product-card {
   display: flex;
   flex-direction: column;
-  background-color: transparent;
-  border: none;
-  border-radius: 8px; /* Slightly rounded for the hover effect */
-  overflow: visible;
-  transition: background-color 0.3s ease;
+  background-color: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
   position: relative;
-  padding: 8px; /* Breathing room for hover state */
-  margin: -8px; /* Offset padding so grid aligns perfectly */
 }
 
 .product-card:hover {
-  background-color: #f3f3f4; /* surface_container_low */
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  transform: translateY(-3px);
+  background-color: #fff;
 }
 
 .product-card-link {
@@ -459,42 +459,45 @@
   color: inherit;
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
-/* 4:5 portrait ratio — matches luxury watch photography */
+/* Square image area with light grey background */
 .product-image-wrapper {
-  aspect-ratio: 4 / 5;
-  background-color: #f4f4f4;
+  aspect-ratio: 1 / 1;
+  background-color: #f7f7f7;
   overflow: hidden;
-  position: relative;  /* card-actions are absolute inside here */
+  position: relative;
+  border-radius: 16px 16px 0 0;
 }
 
 .product-image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;  /* FIX: was missing on some paths causing small icon */
+  object-fit: contain;
   object-position: center;
   display: block;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 12px;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card:hover .product-image-wrapper img {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
-/* Discount badge */
+/* Discount badge — top-left corner */
 .discount-badge {
   position: absolute;
   top: 12px;
   left: 12px;
   background-color: #111;
   color: white;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 2px;
+  border-radius: 4px;
   z-index: 2;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -505,26 +508,25 @@
   left: 12px;
   background-color: rgba(0,0,0,0.55);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   padding: 3px 10px;
-  border-radius: 2px;
+  border-radius: 4px;
   z-index: 3;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .out-of-stock-card {
   opacity: 0.65;
-  pointer-events: auto; /* Still allow clicking to view product detail */
+  pointer-events: auto;
 }
 
 .out-of-stock-card .product-image-wrapper img {
   filter: grayscale(35%);
 }
 
-
-/* Image placeholder — large letter centered */
+/* Image placeholder */
 .img-placeholder {
   width: 100%;
   height: 100%;
@@ -534,32 +536,29 @@
   color: #ccc;
   font-size: 3rem;
   font-weight: 700;
-  letter-spacing: -2px;
-  background: #f4f4f4;
+  background: #f7f7f7;
 }
 
-/* Product info — below image, generous spacing */
+/* Product info section */
 .product-info {
-  padding: 24px 8px 8px; /* 24px vertical gap from image as per design */
+  padding: 14px 14px 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* Brand — small uppercase tracking */
+/* Hide brand — reference design doesn't show it */
 .product-brand {
-  display: block;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 4px;
+  display: none;
 }
 
-/* Title — clean, single line */
+/* Product name — prominent */
 .truncate-title {
   font-family: 'Manrope', 'Inter', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 500;
-  margin: 0 0 6px 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
   color: #111;
   line-height: 1.35;
   white-space: nowrap;
@@ -568,69 +567,72 @@
 }
 
 .product-spec {
-  display: block;
-  font-size: 0.7rem;
-  color: #bbb;
-  letter-spacing: 0.04em;
-  margin-bottom: 6px;
-  text-transform: uppercase;
+  display: none; /* hidden per reference design */
 }
 
+/* Price row */
 .price-row {
   display: flex;
-  gap: 8px;
-  align-items: baseline;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
 }
 
 .product-price {
   color: #111;
   margin: 0;
-  font-weight: 600;
-  font-size: 0.88rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* Old price + savings on same line */
+.old-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .old-price {
   margin: 0;
   text-decoration: line-through;
-  color: #ccc;
-  font-size: 0.78rem;
+  color: #bbb;
+  font-size: 0.8rem;
 }
 
-/* ── Card actions — slide up on hover from BOTTOM of image wrapper ── */
+.savings-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #16a34a;
+  background-color: #dcfce7;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── Always-visible action bar at bottom of card ── */
 .card-actions {
-  position: absolute;        /* inside .product-image-wrapper */
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
-  background: rgba(255,255,255,0.97);
-  transform: translateY(100%);
-  opacity: 0;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s;
-  z-index: 4;
-  pointer-events: none;
-}
-
-.product-card:hover .card-actions {
-  transform: translateY(0);
-  opacity: 1;
-  pointer-events: auto;
+  margin: 12px 14px 14px;
+  border: 1.5px solid #e5e5e5;
+  border-radius: 100px;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
 }
 
 .btn-card-buy {
   flex: 1;
-  padding: 11px 0;
+  padding: 10px 0;
   text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   background: transparent;
   color: #111;
-  text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.18s, color 0.18s;
+  font-family: inherit;
 }
 
 .btn-card-buy:hover {
@@ -639,16 +641,16 @@
 }
 
 .btn-card-cart {
-  width: 44px;
+  width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
-  border-left: 1px solid rgba(0,0,0,0.08);
+  border-left: 1.5px solid #e5e5e5;
   cursor: pointer;
-  color: #111;
-  transition: background-color 0.2s, color 0.2s;
+  color: #555;
+  transition: background-color 0.18s, color 0.18s;
   flex-shrink: 0;
 }
 
@@ -657,13 +659,14 @@
   color: #fff;
 }
 
-/* C-05: Cart added feedback */
+/* Cart added feedback */
 .btn-card-cart.btn-cart-added {
   background-color: #22c55e;
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: default;
+  border-left-color: #22c55e;
 }
 
 /* Best-seller badge */
@@ -671,14 +674,14 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #111;
+  background: #0a0a0a;
   color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 2px;
+  padding: 3px 9px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -712,42 +715,6 @@
   color: var(--store-text-light);
 }
 
-/* ── Step 29: New ProductCard fields ──────────────────────────────────────── */
-.product-brand {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #999;
-  margin-bottom: 4px;
-}
-
-.product-spec {
-  display: block;
-  font-size: 0.75rem;
-  color: #aaa;
-  margin-bottom: 6px;
-}
-
-/* Best Seller overlay badge */
-.badge-bs {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #0a0a0a;
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  z-index: 2;
-}
 
 /* ── Step 29: Hero floating featured card ─────────────────────────────────── */
 .floating-spec-link {
