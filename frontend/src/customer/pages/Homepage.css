@@ -441,7 +441,7 @@
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #e8e8e8;
   border-radius: 16px;
   overflow: hidden;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
@@ -477,7 +477,7 @@
   object-fit: contain;
   object-position: center;
   display: block;
-  padding: 12px;
+  padding: 20px;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -546,6 +546,14 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  color: #111;
+}
+
+/* Force all text inside info to stay black — overrides Link color inheritance */
+.product-info h3,
+.product-info p,
+.product-info span {
+  color: inherit;
 }
 
 /* Hide brand — reference design doesn't show it */
@@ -553,13 +561,13 @@
   display: none;
 }
 
-/* Product name — prominent */
+/* Product name — prominent, always black regardless of link color */
 .truncate-title {
   font-family: 'Manrope', 'Inter', sans-serif;
   font-size: 0.92rem;
   font-weight: 600;
   margin: 0;
-  color: #111;
+  color: #111 !important;
   line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
