@@ -30,11 +30,15 @@ const Navbar = () => {
       .catch(() => {});
   }, []);
 
+  const mobileSearchRef = useRef(null);
+
   // Close user menu on outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target))
         setShowUserMenu(false);
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target))
+        setMobileSearch(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -122,10 +126,13 @@ const Navbar = () => {
           {/* Mobile only: Search toggle icon */}
           <button
             className="icon-btn mobile-search-toggle"
-            aria-label="Search"
+            aria-label={mobileSearch ? 'Close search' : 'Search'}
             onClick={() => setMobileSearch(s => !s)}
           >
-            <Search size={20} strokeWidth={1.5} />
+            {mobileSearch
+              ? <XIcon size={20} strokeWidth={1.5} />
+              : <Search size={20} strokeWidth={1.5} />
+            }
           </button>
 
           {/* Mobile only: Hamburger menu */}
@@ -207,7 +214,7 @@ const Navbar = () => {
 
       {/* ── Mobile Search Bar (slides below navbar) ── */}
       {mobileSearch && (
-        <div className="mobile-search-bar">
+        <div className="mobile-search-bar" ref={mobileSearchRef}>
           <form onSubmit={handleMobileSearch} role="search">
             <input
               type="search"

@@ -21,6 +21,35 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('watchCart', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Refresh cart item prices/stock from server on mount
+  useEffect(() => {
+    if (cartItems.length === 0) return;
+    const API = import.meta.env.VITE_API_URL || '';
+    const refreshCart = async () => {
+      const updated = await Promise.all(
+        cartItems.map(async (item) => {
+          try {
+            const res = await fetch(`${API}/api/products/${item._id}`);
+            if (!res.ok) return item;
+            const fresh = await res.json();
+            return {
+              ...item,
+              price: fresh.price,
+              stock: fresh.stock,
+              name: fresh.name,
+              images: fresh.images,
+            };
+          } catch {
+            return item;
+          }
+        })
+      );
+      setCartItems(updated);
+    };
+    refreshCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on app load
+
   const addToCart = (product, quantity = 1) => {
     setCartItems(prev => {
       const existing = prev.find(item => item._id === product._id);

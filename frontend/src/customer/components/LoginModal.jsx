@@ -1,5 +1,5 @@
 // frontend/src/customer/components/LoginModal.jsx
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Eye, EyeOff, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { API } from '../../utils/api';
@@ -89,9 +89,32 @@ const LoginModal = ({ onClose }) => {
     }
   };
 
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    const modal = modalRef.current;
+    if (!modal) return;
+    const focusable = modal.querySelectorAll(
+      'button, input, a, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const trapFocus = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    modal.addEventListener('keydown', trapFocus);
+    first?.focus();
+    return () => modal.removeEventListener('keydown', trapFocus);
+  }, [tab]);
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box" onClick={e => e.stopPropagation()}>
+      <div className="modal-box" ref={modalRef} onClick={e => e.stopPropagation()}>
 
         {/* Close button */}
         <button className="modal-close-btn" onClick={onClose} aria-label="Close">

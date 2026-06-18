@@ -8,6 +8,7 @@ const Footer = () => {
   const [categories, setCategories] = useState([]);
   const [email, setEmail]           = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [subError, setSubError]     = useState('');
 
   useEffect(() => {
     fetch(`${API}/api/categories`)
@@ -19,6 +20,7 @@ const Footer = () => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    setSubError('');
     try {
       const res = await fetch(`${API}/api/newsletter/subscribe`, {
         method: 'POST',
@@ -29,10 +31,11 @@ const Footer = () => {
         setSubscribed(true);
         setEmail('');
       } else {
-        // Silently fail — don't alarm the user, just don't claim success
+        setSubError('Could not subscribe. Please try again.');
         setEmail('');
       }
     } catch {
+      setSubError('Could not subscribe. Please try again.');
       setEmail('');
     }
   };
@@ -119,21 +122,27 @@ const Footer = () => {
             Stay updated on new releases and exclusive offers.
           </p>
           {subscribed ? (
-            <p className="footer-subscribed">✓ You're on the list! We'll notify you of new arrivals and exclusive deals.</p>
+            <>
+              <p className="footer-subscribed">✓ You're on the list! We'll notify you of new arrivals and exclusive deals.</p>
+              <p style={{ color: '#22C55E', fontSize: '0.85rem', marginTop: '6px' }}>Subscribed! Thank you.</p>
+            </>
           ) : (
-            <form className="newsletter-form" onSubmit={handleSubscribe}>
-              <input
-                type="email"
-                placeholder="Email address…"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                aria-label="Email for newsletter"
-              />
-              <button type="submit" aria-label="Subscribe">
-                <ArrowRight size={16} />
-              </button>
-            </form>
+            <>
+              <form className="newsletter-form" onSubmit={handleSubscribe}>
+                <input
+                  type="email"
+                  placeholder="Email address…"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  aria-label="Email for newsletter"
+                />
+                <button type="submit" aria-label="Subscribe">
+                  <ArrowRight size={16} />
+                </button>
+              </form>
+              {subError && <p style={{ color: '#E44', fontSize: '0.85rem', marginTop: '6px' }}>{subError}</p>}
+            </>
           )}
           <p className="footer-privacy-note">
             By subscribing you agree to our privacy policy. No spam, ever.

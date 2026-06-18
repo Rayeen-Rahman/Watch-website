@@ -80,17 +80,15 @@ const CategoryPage = () => {
     setPage(1);
   }, [location.search]);
 
-  // Only clear searchText when navigating to a new slug without a ?search= param
-  // (prevents wiping the search term when navbar search navigates to /category/all?search=...)
+  // Reset page and filters when category slug changes
   useEffect(() => {
     const q = new URLSearchParams(location.search).get('search') || '';
-    if (!q) { setPage(1); setSearchText(''); }
-  }, [slug]);
-  useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
-  // Reset to page 1 every time category slug changes
-  useEffect(() => {
     setPage(1);
+    if (!q) setSearchText('');
   }, [slug]);
+
+  // Reset page when any filter changes
+  useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
 
   useEffect(() => {
     fetchProducts();

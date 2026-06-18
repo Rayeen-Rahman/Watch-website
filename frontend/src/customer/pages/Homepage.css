@@ -414,10 +414,10 @@
 
   /* Stop continuous GPU animation on mobile — saves battery and reduces jank */
   .hero-image-container {
-    animation: none;
+    animation: none !important;
   }
   .floating-spec-card {
-    animation: none;
+    animation: none !important;
     display: none; /* already hidden at this breakpoint */
   }
 }
@@ -713,11 +713,11 @@
 
 /* ── SKELETON LOADING ── */
 .skeleton-card {
-  aspect-ratio: 1 / 1;
+  height: 380px; /* matches actual card height: 1:1 image + text + button */
   background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: skeletonLoading 1.5s infinite;
-  border-radius: 8px;
+  border-radius: 16px; /* match product-card border-radius */
 }
 
 @keyframes skeletonLoading {

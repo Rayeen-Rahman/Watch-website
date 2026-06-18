@@ -121,6 +121,20 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs
 
+// Add short-lived cache headers to public GET endpoints to reduce repeat load times
+app.use('/api/products', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+  }
+  next();
+});
+app.use('/api/categories', (req, res, next) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+  }
+  next();
+});
+
 // ── STEP 12: Serve uploaded product images statically ─────────────────────────
 // Placed BEFORE the rate limiter (rate limiter is scoped to /api/ only, but
 // being explicit keeps intent clear). Extra headers ensure cross-origin

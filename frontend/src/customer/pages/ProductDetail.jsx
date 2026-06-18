@@ -22,14 +22,32 @@ const ProductDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Reset title when unmounting so other pages get their own title
-    return () => { document.title = 'Artifact BD — Premium Timepieces in Bangladesh'; };
+    // Reset title and meta description when unmounting so other pages get default descriptions
+    return () => {
+      document.title = 'Artifact BD — Premium Timepieces in Bangladesh';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content',
+          'Shop premium watches in Bangladesh. Cash on delivery available. Only at Artifact BD.');
+      }
+    };
   }, []);
 
-  // Update document title when product loads
+  // Update document title AND meta description when product loads
   useEffect(() => {
     if (product) {
       document.title = `${product.name} — Artifact BD`;
+      // Update meta description for SEO and social sharing
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      const desc = product.shortDescription ||
+        product.description?.slice(0, 155) ||
+        `Buy ${product.name} at Artifact BD. Cash on Delivery available.`;
+      metaDesc.setAttribute('content', desc);
     }
   }, [product]);
 

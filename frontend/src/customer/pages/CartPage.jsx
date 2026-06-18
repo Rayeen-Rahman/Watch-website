@@ -2,13 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { API } from '../../utils/api';
 import './CartPage.css';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
-
-  const _raw = import.meta.env.VITE_API_URL || '';
-  const API = _raw.includes('localhost') ? '' : _raw;
 
   if (!cartItems || cartItems.length === 0) {
     return (
