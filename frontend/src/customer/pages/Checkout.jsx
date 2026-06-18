@@ -61,6 +61,10 @@ const Checkout = () => {
 
     setIsSubmitting(true);
 
+    // B-04 fix: city-aware shipping cost (matches InfoPage shipping info)
+    const isInsideDhaka = formData.city.trim().toLowerCase().includes('dhaka');
+    const shippingCost  = cartTotal >= 2000 ? 0 : (isInsideDhaka ? 80 : 120);
+
     const orderPayload = {
       customerName: formData.customerName.trim(),
       phone: formData.phone.trim(),
@@ -72,7 +76,7 @@ const Checkout = () => {
         quantity: item.qty,
         price:    item.price,
       })),
-      total: cartTotal + (cartTotal >= 2000 ? 0 : 80),
+      total: cartTotal + shippingCost,
     };
 
     try {
@@ -230,14 +234,27 @@ const Checkout = () => {
                 <span>৳{cartTotal.toLocaleString()}</span>
               </div>
               <div className="total-row">
-                <span>Delivery</span>
-                <span className={cartTotal >= 2000 ? "free-shipping" : ""}>
-                  {cartTotal >= 2000 ? 'FREE' : '৳80'}
+                <span>
+                  Delivery
+                  {formData.city.trim() && (
+                    <small style={{ display:'block', color:'#999', fontSize:'0.72rem' }}>
+                      {formData.city.trim().toLowerCase().includes('dhaka') ? 'Inside Dhaka' : 'Outside Dhaka'}
+                    </small>
+                  )}
+                </span>
+                <span className={cartTotal >= 2000 ? 'free-shipping' : ''}>
+                  {cartTotal >= 2000
+                    ? 'FREE'
+                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : (formData.city.trim() ? 120 : 80)}`}
                 </span>
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
-                <span>৳{(cartTotal + (cartTotal >= 2000 ? 0 : 80)).toLocaleString()}</span>
+                <span>৳{(cartTotal + (
+                  cartTotal >= 2000 ? 0
+                  : (formData.city.trim().toLowerCase().includes('dhaka') ? 80
+                    : (formData.city.trim() ? 120 : 80))
+                )).toLocaleString()}</span>
               </div>
             </div>
 

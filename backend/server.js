@@ -107,6 +107,15 @@ app.use(
     message: { message: 'Too many registration attempts. Try again in an hour.' },
   })
 );
+// B-03 fix: Tight rate limit on order lookup — prevents phone-number enumeration
+app.use(
+  '/api/orders/lookup',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,   // 15 minutes
+    max: 10,                     // 10 lookups per IP per window
+    message: { message: 'Too many order lookups. Please try again later.' },
+  })
+);
 
 // Body parsers
 app.use(express.json());
