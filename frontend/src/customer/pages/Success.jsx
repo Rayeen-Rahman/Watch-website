@@ -5,21 +5,28 @@ import './Success.css';
 
 const Success = () => {
   const [animate, setAnimate] = useState(false);
+  const [allowed, setAllowed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Guard: only show if the user just placed an order
     const placed = sessionStorage.getItem('orderPlaced');
     if (!placed) {
+      // No valid order — redirect home and replace history so back button
+      // doesn't loop back to this page
       navigate('/', { replace: true });
       return;
     }
+    // Consume the flag immediately
     sessionStorage.removeItem('orderPlaced');
+    setAllowed(true);
     // Trigger entrance animation after mount
     requestAnimationFrame(() => setAnimate(true));
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Don't render anything until guard passes — prevents flash + back-button replay
+  if (!allowed) return null;
 
   return (
     <div className={`success-page ${animate ? 'success-visible' : ''}`}>

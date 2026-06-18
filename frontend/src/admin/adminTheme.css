@@ -350,3 +350,99 @@ body {
   background: var(--admin-error);
 }
 
+/* Bug 3 fix: Order ID distinct color — #A1A1A1 on #1A1A1A was near-invisible */
+.order-id-cell {
+  font-family: monospace;
+  color: #818CF8;   /* indigo — clearly readable on dark bg */
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Bug 4 fix: Mobile Admin Panel
+   Sidebar slides in as a fixed overlay. Burger button always visible.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .admin-layout {
+    position: relative;
+  }
+
+  /* Sidebar becomes fixed overlay, hidden off-screen by default */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1200;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+    width: 260px !important;
+    min-width: 260px !important;
+  }
+
+  /* NOT collapsed = open on mobile */
+  .admin-sidebar:not(.sidebar-collapsed) {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.7);
+  }
+
+  /* Collapsed = hidden */
+  .admin-sidebar.sidebar-collapsed {
+    transform: translateX(-100%);
+    width: 260px !important;
+    min-width: 260px !important;
+  }
+
+  /* Restore hidden text/labels when sidebar is open on mobile */
+  .admin-sidebar:not(.sidebar-collapsed) .sidebar-logo h2 { display: block !important; }
+  .admin-sidebar:not(.sidebar-collapsed) .menu-item span  { display: inline !important; }
+  .admin-sidebar:not(.sidebar-collapsed) .menu-title      { display: block !important; }
+  .admin-sidebar:not(.sidebar-collapsed) .sidebar-quick-actions { display: flex !important; }
+  .admin-sidebar:not(.sidebar-collapsed) .sidebar-footer div    { display: flex !important; }
+
+  /* Main takes full width */
+  .admin-main {
+    width: 100%;
+  }
+
+  /* Burger: bigger tap target, always white so it's visible */
+  .sidebar-toggle-btn {
+    display: flex !important;
+    width: 44px;
+    height: 44px;
+    color: var(--admin-text-primary) !important;
+  }
+
+  .admin-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 1100;
+    animation: fadeInBackdrop 0.2s ease-out;
+  }
+
+  @keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Table: horizontal scroll on narrow screens */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tighter page padding */
+  .admin-page { padding: 14px !important; }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+

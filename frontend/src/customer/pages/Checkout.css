@@ -111,9 +111,19 @@
   background-color: #ffffff;
   color: #111111;
   caret-color: #111111;
+  color-scheme: light;           /* force light mode, prevents OS dark-mode override */
   transition: border-color 0.2s;
 }
 .form-group input::placeholder { color: #aaa; }
+
+/* Prevent browser autofill from painting dark backgrounds on mobile */
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111111 !important;
+  caret-color: #111111;
+}
 
 .form-group input:focus {
   outline: none;

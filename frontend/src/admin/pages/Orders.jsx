@@ -237,7 +237,7 @@ const Orders = ({ showToast }) => {
                       checked={selectedIds.includes(order._id)}
                       onChange={e => handleSelectOne(e, order._id)} />
                   </td>
-                  <td style={{ fontFamily: 'monospace', color: 'var(--admin-text-secondary)', fontSize: '0.85rem' }}>
+                  <td className="order-id-cell">
                     #{order._id.slice(-6).toUpperCase()}
                   </td>
                   <td style={{ fontWeight: 500 }}>{order.customerName}</td>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import Products from '../pages/Products';
@@ -17,8 +17,9 @@ const AdminLayout = () => {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth <= 768);
   const [toast, setToast] = useState({ message: '', error: false });
+  const location = useLocation();
 
   const showToast = (message, error = false) => {
     setToast({ message, error });
@@ -27,8 +28,22 @@ const AdminLayout = () => {
     }, 4000);
   };
 
+  // Collapse sidebar when route changes on mobile
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setSidebarCollapsed(true);
+    }
+  }, [location.pathname]);
+
   return (
     <div className="admin-layout">
+      {/* Mobile Sidebar Backdrop */}
+      {!sidebarCollapsed && (
+        <div 
+          className="admin-sidebar-backdrop" 
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
       <Sidebar
         collapsed={sidebarCollapsed}
         onOpenAddProduct={() => setIsAddProductOpen(true)}
