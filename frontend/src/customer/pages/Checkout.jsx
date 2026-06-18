@@ -28,17 +28,28 @@ const Checkout = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [orderSubmitted, setOrderSubmitted] = useState(false);
 
+  // BUY NOW mode: read a single item from sessionStorage instead of full cart
+  const isBuyNow = new URLSearchParams(window.location.search).get('mode') === 'buynow';
+  const buyNowRaw = sessionStorage.getItem('buyNowItem');
+  const buyNowItem = buyNowRaw ? JSON.parse(buyNowRaw) : null;
+  // The items we actually check out: either just the Buy Now product, or the full cart
+  const checkoutItems = isBuyNow && buyNowItem
+    ? [{ ...buyNowItem.product, qty: buyNowItem.quantity }]
+    : cartItems;
+  const checkoutTotal = checkoutItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
   // Close cart panel + redirect empty carts
   useEffect(() => {
     setIsCartOpen(false);
-    if (cartItems.length === 0 && !orderSubmitted) {
-      // Small delay prevents race condition where clearCart triggers
-      // this redirect before orderSubmitted state updates
-      const timer = setTimeout(() => navigate('/'), 100);
+    // Only redirect to home if cart is empty AND we have NOT just submitted an order
+    // The 500ms delay prevents the race condition where clearCart fires before
+    // navigate('/success') has been called by handleSubmit
+    if (checkoutItems.length === 0 && !orderSubmitted) {
+      const timer = setTimeout(() => navigate('/'), 500);
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems.length, orderSubmitted]);
+  }, [checkoutItems.length, orderSubmitted]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -71,20 +82,20 @@ const Checkout = () => {
 
     // B-04 fix: city-aware shipping cost (matches InfoPage shipping info)
     const isInsideDhaka = formData.city.trim().toLowerCase().includes('dhaka');
-    const shippingCost  = cartTotal >= 2000 ? 0 : (isInsideDhaka ? 80 : 120);
+    const shippingCost  = checkoutTotal >= 2000 ? 0 : (isInsideDhaka ? 80 : 120);
 
     const orderPayload = {
       customerName: formData.customerName.trim(),
       phone: formData.phone.trim(),
       address: [formData.address, formData.city, formData.postalCode]
         .filter(Boolean).join(', '),
-      products: cartItems.map(item => ({
+      products: checkoutItems.map(item => ({
         product:  item._id,
         name:     item.name || 'Watch',  // B-06 fix: persist name at order time
         quantity: item.qty,
         price:    item.price,
       })),
-      total: cartTotal + shippingCost,
+      total: checkoutTotal + shippingCost,
     };
 
     try {
@@ -98,7 +109,11 @@ const Checkout = () => {
 
       // ── Step 32: Clear cart after successful order ─────────────────────────
       setOrderSubmitted(true);
-      clearCart();
+      if (isBuyNow) {
+        sessionStorage.removeItem('buyNowItem');
+      } else {
+        clearCart();
+      }
       sessionStorage.setItem('orderPlaced', 'true');
 
       // Auto-save the checkout phone to user profile if logged in and no phone saved yet
@@ -126,7 +141,7 @@ const Checkout = () => {
     }
   };
 
-  if (cartItems.length === 0) return null;
+  if (checkoutItems.length === 0) return null;
 
   return (
     <div className="checkout-page">
@@ -233,7 +248,7 @@ const Checkout = () => {
               Order Summary
             </h3>
             <div className="summary-items">
-              {cartItems.map(item => {
+              {checkoutItems.map(item => {
                 const imgSrc = resolveImg(item.images?.[0]);
                 return (
                   <div key={item._id} className="summary-item">
@@ -258,8 +273,8 @@ const Checkout = () => {
 
             <div className="summary-totals">
               <div className="total-row">
-                <span>Subtotal ({cartItems.reduce((a, i) => a + i.qty, 0)} items)</span>
-                <span>৳{cartTotal.toLocaleString()}</span>
+                <span>Subtotal ({checkoutItems.reduce((a, i) => a + i.qty, 0)} items)</span>
+                <span>৳{checkoutTotal.toLocaleString()}</span>
               </div>
               <div className="total-row">
                 <span>
@@ -270,8 +285,8 @@ const Checkout = () => {
                     </small>
                   )}
                 </span>
-                <span className={cartTotal >= 2000 ? 'free-shipping' : ''}>
-                  {cartTotal >= 2000
+                <span className={checkoutTotal >= 2000 ? 'free-shipping' : ''}>
+                  {checkoutTotal >= 2000
                     ? 'FREE'
                     : !formData.city.trim()
                     ? 'Enter city'
@@ -280,8 +295,8 @@ const Checkout = () => {
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
-                <span>৳{(cartTotal + (
-                  cartTotal >= 2000 ? 0
+                <span>৳{(checkoutTotal + (
+                  checkoutTotal >= 2000 ? 0
                   : (!formData.city.trim() ? 0 : (formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120))
                 )).toLocaleString()}</span>
               </div>

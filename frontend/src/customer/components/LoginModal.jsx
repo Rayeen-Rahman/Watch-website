@@ -91,6 +91,7 @@ const LoginModal = ({ onClose }) => {
 
   const modalRef = useRef(null);
 
+  // Close on Escape key + focus trap inside modal
   useEffect(() => {
     const modal = modalRef.current;
     if (!modal) return;
@@ -99,18 +100,21 @@ const LoginModal = ({ onClose }) => {
     );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    const trapFocus = (e) => {
+    const handleKeyDown = (e) => {
+      // Close on Escape
+      if (e.key === 'Escape') { onClose(); return; }
       if (e.key !== 'Tab') return;
+      // Trap Tab / Shift+Tab inside modal
       if (e.shiftKey) {
         if (document.activeElement === first) { e.preventDefault(); last.focus(); }
       } else {
         if (document.activeElement === last) { e.preventDefault(); first.focus(); }
       }
     };
-    modal.addEventListener('keydown', trapFocus);
+    modal.addEventListener('keydown', handleKeyDown);
     first?.focus();
-    return () => modal.removeEventListener('keydown', trapFocus);
-  }, [tab]);
+    return () => modal.removeEventListener('keydown', handleKeyDown);
+  }, [tab, onClose]);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>

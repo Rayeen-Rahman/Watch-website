@@ -103,14 +103,19 @@ const CartPage = () => {
             <div className="summary-row">
               <span>Delivery</span>
               <span className="summary-free">
-                {cartTotal >= 2000 ? 'FREE' : '৳80'}
+                {cartTotal >= 2000 ? 'FREE' : '৳80–৳120'}
               </span>
             </div>
             <div className="summary-divider" />
             <div className="summary-row summary-total">
-              <span>Total</span>
-              <span>৳{(cartTotal + (cartTotal >= 2000 ? 0 : 80)).toLocaleString()}</span>
+              <span>Total (estimated)</span>
+              <span>৳{(cartTotal + (cartTotal >= 2000 ? 0 : 80)).toLocaleString()}+</span>
             </div>
+            {cartTotal < 2000 && (
+              <p style={{ fontSize: '0.75rem', color: '#888', textAlign: 'center', marginTop: '4px', lineHeight: '1.4' }}>
+                Final delivery cost confirmed at checkout based on your city.
+              </p>
+            )}
 
             <Link to="/checkout" className="btn-checkout">
               Proceed to Checkout <ArrowRight size={16} />

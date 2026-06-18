@@ -3,6 +3,8 @@ const express = require('express');
 const router  = express.Router();
 const bcrypt  = require('bcryptjs');
 const jwt     = require('jsonwebtoken');
+const crypto  = require('crypto');
+const nodemailer = require('nodemailer');
 const User    = require('../models/User');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 const {
@@ -117,15 +119,29 @@ router.route('/:id')
   .put(protect, isAdmin, updateUser)
   .delete(protect, isAdmin, deleteUser);
 
-// Forgot password — sends a simple notification email
-// NOTE: For a real implementation, use nodemailer + a token. This is a
-// minimal version that just returns success so the UI flow works.
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required' });
-    // Always return success (prevents email enumeration)
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    // Always return success — never reveal if email exists (security)
     res.json({ message: 'If this email exists, a reset link has been sent.' });
+    if (!user) return;  // stop here silently
+    const token = crypto.randomBytes(32).toString('hex');
+    user.resetToken = token;
+    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+    await user.save();
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+    });
+    await transporter.sendMail({
+      from: `"Artifact BD" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'Reset your Artifact BD password',
+      html: `<p>Click to reset: <a href="${resetUrl}">${resetUrl}</a>. Expires in 1 hour.</p>`
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

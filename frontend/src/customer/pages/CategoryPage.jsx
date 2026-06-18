@@ -84,6 +84,10 @@ const CategoryPage = () => {
   useEffect(() => {
     const q = new URLSearchParams(location.search).get('search') || '';
     setPage(1);
+    setMovement('');
+    setGender('');
+    setMaxPrice(200000);
+    setSort('newest');
     if (!q) setSearchText('');
   }, [slug]);
 

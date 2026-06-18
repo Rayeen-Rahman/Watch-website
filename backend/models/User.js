@@ -44,6 +44,8 @@ const userSchema = new mongoose.Schema({
     city:   String,
     zip:    String,
   },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

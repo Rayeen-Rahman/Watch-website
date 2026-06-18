@@ -33,21 +33,27 @@ const ProductDetail = () => {
     };
   }, []);
 
-  // Update document title AND meta description when product loads
+  // Update title, meta description, AND Open Graph tags when product loads
   useEffect(() => {
     if (product) {
       document.title = `${product.name} — Artifact BD`;
-      // Update meta description for SEO and social sharing
-      let metaDesc = document.querySelector('meta[name="description"]');
-      if (!metaDesc) {
-        metaDesc = document.createElement('meta');
-        metaDesc.setAttribute('name', 'description');
-        document.head.appendChild(metaDesc);
-      }
       const desc = product.shortDescription ||
         product.description?.slice(0, 155) ||
         `Buy ${product.name} at Artifact BD. Cash on Delivery available.`;
-      metaDesc.setAttribute('content', desc);
+      const setMeta = (attr, key, value) => {
+        let el = document.querySelector(`meta[${attr}="${key}"]`);
+        if (!el) {
+          el = document.createElement('meta');
+          el.setAttribute(attr, key);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', value);
+      };
+      setMeta('name', 'description', desc);
+      setMeta('property', 'og:title', `${product.name} — Artifact BD`);
+      setMeta('property', 'og:description', desc);
+      if (product.images?.[0]) setMeta('property', 'og:image', resolveImg(product.images[0]));
+      setMeta('property', 'og:type', 'product');
     }
   }, [product]);
 
@@ -96,14 +102,13 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
-    // Save existing cart to sessionStorage so it can be restored after checkout
-    // Only send THIS product to checkout, do not destroy other cart items
+    // Save current cart so we can restore it on the Success page
     const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
     sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
-    clearCart();
-    addToCart(product, quantity);
-    setIsCartOpen(false);
-    navigate('/checkout');
+    // Do NOT call clearCart() here — instead set a flag and let Checkout
+    // send only this product while keeping the rest of the cart intact.
+    sessionStorage.setItem('buyNowItem', JSON.stringify({ product, quantity }));
+    navigate('/checkout?mode=buynow');
   };
 
   // Step 45: Related slider scroll

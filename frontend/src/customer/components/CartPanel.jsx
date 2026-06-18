@@ -4,8 +4,7 @@ import { X, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './CartPanel.css';
 
-import { API } from '../../utils/api';
-const resolveImg = (url) => url?.replace(/\\/g, '/').startsWith('/uploads') ? `${API}${url.replace(/\\/g, '/')}` : url;
+import { API, resolveImg } from '../../utils/api';
 
 const CartPanel = () => {
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();

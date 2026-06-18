@@ -20,6 +20,11 @@ const Footer = () => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    // Validate email format before hitting the server
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setSubError('Please enter a valid email address.');
+      return;
+    }
     setSubError('');
     try {
       const res = await fetch(`${API}/api/newsletter/subscribe`, {
