@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -34,9 +34,22 @@ const CategoryPage = () => {
   const [sort,       setSort]        = useState('newest');
   const [movement,   setMovement]    = useState('');
   const [gender,     setGender]      = useState('');
-  const [maxPrice,   setMaxPrice]    = useState(200000);
+  const [maxPrice,   setMaxPrice]    = useState(500000);
   const [showFilter, setShowFilter]  = useState(false);
   const [searchText, setSearchText]  = useState(urlSearch);
+
+  const prevSearchRef = useRef(urlSearch);
+  const [showSearchCleared, setShowSearchCleared] = useState(false);
+
+  useEffect(() => {
+    const q = new URLSearchParams(location.search).get('search') || '';
+    if (prevSearchRef.current && !q) {
+      setShowSearchCleared(true);
+      const timer = setTimeout(() => setShowSearchCleared(false), 4000);
+      return () => clearTimeout(timer);
+    }
+    prevSearchRef.current = q;
+  }, [location.search]);
 
   // ── Fetch categories for sidebar ────────────────────────────────────────────
   useEffect(() => {
@@ -54,7 +67,7 @@ const CategoryPage = () => {
       if (slug && slug !== 'all') params.set('category', slug);
       if (movement)   params.set('movementType', movement);
       if (gender)     params.set('gender', gender);
-      if (maxPrice < 200000) params.set('maxPrice', maxPrice);
+      if (maxPrice < 500000) params.set('maxPrice', maxPrice);
       if (searchText) params.set('search', searchText);
       if (sort === 'price_asc')  { params.set('sortBy', 'price'); params.set('order', 'asc'); }
       if (sort === 'price_desc') { params.set('sortBy', 'price'); params.set('order', 'desc'); }
@@ -86,7 +99,7 @@ const CategoryPage = () => {
     setPage(1);
     setMovement('');
     setGender('');
-    setMaxPrice(200000);
+    setMaxPrice(500000);
     setSort('newest');
     if (!q) setSearchText('');
   }, [slug]);
@@ -101,7 +114,7 @@ const CategoryPage = () => {
   const navigate = useNavigate();
 
   const clearFilters = () => {
-    setMovement(''); setGender(''); setMaxPrice(200000); setSort('newest'); setPage(1);
+    setMovement(''); setGender(''); setMaxPrice(500000); setSort('newest'); setPage(1);
     setSearchText('');
     navigate(`/category/${slug || 'all'}`, { replace: true });
   };
@@ -129,7 +142,25 @@ const CategoryPage = () => {
       <div className="category-layout">
 
         {/* ── SIDEBAR FILTERS ─────────────────────────────────────────────── */}
-        <aside className={`filter-sidebar ${showFilter ? 'filter-sidebar-open' : ''}`}>
+        {showFilter && (
+          <div
+            className="filter-backdrop"
+            onClick={() => setShowFilter(false)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.35)',
+              zIndex: 49,
+            }}
+          />
+        )}
+        <aside
+          className={`filter-sidebar ${showFilter ? 'filter-sidebar-open' : ''}`}
+          style={{ zIndex: 50 }}
+        >
           <div className="filter-header">
             <h3>Filters</h3>
             <button className="filter-clear-btn" onClick={clearFilters}>Clear all</button>
@@ -193,19 +224,39 @@ const CategoryPage = () => {
           {/* Price range */}
           <div className="filter-section">
             <h4>Max Price <span className="price-display">৳{maxPrice.toLocaleString()}</span></h4>
-            <input type="range" min={1000} max={200000} step={1000}
+            <input type="range" min={1000} max={500000} step={1000}
               value={maxPrice}
               onChange={e => setMaxPrice(Number(e.target.value))}
               className="price-slider" />
             <div className="price-range-labels">
               <span>৳1,000</span>
-              <span>৳{(200000).toLocaleString()}</span>
+              <span>৳{(500000).toLocaleString()}</span>
             </div>
           </div>
         </aside>
 
         {/* ── MAIN CONTENT ─────────────────────────────────────────────────── */}
         <div className="category-main">
+          {showSearchCleared && (
+            <div className="search-cleared-toast" style={{
+              background: '#f4f4f5',
+              color: '#52525b',
+              padding: '10px 16px',
+              borderRadius: '6px',
+              fontSize: '0.88rem',
+              marginBottom: '16px',
+              border: '1px solid #e4e4e7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              animation: 'fadeIn 0.2s'
+            }}>
+              <span>Search cleared. Showing all products.</span>
+              <button onClick={() => setShowSearchCleared(false)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', color: '#a1a1aa', display: 'flex', alignItems: 'center'
+              }}><X size={14} /></button>
+            </div>
+          )}
 
           {/* Toolbar */}
           <div className="category-toolbar">
@@ -230,7 +281,7 @@ const CategoryPage = () => {
           </div>
 
           {/* Active filter pills */}
-          {(movement || gender || maxPrice < 200000 || searchText) && (
+          {(movement || gender || maxPrice < 500000 || searchText) && (
             <div className="active-filters">
               {searchText && (
                 <span className="filter-pill">
@@ -243,7 +294,7 @@ const CategoryPage = () => {
               )}
               {movement  && <span className="filter-pill">{movement} <button onClick={() => setMovement('')}><X size={10}/></button></span>}
               {gender    && <span className="filter-pill">{gender}   <button onClick={() => setGender('')}><X size={10}/></button></span>}
-              {maxPrice < 200000 && <span className="filter-pill">Max ৳{maxPrice.toLocaleString()} <button onClick={() => setMaxPrice(200000)}><X size={10}/></button></span>}
+              {maxPrice < 500000 && <span className="filter-pill">Max ৳{maxPrice.toLocaleString()} <button onClick={() => setMaxPrice(500000)}><X size={10}/></button></span>}
             </div>
           )}
 
@@ -258,11 +309,11 @@ const CategoryPage = () => {
             <div className="empty-state">
               <div className="empty-icon">⌚</div>
               <h3>No watches found</h3>
-              <p>{searchText || movement || gender || maxPrice < 200000
+              <p>{searchText || movement || gender || maxPrice < 500000
                 ? 'Try adjusting or clearing your filters.'
                 : 'No products in this category yet.'}</p>
               <div className="empty-actions">
-                {(movement || gender || maxPrice < 200000) && (
+                {(movement || gender || maxPrice < 500000) && (
                   <button className="btn-empty-clear" onClick={clearFilters}>Clear Filters</button>
                 )}
                 <Link to="/category/all" className="btn-empty-browse">Browse All Watches</Link>

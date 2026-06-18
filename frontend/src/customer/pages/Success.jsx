@@ -7,6 +7,7 @@ const Success = () => {
   const [animate, setAnimate] = useState(false);
   const [allowed, setAllowed] = useState(false);
   const navigate = useNavigate();
+  const [oid, setOid] = useState('');
 
   useEffect(() => {
     const placed = sessionStorage.getItem('orderPlaced');
@@ -18,6 +19,11 @@ const Success = () => {
     }
     // Consume the flag immediately
     sessionStorage.removeItem('orderPlaced');
+    const orderId = sessionStorage.getItem('lastOrderId') || '';
+    if (orderId) {
+      setOid(orderId);
+      sessionStorage.removeItem('lastOrderId');
+    }
     setAllowed(true);
 
     // Restore cart if it was saved during Buy Now
@@ -46,6 +52,11 @@ const Success = () => {
 
       {/* ── Heading ────────────────────────────────────────────────────── */}
       <h1 className="success-heading">Order Confirmed!</h1>
+      {oid && (
+        <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '-8px', marginBottom: '16px' }}>
+          Order Reference: <strong style={{ color: '#333' }}>#{oid.slice(-8).toUpperCase()}</strong>
+        </p>
+      )}
       <p className="success-sub">
         Your timepiece is on its way. You'll receive it shortly via Cash on Delivery.
       </p>

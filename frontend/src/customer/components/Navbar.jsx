@@ -19,6 +19,7 @@ const Navbar = () => {
   const [mobileQuery,    setMobileQuery]    = useState('');
   const [categories,     setCategories]     = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isBumping,      setIsBumping]      = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -29,6 +30,13 @@ const Navbar = () => {
       .then(d => setCategories(Array.isArray(d) ? d.slice(0, 6) : []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (cartCount === 0) return;
+    setIsBumping(true);
+    const timer = setTimeout(() => setIsBumping(false), 300);
+    return () => clearTimeout(timer);
+  }, [cartCount]);
 
   const mobileSearchRef = useRef(null);
 
@@ -183,7 +191,7 @@ const Navbar = () => {
 
           {/* Cart */}
           <button
-            className="icon-btn cart-btn"
+            className={`icon-btn cart-btn ${isBumping ? 'cart-bump' : ''}`}
             aria-label="Open cart"
             onClick={() => setIsCartOpen(true)}
           >

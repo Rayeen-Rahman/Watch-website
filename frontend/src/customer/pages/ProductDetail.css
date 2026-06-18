@@ -693,6 +693,7 @@
   background-color: var(--store-bg);
   border-top: 1px solid var(--store-border);
   padding: 14px 5%;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-between;
   align-items: center;

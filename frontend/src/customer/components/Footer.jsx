@@ -127,10 +127,9 @@ const Footer = () => {
             Stay updated on new releases and exclusive offers.
           </p>
           {subscribed ? (
-            <>
-              <p className="footer-subscribed">✓ You're on the list! We'll notify you of new arrivals and exclusive deals.</p>
-              <p style={{ color: '#22C55E', fontSize: '0.85rem', marginTop: '6px' }}>Subscribed! Thank you.</p>
-            </>
+            <p className="footer-subscribed">
+              ✓ Subscribed! You are on the list. We will notify you of new arrivals and exclusive deals.
+            </p>
           ) : (
             <>
               <form className="newsletter-form" onSubmit={handleSubscribe}>

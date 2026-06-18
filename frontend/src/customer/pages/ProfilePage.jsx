@@ -20,9 +20,24 @@ const ProfilePage = () => {
 
   if (!user) {
     return (
-      <div className="profile-unauth">
+      <div className="profile-unauth" style={{ textAlign: 'center', padding: '80px 20px' }}>
         <User size={60} strokeWidth={1} />
-        <h2>Sign in to view your profile</h2>
+        <h2 style={{ marginTop: '16px' }}>Sign in to view your profile</h2>
+        <p style={{ color: '#888', marginBottom: '24px' }}>
+          Please log in to access your profile settings.
+        </p>
+        <a href="/" style={{
+          display: 'inline-block',
+          padding: '12px 28px',
+          background: '#000',
+          color: '#fff',
+          borderRadius: '6px',
+          textDecoration: 'none',
+          fontWeight: '600',
+          fontSize: '0.95rem'
+        }}>
+          Go to Home & Sign In
+        </a>
       </div>
     );
   }

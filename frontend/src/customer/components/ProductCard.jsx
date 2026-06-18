@@ -11,18 +11,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
-import { API } from '../../utils/api';
-
-/** Resolve /uploads paths to absolute backend URL */
-export const resolveImg = (url) => {
-  if (!url) return '';
-  const normalised = url.replace(/\\/g, '/');
-  // For Cloudinary URLs, inject auto format + quality
-  if (normalised.includes('cloudinary.com') && !normalised.includes('f_auto')) {
-    return normalised.replace('/upload/', '/upload/f_auto,q_auto/');
-  }
-  return normalised.startsWith('/uploads') ? `${API}${normalised}` : normalised;
-};
+import { API, resolveImg } from '../../utils/api';
 
 /** Returns a "৳X OFF" savings string or null */
 export const getSavingsLabel = (product) => {
@@ -51,7 +40,7 @@ const ProductCard = ({ product, sliderCard = false }) => {
 
   const handleAddToCart = () => {
     if (added) return;           // prevent spam during feedback window
-    addToCart(product, 1);
+    addToCart(product, 1, false);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

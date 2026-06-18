@@ -5,11 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, CheckCircle, ShoppingBag } from 'lucide-react';
 import './Checkout.css';
 
-import { API } from '../../utils/api';
-
-/** Resolve /uploads paths to absolute backend URL */
-const resolveImg = (url) =>
-  url?.startsWith('/uploads') ? `${API}${url}` : url;
+import { API, resolveImg } from '../../utils/api';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart, setIsCartOpen } = useCart();
@@ -27,6 +23,17 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+
+  useEffect(() => {
+    const hasData = Object.values(formData).some(v => v.trim().length > 0);
+    if (!hasData || orderSubmitted) return;
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [formData, orderSubmitted]);
 
   // BUY NOW mode: read a single item from sessionStorage instead of full cart
   const isBuyNow = new URLSearchParams(window.location.search).get('mode') === 'buynow';
@@ -115,6 +122,7 @@ const Checkout = () => {
         clearCart();
       }
       sessionStorage.setItem('orderPlaced', 'true');
+      sessionStorage.setItem('lastOrderId', data._id || '');
 
       // Auto-save the checkout phone to user profile if logged in and no phone saved yet
       if (user && token && !user.phone && formData.phone) {
@@ -295,10 +303,14 @@ const Checkout = () => {
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
-                <span>৳{(checkoutTotal + (
-                  checkoutTotal >= 2000 ? 0
-                  : (!formData.city.trim() ? 0 : (formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120))
-                )).toLocaleString()}</span>
+                <span>
+                  {checkoutTotal >= 2000
+                    ? `৳${checkoutTotal.toLocaleString()} (Free shipping)`
+                    : !formData.city.trim()
+                    ? `৳${(checkoutTotal + 80).toLocaleString()} (estimated)`
+                    : `৳${(checkoutTotal + (formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120)).toLocaleString()}`
+                  }
+                </span>
               </div>
             </div>
 

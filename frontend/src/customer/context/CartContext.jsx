@@ -50,7 +50,7 @@ export const CartProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on app load
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, openCart = true) => {
     setCartItems(prev => {
       const existing = prev.find(item => item._id === product._id);
       const maxStock = product.stock ?? Infinity;
@@ -73,7 +73,9 @@ export const CartProvider = ({ children }) => {
       }
       return [...prev, { ...cartItem, qty: Math.min(quantity, maxStock) }];
     });
-    setIsCartOpen(true);
+    if (openCart) {
+      setIsCartOpen(true);
+    }
   };
 
   const removeFromCart = (id) => {

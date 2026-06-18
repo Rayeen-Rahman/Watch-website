@@ -91,14 +91,22 @@ const OrderHistoryPage = () => {
     } else {
       // Regular customers: orders are guest-based (phone lookup).
       // Only auto-search if the user has a saved phone number.
-      setLoading(false);
       if (user.phone && user.phone.trim()) {
         setPhone(user.phone.trim());
-        // Auto-trigger search with stored phone
+        setLoading(true);
         fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(user.phone.trim())}`)
           .then(r => r.json())
-          .then(data => { setOrders(Array.isArray(data) ? data : []); setSearched(true); })
-          .catch(() => setError('Failed to load orders'));
+          .then(data => {
+            setOrders(Array.isArray(data) ? data : []);
+            setSearched(true);
+            setLoading(false);
+          })
+          .catch(() => {
+            setError('Failed to load orders');
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
       }
       // If no phone saved — the authenticated view renders the phone lookup form below
     }
@@ -107,10 +115,15 @@ const OrderHistoryPage = () => {
   const handlePhoneLookup = async (e) => {
     e.preventDefault();
     if (!phone.trim()) return;
+    const cleaned = phone.trim().replace(/[\s\-()]/g, '');
+    if (!/^(\+?880|0)[1-9]\d{8,9}$/.test(cleaned)) {
+      setError('Please enter a valid Bangladeshi phone number (e.g. 01700000000)');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
-      const res  = await fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(phone.trim())}`);
+      const res  = await fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(cleaned)}`);
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
       setSearched(true);
@@ -128,6 +141,9 @@ const OrderHistoryPage = () => {
         <Package size={60} strokeWidth={1} />
         <h2>Track Your Order</h2>
         <p>Enter the phone number you used at checkout to find your orders.</p>
+        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+          For security, you can search up to 5 times every 15 minutes.
+        </p>
         <form
           onSubmit={handlePhoneLookup}
           style={{ marginTop: '24px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
@@ -175,6 +191,9 @@ const OrderHistoryPage = () => {
             <Package size={48} strokeWidth={1} />
             <h3>Track your order</h3>
             <p>Enter the phone number you used at checkout to find your orders, or add one to your <Link to="/profile" style={{ color: 'inherit', textDecoration: 'underline' }}>Profile</Link>.</p>
+            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
+              For security, you can search up to 5 times every 15 minutes.
+            </p>
             <form
               onSubmit={handlePhoneLookup}
               style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}

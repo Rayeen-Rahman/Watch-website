@@ -110,6 +110,11 @@ const AdminLogin = () => {
         <p className="login-footer">
           Artifact BD © {new Date().getFullYear()} — Secure Admin Access
         </p>
+        <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.85rem' }}>
+          <a href="/" style={{ color: '#555', textDecoration: 'underline' }}>
+            ← Back to Store
+          </a>
+        </p>
       </div>
     </div>
   );
