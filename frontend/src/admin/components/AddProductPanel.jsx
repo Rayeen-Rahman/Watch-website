@@ -110,6 +110,8 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       caseSize:         formData.caseSize,
       waterResistance:  formData.waterResistance,
       gender:           formData.gender,
+      isBestSeller:     Boolean(formData.isBestSeller),  // B-07 fix
+      isFeatured:       Boolean(formData.isFeatured),    // B-07 fix
     };
 
     try {

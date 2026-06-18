@@ -6,6 +6,11 @@ const orderItemSchema = new mongoose.Schema({
     ref: 'Product',
     required: true
   },
+  name: {
+    type: String,
+    required: true,    // B-06 fix: store name at purchase time
+    default: 'Watch',
+  },
   quantity: {
     type: Number,
     required: true,

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import { API } from '../../utils/api';  // B-09 fix
 import './CategoryPage.css';
 
 const SORT_OPTIONS = [
@@ -28,8 +29,6 @@ const CategoryPage = () => {
   const [totalCount,  setTotalCount]  = useState(0);
   const [page,        setPage]        = useState(1);
   const [pages,       setPages]       = useState(1);
-  const _raw  = import.meta.env.VITE_API_URL || '';
-  const API   = _raw.includes('localhost') ? '' : _raw;
   const LIMIT  = 12;
 
   const [sort,       setSort]        = useState('newest');

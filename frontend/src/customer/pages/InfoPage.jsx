@@ -121,7 +121,7 @@ const InfoPage = ({ page }) => {
           {pageData.sections.map((s, i) => (
             <div key={i} className="info-section">
               <h3 className="info-q">{s.q}</h3>
-              <p className="info-a">{s.a}</p>
+              <p className="info-a" style={{ whiteSpace: 'pre-line' }}>{s.a}</p>
             </div>
           ))}
         </div>

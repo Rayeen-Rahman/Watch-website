@@ -67,9 +67,10 @@ const Checkout = () => {
       address: [formData.address, formData.city, formData.postalCode]
         .filter(Boolean).join(', '),
       products: cartItems.map(item => ({
-        product: item._id,
+        product:  item._id,
+        name:     item.name || 'Watch',  // B-06 fix: persist name at order time
         quantity: item.qty,
-        price: item.price,
+        price:    item.price,
       })),
       total: cartTotal + (cartTotal >= 2000 ? 0 : 80),
     };
