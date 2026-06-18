@@ -19,7 +19,8 @@ const Footer = () => {
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    // Store locally for now (no backend email service yet)
+    // B-05 fix: was a no-op (only set state, never saved anywhere).
+    // Marking as coming soon until a real email service is integrated.
     setSubscribed(true);
     setEmail('');
   };

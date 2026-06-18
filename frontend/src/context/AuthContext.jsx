@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('watchstore_user');
     localStorage.removeItem('watchstore_token');
+    localStorage.removeItem('watchCart');  // B-02 fix: clear cart on logout
   };
 
   return (

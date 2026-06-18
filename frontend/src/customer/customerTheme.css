@@ -294,7 +294,10 @@ body.customer-view {
 @media (max-width: 900px) {
   .trust-features-section {
     flex-wrap: wrap;
-    margin: 20px 5% 40px;
+    margin-top: 20px;    /* L-01 fix: cancel -100px desktop overlap on mobile */
+    margin-bottom: 40px;
+    margin-left: 5%;
+    margin-right: 5%;
     padding: 20px 0;
   }
   .trust-feature {
@@ -630,6 +633,11 @@ body.customer-view {
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* L-02 fix: hide category links on tablets (768-1024px) — they overflow */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .navbar-cats { display: none; }
 }
 
 /* Responsive: on mobile hide the desktop search, show the toggle icon */

@@ -23,6 +23,22 @@
   }
 }
 
+/* L-04 fix: 375px phones — tighten spacing so summary is readable */
+@media (max-width: 480px) {
+  .checkout-page {
+    padding: 24px 4% 80px 4%;
+  }
+  .checkout-container {
+    gap: 28px;
+  }
+  .summary-card {
+    padding: 18px 14px;
+  }
+  .checkout-title {
+    font-size: 1.4rem;
+  }
+}
+
 .breadcrumb-back {
   display: inline-flex;
   align-items: center;
