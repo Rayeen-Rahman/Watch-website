@@ -16,13 +16,25 @@ const Footer = () => {
       .catch(() => {});
   }, []);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    // B-05 fix: was a no-op (only set state, never saved anywhere).
-    // Marking as coming soon until a real email service is integrated.
-    setSubscribed(true);
-    setEmail('');
+    try {
+      const res = await fetch(`${API}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (res.ok) {
+        setSubscribed(true);
+        setEmail('');
+      } else {
+        // Silently fail — don't alarm the user, just don't claim success
+        setEmail('');
+      }
+    } catch {
+      setEmail('');
+    }
   };
 
   return (

@@ -87,7 +87,14 @@ const CategoryPage = () => {
     if (!q) { setPage(1); setSearchText(''); }
   }, [slug]);
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  // Reset to page 1 every time category slug changes
+  useEffect(() => {
+    setPage(1);
+  }, [slug]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const navigate = useNavigate();
 

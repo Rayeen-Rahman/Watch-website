@@ -25,6 +25,16 @@ export const CartProvider = ({ children }) => {
     setCartItems(prev => {
       const existing = prev.find(item => item._id === product._id);
       const maxStock = product.stock ?? Infinity;
+      // Store only the fields needed for display + ordering
+      // This keeps localStorage small and avoids deeply stale product data
+      const cartItem = {
+        _id:    product._id,
+        name:   product.name,
+        price:  product.price,
+        images: product.images,
+        brand:  product.brand,
+        stock:  product.stock,
+      };
       if (existing) {
         // Clamp at available stock
         const newQty = Math.min(existing.qty + quantity, maxStock);
@@ -32,7 +42,7 @@ export const CartProvider = ({ children }) => {
           item._id === product._id ? { ...item, qty: newQty } : item
         );
       }
-      return [...prev, { ...product, qty: Math.min(quantity, maxStock) }];
+      return [...prev, { ...cartItem, qty: Math.min(quantity, maxStock) }];
     });
     setIsCartOpen(true);
   };

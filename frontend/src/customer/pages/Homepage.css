@@ -411,6 +411,20 @@
   .hero-content h1 { font-size: 2.4rem; letter-spacing: -1px; }
   .hero-watch-img { max-width: 80%; }
   .floating-spec-card { display: none; }
+
+  /* Stop continuous GPU animation on mobile — saves battery and reduces jank */
+  .hero-image-container {
+    animation: none;
+  }
+  .floating-spec-card {
+    animation: none;
+    display: none; /* already hidden at this breakpoint */
+  }
+}
+
+@media (max-width: 400px) {
+  .hero-content h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+  .hero-content p { font-size: 0.9rem; }
 }
 
 @media (max-width: 480px) {
@@ -759,5 +773,16 @@
   text-transform: uppercase;
   color: #6366F1;
   margin-bottom: 2px;
+}
+
+@media (max-width: 480px) {
+  .best-sellers-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .slider-nav-buttons {
+    align-self: flex-end;
+  }
 }
 

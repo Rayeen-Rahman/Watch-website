@@ -31,9 +31,14 @@ const Checkout = () => {
   // Close cart panel + redirect empty carts
   useEffect(() => {
     setIsCartOpen(false);
-    if (cartItems.length === 0 && !orderSubmitted) navigate('/');
+    if (cartItems.length === 0 && !orderSubmitted) {
+      // Small delay prevents race condition where clearCart triggers
+      // this redirect before orderSubmitted state updates
+      const timer = setTimeout(() => navigate('/'), 100);
+      return () => clearTimeout(timer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartItems.length]);
+  }, [cartItems.length, orderSubmitted]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -268,15 +273,16 @@ const Checkout = () => {
                 <span className={cartTotal >= 2000 ? 'free-shipping' : ''}>
                   {cartTotal >= 2000
                     ? 'FREE'
-                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : (formData.city.trim() ? 120 : 80)}`}
+                    : !formData.city.trim()
+                    ? 'Enter city'
+                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120}`}
                 </span>
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
                 <span>৳{(cartTotal + (
                   cartTotal >= 2000 ? 0
-                  : (formData.city.trim().toLowerCase().includes('dhaka') ? 80
-                    : (formData.city.trim() ? 120 : 80))
+                  : (!formData.city.trim() ? 0 : (formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120))
                 )).toLocaleString()}</span>
               </div>
             </div>

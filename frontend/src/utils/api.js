@@ -27,5 +27,9 @@ export const resolveImg = (url) => {
   if (!url) return '';
   // Normalise Windows backslashes that may appear on the dev machine
   const normalised = url.replace(/\\/g, '/');
+  // For Cloudinary URLs, inject auto format + quality
+  if (normalised.includes('cloudinary.com') && !normalised.includes('f_auto')) {
+    return normalised.replace('/upload/', '/upload/f_auto,q_auto/');
+  }
   return normalised.startsWith('/uploads') ? `${API}${normalised}` : normalised;
 };

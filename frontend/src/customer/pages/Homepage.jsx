@@ -50,8 +50,14 @@ const Homepage = () => {
     bestSellersRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
 
   // Resolve image URLs
-  const resolveImg = (url) =>
-    url?.startsWith('/uploads') ? `${API}${url}` : url;
+  const resolveImg = (url) => {
+    if (!url) return '';
+    const normalised = url.replace(/\\/g, '/');
+    if (normalised.includes('cloudinary.com') && !normalised.includes('f_auto')) {
+      return normalised.replace('/upload/', '/upload/f_auto,q_auto/');
+    }
+    return normalised.startsWith('/uploads') ? `${API}${normalised}` : normalised;
+  };
 
   return (
     <div className="homepage">
@@ -118,6 +124,9 @@ const Homepage = () => {
                         src={resolveImg(featuredProd.images[0])}
                         alt={featuredProd.name}
                         className="floating-thumb"
+                        loading="lazy"
+                        width="56"
+                        height="56"
                       />
                     )}
                     <div className="floating-info">

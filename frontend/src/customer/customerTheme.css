@@ -40,13 +40,21 @@ body.customer-view {
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
-  z-index: 1002; /* Above navbar */
+  z-index: 1002;
+}
+
+@media (max-width: 600px) {
+  .campaign-bar {
+    position: relative; /* don't sticky on mobile — avoids overlap with navbar */
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
 }
 
 /* Glass Navbar */
 .store-navbar {
   position: sticky;
-  top: 33px; /* height of campaign bar — adjust if campaign bar text wraps */
+  top: 0; /* campaign bar is no longer sticky on mobile so navbar just sticks at top */
   width: 100%;
   height: 60px;
   background-color: #ffffff;

@@ -1,0 +1,570 @@
+ARTIFACT BD
+Website Bug Report & Fix Guide
+artifactbd.com  |  Watch-website-main
+Prepared for AI-assisted repair  |  June 2026
+How to Use This Document (Read First)
+This guide is written so an AI coding assistant (Antigravity / Gemini) can follow it step by step without confusion. Each fix tells you EXACTLY: (1) the filename, (2) what to find, (3) what to replace it with. Do ONE fix at a time and save the file before moving to the next.
+
+ALL files are inside Watch-website-main/frontend/src/ unless the fix says otherwise.
+Severity: Critical = site crashes or orders fail. High = users are blocked. Medium = bad UX. Low = polish.
+After applying ALL fixes, run: npm run build inside the frontend folder, then redeploy.
+
+Section 1: Master Bug List
+A quick-reference table of every bug found. Detailed fix instructions follow in Section 2.
+
+#
+File
+Severity
+Issue Type
+Description
+1
+customer/pages/Checkout.jsx
+Critical
+Logic Bug
+Buy Now clears the entire cart before checkout — any existing cart items are deleted permanently
+2
+customer/context/CartContext.jsx
+Critical
+Data Bug
+Cart stores full product objects in localStorage. Stock and price changes are never refreshed
+3
+customer/pages/Checkout.jsx
+High
+UX Bug
+Empty cart redirects instantly to homepage — user cannot see the order success screen
+4
+customer/pages/ProductDetail.jsx
+High
+Logic Bug
+"Buy Now" does not redirect to checkout after clearing — user stays on product page if navigation fails
+5
+customer/components/Navbar.jsx
+High
+Layout Bug
+Navbar sticky top (33px) breaks when campaign bar text wraps on small screens (mobile)
+6
+customer/pages/Homepage.css
+High
+Mobile Bug
+Hero section h1 is 4.2rem on desktop. On phones (320px) it overflows horizontally
+7
+customer/components/LoginModal.jsx
+High
+Accessibility
+Modal has no focus trap. Keyboard users can Tab out of the modal into the page behind it
+8
+customer/pages/CategoryPage.jsx
+High
+UX Bug
+Pagination page number does not reset when category slug changes — shows wrong page on nav
+9
+customer/components/Footer.jsx
+Medium
+Fake Feature
+Newsletter signup shows success but never saves email anywhere (no API call)
+10
+customer/pages/Homepage.jsx
+Medium
+Layout Bug
+Skeleton loading cards have 1:1 aspect ratio but are in product-grid — height mismatch on render
+11
+customer/pages/Homepage.css
+Medium
+Mobile Bug
+Best Sellers slider nav buttons overlap section heading on screens below 480px
+12
+customer/customerTheme.css
+Medium
+Layout Bug
+Sticky navbar top (33px) is hardcoded but campaign bar height changes — nav can overlap content on mobile
+13
+customer/pages/ProductDetail.jsx
+Medium
+SEO Bug
+Product page has no <title> or meta description update — every product page shares the same title from index.html
+14
+frontend/index.html
+Medium
+Performance
+Hero image is not preloaded. LCP (Largest Contentful Paint) is slow on mobile because the main image loads late
+15
+customer/pages/Checkout.jsx
+Medium
+UX Bug
+Default delivery cost shown as 80 (Dhaka) before user types city — misleading for outside-Dhaka users
+16
+customer/pages/ProductDetail.jsx
+Low
+Logic Bug
+Related products query fetches same category products but includes current product if API returns it
+17
+customer/components/CartPanel.jsx
+Low
+UX Bug
+No minimum quantity guard in updateQuantity — qty can be decremented to 0 silently removing item without warning
+18
+vite.config.js
+Low
+Performance
+No image compression plugin — PNG/JPG assets are served unoptimized, slowing mobile load times
+19
+frontend/index.html
+Low
+Performance
+Google Fonts loaded on every page even on mobile. Self-hosting the 2 weights used would be faster
+
+Section 2: Detailed Fixes (Step by Step)
+Each fix below is self-contained. Apply them in order. The AI should search for the EXACT "Find this code" text in the named file and replace it with the "Replace with" block.
+
+  BUG #1 — CRITICAL  |  Buy Now Destroys Cart
+File: customer/pages/ProductDetail.jsx
+What goes wrong: The handleBuyNow function calls clearCart() before adding the product. If a customer had 3 items in their cart and clicks "Buy Now" on a 4th product, all 3 previous items are permanently deleted. This is a silent data loss bug.
+
+FIND THIS CODE (around line 53 in ProductDetail.jsx):
+const handleBuyNow = () => {
+  // Buy Now: clear any existing cart items so only this product goes to checkout
+  // This prevents leftover items from a previous 'Buy Now' session
+  clearCart();
+  addToCart(product, quantity);
+  setIsCartOpen(false);
+  navigate('/checkout');
+};
+
+REPLACE WITH (stores cart in sessionStorage, then restores after checkout):
+const handleBuyNow = () => {
+  // Save existing cart to sessionStorage so it can be restored after checkout
+  // Only send THIS product to checkout, do not destroy other cart items
+  const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
+  sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
+  clearCart();
+  addToCart(product, quantity);
+  setIsCartOpen(false);
+  navigate('/checkout');
+};
+
+ALSO DO: In customer/pages/Success.jsx (or wherever order is confirmed), add this code to restore the cart:
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("savedCartBeforeBuyNow");
+    if (saved) {
+      localStorage.setItem("watchCart", saved);
+      sessionStorage.removeItem("savedCartBeforeBuyNow");
+    }
+  }, []);
+
+  BUG #2 — CRITICAL  |  Stale Cart Data (Price/Stock Never Refreshes)
+File: customer/context/CartContext.jsx
+What goes wrong: Cart items are saved in localStorage with full product objects. If you change a product price in admin from ৳2,000 to ৳1,500, a user who added it before the change will still be charged ৳2,000. Stock status is also stale — an out-of-stock product still appears in their cart as available.
+
+FIND THIS CODE (top of CartContext.jsx, the addToCart function):
+const addToCart = (product, quantity = 1) => {
+  setCartItems(prev => {
+    const existing = prev.find(item => item._id === product._id);
+    const maxStock = product.stock ?? Infinity;
+    if (existing) {
+      const newQty = Math.min(existing.qty + quantity, maxStock);
+      return prev.map(item =>
+        item._id === product._id ? { ...item, qty: newQty } : item
+      );
+    }
+    return [...prev, { ...product, qty: Math.min(quantity, maxStock) }];
+  });
+  setIsCartOpen(true);
+};
+
+REPLACE WITH (only stores id, qty, name, price, images — minimal snapshot):
+const addToCart = (product, quantity = 1) => {
+  setCartItems(prev => {
+    const existing = prev.find(item => item._id === product._id);
+    const maxStock = product.stock ?? Infinity;
+    // Store only the fields needed for display + ordering
+    // This keeps localStorage small and avoids deeply stale product data
+    const cartItem = {
+      _id:    product._id,
+      name:   product.name,
+      price:  product.price,
+      images: product.images,
+      brand:  product.brand,
+      stock:  product.stock,
+    };
+    if (existing) {
+      const newQty = Math.min(existing.qty + quantity, maxStock);
+      return prev.map(item =>
+        item._id === product._id ? { ...item, qty: newQty } : item
+      );
+    }
+    return [...prev, { ...cartItem, qty: Math.min(quantity, maxStock) }];
+  });
+  setIsCartOpen(true);
+};
+
+  BUG #3 — HIGH  |  Empty Cart Redirects Before Success Screen Shows
+File: customer/pages/Checkout.jsx
+What goes wrong: After placing an order, clearCart() is called. The useEffect watching cartItems.length sees it go to 0 and immediately navigates to "/" (homepage), but only if !orderSubmitted. However there is a race condition — sometimes the state update for orderSubmitted happens a frame after the clearCart triggers, so users may get bounced to homepage instead of seeing a thank-you.
+
+FIND THIS CODE (near line 55 in Checkout.jsx):
+  // Close cart panel + redirect empty carts
+  useEffect(() => {
+    setIsCartOpen(false);
+    if (cartItems.length === 0 && !orderSubmitted) navigate('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems.length]);
+
+REPLACE WITH (adds a small delay to avoid the race condition):
+  // Close cart panel + redirect empty carts
+  useEffect(() => {
+    setIsCartOpen(false);
+    if (cartItems.length === 0 && !orderSubmitted) {
+      // Small delay prevents race condition where clearCart triggers
+      // this redirect before orderSubmitted state updates
+      const timer = setTimeout(() => navigate('/'), 100);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartItems.length, orderSubmitted]);
+
+  BUG #4 — HIGH  |  Navbar Sticky Position Breaks on Mobile
+File: customer/customerTheme.css
+What goes wrong: The campaign bar at the top says "Free Delivery in Dhaka on orders above ৳2,000 · 7-Day Easy Exchange". On mobile phones (< 400px wide) this text wraps to 2 lines, making the campaign bar ~50px tall instead of 33px. But the navbar has top: 33px hardcoded. So on mobile the navbar overlaps the campaign bar bottom and content scrolls under it.
+
+FIND THIS CODE in customerTheme.css:
+.store-navbar {
+  position: sticky;
+  top: 33px; /* height of campaign bar — adjust if campaign bar text wraps */
+  width: 100%;
+  height: 60px;
+
+REPLACE WITH:
+.store-navbar {
+  position: sticky;
+  top: 0; /* campaign bar is no longer sticky on mobile so navbar just sticks at top */
+  width: 100%;
+  height: 60px;
+
+ALSO FIND in customerTheme.css:
+.campaign-bar {
+  background-color: var(--store-accent);
+  color: var(--store-bg);
+  text-align: center;
+  padding: 8px 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 1002; /* Above navbar */
+}
+
+REPLACE WITH (removes sticky from campaign bar on mobile so navbar stacks correctly):
+.campaign-bar {
+  background-color: var(--store-accent);
+  color: var(--store-bg);
+  text-align: center;
+  padding: 8px 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 1002;
+}
+
+@media (max-width: 600px) {
+  .campaign-bar {
+    position: relative; /* don't sticky on mobile — avoids overlap with navbar */
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+}
+
+  BUG #5 — HIGH  |  Hero Heading Too Big on Small Phones
+File: customer/pages/Homepage.css
+What goes wrong: The h1 "Find Your Perfect Watch" is 4.2rem (~67px) on desktop. The media query at 768px only reduces it to 2.4rem. On phones 320-375px wide, 2.4rem is still ~38px and the 3-word title wraps awkwardly, pushing page content down.
+
+FIND THIS CODE in Homepage.css (inside @media max-width: 768px):
+  .hero-content h1 { font-size: 2.4rem; letter-spacing: -1px; }
+
+REPLACE WITH:
+  .hero-content h1 { font-size: 2.4rem; letter-spacing: -1px; }
+
+@media (max-width: 400px) {
+  .hero-content h1 { font-size: 1.9rem; letter-spacing: -0.5px; }
+  .hero-content p { font-size: 0.9rem; }
+}
+
+  BUG #6 — HIGH  |  Category Page Pagination Stays on Wrong Page
+File: customer/pages/CategoryPage.jsx
+What goes wrong: If a user is on page 3 of "Luxury" watches and then clicks "Casual" in the navbar, the slug changes but page state stays at 3. The API fetches page 3 of Casual watches — which may be empty. User sees a blank product grid.
+
+FIND THIS CODE in CategoryPage.jsx:
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+REPLACE WITH:
+  // Reset to page 1 every time category slug changes
+  useEffect(() => {
+    setPage(1);
+  }, [slug]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  BUG #7 — MEDIUM  |  Newsletter Signup Fakes Success
+File: customer/components/Footer.jsx
+What goes wrong: When a user enters their email and clicks subscribe, the footer shows "You're on the list!" — but no email is ever saved. The data is lost completely. This is a trust issue with customers.
+
+FIND THIS CODE in Footer.jsx:
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    // B-05 fix: was a no-op (only set state, never saved anywhere).
+    // Marking as coming soon until a real email service is integrated.
+    setSubscribed(true);
+    setEmail('');
+  };
+
+REPLACE WITH (saves to backend and only shows success if it actually worked):
+  import { API } from '../../utils/api'; // make sure this import exists at top of Footer.jsx
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    try {
+      const res = await fetch(`${API}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (res.ok) {
+        setSubscribed(true);
+        setEmail('');
+      } else {
+        // Silently fail — don't alarm the user, just don't claim success
+        setEmail('');
+      }
+    } catch {
+      setEmail('');
+    }
+  };
+BACKEND NOTE: You also need to create a POST /api/newsletter/subscribe route in your Express backend that saves the email to MongoDB. Create a simple NewsletterSubscriber model with { email, date }.
+
+  BUG #8 — MEDIUM  |  Product Page Has No SEO Title
+File: customer/pages/ProductDetail.jsx
+What goes wrong: Every single product page (e.g. /product/abc123) shows "Artifact BD — Premium Timepieces in Bangladesh" in the browser tab and in Google. This hurts SEO and makes sharing links look identical. Product names should appear in the title.
+
+FIND THIS CODE in ProductDetail.jsx (the useEffect at the top, around line 21):
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    const fetchProduct = async () => {
+
+REPLACE WITH:
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Reset title when unmounting so other pages get their own title
+    return () => { document.title = 'Artifact BD — Premium Timepieces in Bangladesh'; };
+  }, []);
+
+  // Update document title when product loads
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} — Artifact BD`;
+    }
+  }, [product]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+
+  BUG #9 — MEDIUM  |  Delivery Cost Misleads Out-of-Dhaka Users
+File: customer/pages/Checkout.jsx
+What goes wrong: Before the user types their city, the checkout shows "৳80" as the delivery cost. If they are from Chittagong (outside Dhaka), the actual cost is ৳120. The summary is wrong until they type their city. A user might complete checkout assuming 80 and be surprised.
+
+FIND THIS CODE in the summary totals section of Checkout.jsx:
+                <span className={cartTotal >= 2000 ? 'free-shipping' : ''}>
+                  {cartTotal >= 2000
+                    ? 'FREE'
+                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : (formData.city.trim() ? 120 : 80)}`}
+                </span>
+
+REPLACE WITH (shows "Enter city" until city is typed):
+                <span className={cartTotal >= 2000 ? 'free-shipping' : ''}>
+                  {cartTotal >= 2000
+                    ? 'FREE'
+                    : !formData.city.trim()
+                    ? 'Enter city'
+                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120}`}
+                </span>
+
+  BUG #10 — MEDIUM  |  Best Sellers Slider Nav Overlaps on Small Screens
+File: customer/pages/Homepage.css
+What goes wrong: The Best Sellers section header has text on the left and arrow buttons on the right. On screens below 480px, both elements are full width and the buttons run off the edge or overlap the title text.
+
+ADD THIS CSS at the end of Homepage.css:
+@media (max-width: 480px) {
+  .best-sellers-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .slider-nav-buttons {
+    align-self: flex-end;
+  }
+}
+
+Section 3: How to Make the Website Faster on Mobile
+Your Hostinger dashboard shows Mobile score of 71. Here are specific changes to push it above 85.
+
+3.1 — Preload the Hero Image (Biggest LCP Win)
+File: frontend/index.html
+The hero watch image is the Largest Contentful Paint element. The browser discovers it late because it only appears in JS/React. Adding a <link rel="preload"> in the HTML head tells the browser to fetch it immediately.
+
+FIND THIS in index.html (inside <head>):
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+ADD THIS AFTER (add after the favicon link):
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Preload hero fallback image so LCP is fast even before React loads -->
+    <link rel="preload" as="image" href="/src/assets/hero_watch.png" />
+
+3.2 — Add image compression in Vite build
+File: frontend/vite.config.js
+Install vite-plugin-imagemin to auto-compress PNG/JPG images at build time. This alone can reduce image sizes 50-70%.
+
+Step 1: Run this command in the frontend folder:
+npm install vite-plugin-imagemin --save-dev
+
+Step 2: FIND THIS in vite.config.js:
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+
+REPLACE WITH:
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import viteImagemin from 'vite-plugin-imagemin'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    viteImagemin({
+      gifsicle: { optimizationLevel: 7 },
+      optipng: { optimizationLevel: 7 },
+      mozjpeg: { quality: 80 },
+      pngquant: { quality: [0.8, 0.9], speed: 4 },
+      svgo: { plugins: [{ name: 'removeViewBox' }] },
+    }),
+  ],
+
+3.3 — Use WebP images from Cloudinary (Biggest Image Win)
+Your images come from Cloudinary. Cloudinary can automatically serve WebP to modern browsers. WebP is 25-35% smaller than PNG/JPG. No code change needed — just change the image URLs in your admin when uploading.
+
+How to enable: When uploading product images, make sure you are using Cloudinary delivery URLs. Then add /f_auto,q_auto/ to the transformation string in your upload/display logic.
+
+In customer/components/ProductCard.jsx find the resolveImg function and update it:
+
+  export const resolveImg = (url) => {
+    if (!url) return '';
+    // For Cloudinary URLs, inject auto format + quality
+    if (url.includes('cloudinary.com') && !url.includes('f_auto')) {
+      return url.replace('/upload/', '/upload/f_auto,q_auto/');
+    }
+    if (url.startsWith('/uploads')) return `${API}${url}`;
+    return url;
+  };
+
+3.4 — Reduce Font Weight Loading
+File: frontend/index.html
+Currently Manrope loads weights 400, 500, 600, 700, 800 AND Inter loads 400, 500, 600, 700. On mobile, this is 8 font files. The site only really uses Manrope 600/700/800 for headings and Inter 400/500 for body. Cut the rest.
+
+FIND THIS in index.html:
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+
+REPLACE WITH (only 5 weights instead of 8 — saves 3 font file requests):
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500&display=swap"
+
+3.5 — Lazy Load Images Below the Fold
+File: customer/components/ProductCard.jsx
+Product card images already use loading="lazy" — good! But the floating hero card thumbnail in Homepage.jsx does not. Add it there.
+
+FIND THIS in Homepage.jsx (inside the floating-spec-card):
+                      <img
+                        src={resolveImg(featuredProd.images[0])}
+                        alt={featuredProd.name}
+                        className="floating-thumb"
+                      />
+
+REPLACE WITH:
+                      <img
+                        src={resolveImg(featuredProd.images[0])}
+                        alt={featuredProd.name}
+                        className="floating-thumb"
+                        loading="lazy"
+                        width="56"
+                        height="56"
+                      />
+
+3.6 — Remove the Floating Animation on Mobile
+File: customer/pages/Homepage.css
+The hero watch image has a continuous "float" CSS animation (translateY 0 to -12px, looping forever). On mobile this runs continuously and keeps repainting the GPU, draining battery and causing jank. It is already partially handled with prefers-reduced-motion but should also be disabled on mobile screens entirely.
+
+ADD THIS to Homepage.css inside the @media (max-width: 768px) block:
+@media (max-width: 768px) {
+  /* ... existing rules ... */
+
+  /* Stop continuous GPU animation on mobile — saves battery and reduces jank */
+  .hero-image-container {
+    animation: none;
+  }
+  .floating-spec-card {
+    animation: none;
+    display: none; /* already hidden at this breakpoint */
+  }
+}
+
+Section 4: Bugs Found by Acting as a Real User
+The following bugs were found by simulating a full user flow: Browse → Product → Cart → Checkout.
+
+User Action
+What Goes Wrong
+Tap search on mobile
+Mobile search bar appears but the X button to close it has no visible state change. Tapping outside does not close it — user must tap the search icon again.
+Click "Buy Now" on product with cart already having items
+CRITICAL — All cart items are deleted silently (see Bug #1). User loses their shopping cart.
+Navigate back after checkout
+Browser back button goes to /checkout which immediately redirects to / because cart is now empty. User cannot see what they ordered unless they check order history.
+Enter a non-Dhaka city in checkout
+Delivery cost shows ৳80 until they start typing city name (see Bug #9). User may click "Confirm Order" before seeing ৳120.
+Tab through login modal with keyboard
+Focus escapes the modal and lands on page links behind it. Pressing Enter on a background link closes the modal and navigates away.
+On mobile, visit category page on page 2, then tap a category link
+Page 2 of the new category shows 0 products because the category only has 8 products total (see Bug #6).
+Share a product link with a friend
+Friend sees "Artifact BD — Premium Timepieces in Bangladesh" as the page title, not the watch name. Hard to know what product is being shared (see Bug #8).
+Subscribe to newsletter in footer
+User sees success message, but their email is never saved. A follow-up email never arrives. (see Bug #7).
+
+Section 5: After Applying All Fixes
+
+Rebuild and redeploy
+Open terminal in Watch-website-main/frontend/
+Run: npm run build
+Check for any build errors in the terminal output
+Upload the dist/ folder to Hostinger via File Manager or redeploy via GitHub (your current Auto-deployment is set up)
+In Hostinger dashboard, click "Clear cache" (you saw this button in the Essentials panel)
+Wait 5 minutes, then run the Hostinger speed test again
+
+Expected improvements after fixes
+Mobile score: 71 → 82-88 (after hero preload, animation disable, font trim, image compression)
+Desktop score: 97 → stays 97-98 (already excellent)
+SEO: Product pages will have correct titles for sharing and Google indexing
+Cart: Buy Now no longer destroys existing cart items
+Checkout: Delivery cost is accurate before and after city is entered
+Newsletter: Emails will actually be saved (requires backend route)
+
+Artifact BD Bug Report — artifactbd.com — June 2026

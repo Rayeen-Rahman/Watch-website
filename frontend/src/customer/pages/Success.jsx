@@ -19,6 +19,14 @@ const Success = () => {
     // Consume the flag immediately
     sessionStorage.removeItem('orderPlaced');
     setAllowed(true);
+
+    // Restore cart if it was saved during Buy Now
+    const saved = sessionStorage.getItem("savedCartBeforeBuyNow");
+    if (saved) {
+      localStorage.setItem("watchCart", saved);
+      sessionStorage.removeItem("savedCartBeforeBuyNow");
+    }
+
     // Trigger entrance animation after mount
     requestAnimationFrame(() => setAnimate(true));
     // Scroll to top

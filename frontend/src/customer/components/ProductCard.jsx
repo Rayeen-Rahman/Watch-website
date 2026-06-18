@@ -14,8 +14,15 @@ import { useCart } from '../context/CartContext';
 import { API } from '../../utils/api';
 
 /** Resolve /uploads paths to absolute backend URL */
-export const resolveImg = (url) =>
-  url?.startsWith('/uploads') ? `${API}${url}` : url;
+export const resolveImg = (url) => {
+  if (!url) return '';
+  const normalised = url.replace(/\\/g, '/');
+  // For Cloudinary URLs, inject auto format + quality
+  if (normalised.includes('cloudinary.com') && !normalised.includes('f_auto')) {
+    return normalised.replace('/upload/', '/upload/f_auto,q_auto/');
+  }
+  return normalised.startsWith('/uploads') ? `${API}${normalised}` : normalised;
+};
 
 /** Returns a "৳X OFF" savings string or null */
 export const getSavingsLabel = (product) => {

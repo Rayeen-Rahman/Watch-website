@@ -167,6 +167,7 @@ const orderRoutes    = require('./routes/orderRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const adminRoutes    = require('./routes/adminRoutes');     // Steps 14-16
 const paymentRoutes  = require('./routes/paymentRoutes'); // Step 27 — COD
+const newsletterRoutes = require('./routes/newsletterRoutes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // ── STEP 7: Health check endpoint ────────────────────────────────────────────
@@ -193,6 +194,7 @@ app.use('/api/orders',     orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin',      adminRoutes);    // Steps 14-16: dashboard stats/orders/charts
 app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
+app.use('/api/newsletter', newsletterRoutes);
 
 
 // ── STEP 9: Serve React SPA build in production ──────────────────────────────

@@ -22,7 +22,18 @@ const ProductDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Reset title when unmounting so other pages get their own title
+    return () => { document.title = 'Artifact BD — Premium Timepieces in Bangladesh'; };
+  }, []);
 
+  // Update document title when product loads
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} — Artifact BD`;
+    }
+  }, [product]);
+
+  useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -67,8 +78,10 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
-    // Buy Now: clear any existing cart items so only this product goes to checkout
-    // This prevents leftover items from a previous 'Buy Now' session
+    // Save existing cart to sessionStorage so it can be restored after checkout
+    // Only send THIS product to checkout, do not destroy other cart items
+    const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
+    sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
     clearCart();
     addToCart(product, quantity);
     setIsCartOpen(false);
