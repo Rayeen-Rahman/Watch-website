@@ -70,12 +70,26 @@ const createOrder = async (req, res) => {
     const order = new Order({ customerName, phone, address, products, total });
     const createdOrder = await order.save();
 
-    // ── Decrement Stock ─────────────────────────────────────────────────────
-    await Promise.all(
+    // ── Decrement Stock (atomic — prevents overselling under concurrent load) ──
+    const decrementResults = await Promise.all(
       products.map(item =>
-        Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } })
+        Product.findOneAndUpdate(
+          { _id: item.product, stock: { $gte: item.quantity } },
+          { $inc: { stock: -item.quantity } },
+          { new: true }
+        )
       )
     );
+
+    // If any item failed to decrement, the stock changed between check and update
+    const failedItems = decrementResults.filter(r => r === null);
+    if (failedItems.length > 0) {
+      // Roll back the order we just created
+      await Order.findByIdAndDelete(createdOrder._id);
+      return res.status(400).json({
+        message: 'Some items went out of stock while your order was being processed. Please try again.'
+      });
+    }
 
     res.status(201).json(createdOrder);
   } catch (error) {

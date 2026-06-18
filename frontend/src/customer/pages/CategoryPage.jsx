@@ -221,8 +221,17 @@ const CategoryPage = () => {
           </div>
 
           {/* Active filter pills */}
-          {(movement || gender || maxPrice < 200000) && (
+          {(movement || gender || maxPrice < 200000 || searchText) && (
             <div className="active-filters">
+              {searchText && (
+                <span className="filter-pill">
+                  “{searchText}”
+                  <button onClick={() => {
+                    setSearchText('');
+                    navigate(`/category/${slug || 'all'}`, { replace: true });
+                  }}><X size={10}/></button>
+                </span>
+              )}
               {movement  && <span className="filter-pill">{movement} <button onClick={() => setMovement('')}><X size={10}/></button></span>}
               {gender    && <span className="filter-pill">{gender}   <button onClick={() => setGender('')}><X size={10}/></button></span>}
               {maxPrice < 200000 && <span className="filter-pill">Max ৳{maxPrice.toLocaleString()} <button onClick={() => setMaxPrice(200000)}><X size={10}/></button></span>}

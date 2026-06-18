@@ -18,7 +18,7 @@ const ProductDetail = () => {
   const [showStickyCart, setShowStickyCart] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const relatedSliderRef = useRef(null);
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, clearCart } = useCart();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -67,6 +67,9 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    // Buy Now: clear any existing cart items so only this product goes to checkout
+    // This prevents leftover items from a previous 'Buy Now' session
+    clearCart();
     addToCart(product, quantity);
     setIsCartOpen(false);
     navigate('/checkout');
@@ -196,11 +199,14 @@ const ProductDetail = () => {
             {/* Quantity row */}
             <div className="quantity-row">
               <div className="quantity-selector">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} disabled={!product.stock}>−</button>
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                >−</button>
                 <span>{quantity}</span>
                 <button
                   onClick={() => setQuantity(q => Math.min(product.stock ?? 99, q + 1))}
-                  disabled={!product.stock || quantity >= (product.stock ?? 99)}
+                  disabled={product.stock != null && quantity >= product.stock}
                 >+</button>
               </div>
               {product.stock > 0 && product.stock <= 5 && (

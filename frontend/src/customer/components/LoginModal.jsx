@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { X, Eye, EyeOff, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { API } from '../../utils/api';
 import './LoginModal.css';
 
 const LoginModal = ({ onClose }) => {
@@ -16,8 +17,7 @@ const LoginModal = ({ onClose }) => {
   const [error,       setError]       = useState('');
   const [success,     setSuccess]     = useState('');
 
-  const _raw = import.meta.env.VITE_API_URL || '';
-  const API = _raw.includes('localhost') ? '' : _raw;
+
 
   const resetForm = () => {
     setEmail(''); setPassword(''); setName('');
@@ -39,6 +39,26 @@ const LoginModal = ({ onClose }) => {
       if (!res.ok) throw new Error(data.message || 'Login failed');
       login(data.user || data, data.token);
       onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setError(''); setLoading(true);
+    try {
+      const res = await fetch(`${API}/api/users/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to send reset email');
+      setSuccess('If this email exists, a reset link has been sent.');
+      switchTab('login');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -121,6 +141,13 @@ const LoginModal = ({ onClose }) => {
               </button>
             </div>
 
+            <p style={{ textAlign: 'right', margin: '4px 0 8px', fontSize: '0.8rem' }}>
+              <button type="button" className="link-btn"
+                onClick={() => setTab('forgot')}>
+                Forgot password?
+              </button>
+            </p>
+
             <button type="submit" className="modal-submit-btn" disabled={loading}>
               {loading ? <Loader size={16} className="spin" /> : 'Sign In'}
             </button>
@@ -178,6 +205,29 @@ const LoginModal = ({ onClose }) => {
               Already have an account?{' '}
               <button type="button" className="link-btn" onClick={() => switchTab('login')}>
                 Sign in
+              </button>
+            </p>
+          </form>
+        )}
+
+        {/* ── FORGOT PASSWORD FORM ── */}
+        {tab === 'forgot' && (
+          <form onSubmit={handleForgotPassword} className="modal-form">
+            <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '12px' }}>
+              Enter your email address and we will send you a reset link.
+            </p>
+            <label>Email Address</label>
+            <input
+              type="email" required autoFocus
+              placeholder="you@example.com"
+              value={email} onChange={e => setEmail(e.target.value)}
+            />
+            <button type="submit" className="modal-submit-btn" disabled={loading}>
+              {loading ? <Loader size={16} className="spin" /> : 'Send Reset Link'}
+            </button>
+            <p className="modal-switch-text">
+              <button type="button" className="link-btn" onClick={() => switchTab('login')}>
+                Back to Sign In
               </button>
             </p>
           </form>

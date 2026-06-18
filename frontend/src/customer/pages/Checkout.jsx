@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, CheckCircle, ShoppingBag } from 'lucide-react';
 import './Checkout.css';
 
@@ -12,6 +13,7 @@ const resolveImg = (url) =>
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart, setIsCartOpen } = useCart();
+  const { user, token, login } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -24,11 +26,12 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
 
   // Close cart panel + redirect empty carts
   useEffect(() => {
     setIsCartOpen(false);
-    if (cartItems.length === 0) navigate('/');
+    if (cartItems.length === 0 && !orderSubmitted) navigate('/');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartItems.length]);
 
@@ -89,8 +92,28 @@ const Checkout = () => {
       if (!res.ok) throw new Error(data.message || 'Failed to place order');
 
       // ── Step 32: Clear cart after successful order ─────────────────────────
+      setOrderSubmitted(true);
       clearCart();
       sessionStorage.setItem('orderPlaced', 'true');
+
+      // Auto-save the checkout phone to user profile if logged in and no phone saved yet
+      if (user && token && !user.phone && formData.phone) {
+        try {
+          const profileRes = await fetch(`${API}/api/users/profile`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ name: user.name, email: user.email, phone: formData.phone }),
+          });
+          if (profileRes.ok) {
+            const updated = await profileRes.json();
+            login({ ...user, phone: updated.phone || formData.phone }, token);
+          }
+        } catch (e) {
+          // Non-critical — order already placed, just couldn't save phone
+          console.warn('Could not auto-save phone to profile:', e);
+        }
+      }
+
       navigate('/success');
     } catch (err) {
       setError(err.message);

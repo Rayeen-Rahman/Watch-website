@@ -14,7 +14,10 @@ const protect = async (req, res, next) => {
     if (!req.user)
       return res.status(401).json({ message: 'User not found' });
     next();
-  } catch {
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Session expired — please log in again' });
+    }
     res.status(401).json({ message: 'Not authorised — invalid token' });
   }
 };

@@ -69,8 +69,11 @@ const Success = () => {
 
       {/* ── CTA buttons ────────────────────────────────────────────────── */}
       <div className="success-actions">
-        <Link to="/" className="btn-success-primary">
-          Continue Shopping <ArrowRight size={16} />
+        <Link to="/orders" className="btn-success-primary">
+          Track My Order <ArrowRight size={16} />
+        </Link>
+        <Link to="/" className="btn-success-ghost">
+          Continue Shopping
         </Link>
         <Link to="/category/all" className="btn-success-ghost">
           Browse Collection

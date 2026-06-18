@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, User, LogOut, Settings, Search } from 'lucide-react';
+import { ShoppingBag, User, LogOut, Settings, Search, Menu, X as XIcon } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from './LoginModal';
@@ -18,6 +18,7 @@ const Navbar = () => {
   const [mobileSearch,   setMobileSearch]   = useState(false);
   const [mobileQuery,    setMobileQuery]    = useState('');
   const [categories,     setCategories]     = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const userMenuRef = useRef(null);
 
@@ -51,6 +52,9 @@ const Navbar = () => {
     if (q) {
       navigate(`/category/all?search=${encodeURIComponent(q)}`);
       setSearchQuery('');
+    } else {
+      // Empty search — show all products
+      navigate('/category/all');
     }
   };
 
@@ -59,9 +63,11 @@ const Navbar = () => {
     const q = mobileQuery.trim();
     if (q) {
       navigate(`/category/all?search=${encodeURIComponent(q)}`);
-      setMobileSearch(false);
-      setMobileQuery('');
+    } else {
+      navigate('/category/all');
     }
+    setMobileSearch(false);
+    setMobileQuery('');
   };
 
   return (
@@ -122,6 +128,15 @@ const Navbar = () => {
             <Search size={20} strokeWidth={1.5} />
           </button>
 
+          {/* Mobile only: Hamburger menu */}
+          <button
+            className="icon-btn mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            onClick={() => setMobileMenuOpen(m => !m)}
+          >
+            {mobileMenuOpen ? <XIcon size={20} strokeWidth={1.5} /> : <Menu size={20} strokeWidth={1.5} />}
+          </button>
+
           {/* User icon or Login */}
           {!user ? (
             <button
@@ -166,13 +181,31 @@ const Navbar = () => {
             onClick={() => setIsCartOpen(true)}
           >
             <ShoppingBag size={20} strokeWidth={1.5} />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            {cartCount > 0 && <span className="cart-badge">{cartCount > 99 ? '99+' : cartCount}</span>}
           </button>
 
         </div>
       </nav>
 
-      {/* \u2500\u2500 Mobile Search Bar (slides below navbar) \u2500\u2500 */}
+      {/* Mobile category drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-drawer">
+          <Link to="/category/all" className="mobile-menu-link"
+            onClick={() => setMobileMenuOpen(false)}>All Watches</Link>
+          {categories.map(cat => (
+            <Link
+              key={cat._id}
+              to={`/category/${cat.slug}`}
+              className="mobile-menu-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* ── Mobile Search Bar (slides below navbar) ── */}
       {mobileSearch && (
         <div className="mobile-search-bar">
           <form onSubmit={handleMobileSearch} role="search">

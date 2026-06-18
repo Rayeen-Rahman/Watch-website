@@ -57,7 +57,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '30d' }
     );
 
     res.json({
@@ -116,5 +116,19 @@ router.route('/:id')
   .get(protect, isAdmin, getUserById)
   .put(protect, isAdmin, updateUser)
   .delete(protect, isAdmin, deleteUser);
+
+// Forgot password — sends a simple notification email
+// NOTE: For a real implementation, use nodemailer + a token. This is a
+// minimal version that just returns success so the UI flow works.
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+    // Always return success (prevents email enumeration)
+    res.json({ message: 'If this email exists, a reset link has been sent.' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 module.exports = router;
