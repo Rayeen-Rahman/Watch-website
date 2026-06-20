@@ -90,6 +90,8 @@ router.get('/popular-products', async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 5, 20);
 
     const products = await Order.aggregate([
+      // Filter out orders that are not delivered
+      { $match: { status: 'delivered' } },
       // Flatten order items (your schema uses 'products' array)
       { $unwind: '$products' },
       // Group by product and sum quantities

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { X, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,13 @@ import { API, resolveImg } from '../../utils/api';
 const CartPanel = () => {
   const { isCartOpen, setIsCartOpen, cartItems, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isCartOpen) return;
+    const handlePopState = () => setIsCartOpen(false);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isCartOpen, setIsCartOpen]);
 
   if (!isCartOpen) return null;
 

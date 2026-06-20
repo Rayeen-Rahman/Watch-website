@@ -80,7 +80,19 @@ const updateUser = async (req, res) => {
 
     if (user) {
       user.name = name || user.name;
-      if (email) user.email = email.toLowerCase();
+      if (email && email.toLowerCase() !== user.email) {
+        // Check no other user already has this email
+        const emailTaken = await User.findOne({
+          email: email.toLowerCase(),
+          _id: { $ne: user._id }  // exclude the current user
+        });
+        if (emailTaken) {
+          return res.status(400).json({
+            message: 'Another account with this email address already exists.'
+          });
+        }
+        user.email = email.toLowerCase();
+      }
       user.phone = phone !== undefined ? phone : user.phone;
       user.role = role || user.role;
       user.status = status || user.status;
@@ -100,6 +112,13 @@ const updateUser = async (req, res) => {
 // @access  Private/Admin
 const deleteUser = async (req, res) => {
   try {
+    // Prevent admins from deleting their own account
+    if (req.params.id === String(req.user._id)) {
+      return res.status(400).json({
+        message: 'You cannot delete your own account.'
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (user) {
