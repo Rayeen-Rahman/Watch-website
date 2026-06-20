@@ -30,6 +30,8 @@ const ProductDetail = () => {
         metaDesc.setAttribute('content',
           'Shop premium watches in Bangladesh. Cash on delivery available. Only at Artifact BD.');
       }
+      const schema = document.getElementById('product-schema');
+      if (schema) schema.remove();
     };
   }, []);
 
@@ -54,6 +56,40 @@ const ProductDetail = () => {
       setMeta('property', 'og:description', desc);
       if (product.images?.[0]) setMeta('property', 'og:image', resolveImg(product.images[0]));
       setMeta('property', 'og:type', 'product');
+      setMeta('property', 'og:url', window.location.href);
+
+      // ── Inject JSON-LD Product Schema ──
+      let schemaScript = document.getElementById('product-schema');
+      if (!schemaScript) {
+        schemaScript = document.createElement('script');
+        schemaScript.type = 'application/ld+json';
+        schemaScript.id = 'product-schema';
+        document.head.appendChild(schemaScript);
+      }
+      schemaScript.textContent = JSON.stringify({
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.name,
+        "image": product.images?.map(img => resolveImg(img)) || [],
+        "description": product.description || product.shortDescription || '',
+        "brand": {
+          "@type": "Brand",
+          "name": product.brand || "Artifact BD"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": window.location.href,
+          "priceCurrency": "BDT",
+          "price": product.price,
+          "availability": product.stock > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          "seller": {
+            "@type": "Organization",
+            "name": "Artifact BD"
+          }
+        }
+      });
     }
   }, [product]);
 
@@ -359,63 +395,65 @@ const ProductDetail = () => {
 
       {/* ── RELATED PRODUCTS — Step 45: with prev/next arrows ── */}
       {relatedProducts.length > 0 && (
-        <div className="related-products-section">
-          <div className="related-header">
-            <div>
-              <h2>You May Also Like</h2>
-              <p className="related-subtitle">More from the same collection, handpicked for you.</p>
+        <div className="product-detail-inner">
+          <div className="related-products-section" style={{ paddingLeft: 0, paddingRight: 0 }}>
+            <div className="related-header">
+              <div>
+                <h2>You May Also Like</h2>
+                <p className="related-subtitle">More from the same collection, handpicked for you.</p>
+              </div>
+              <div className="slider-nav-buttons">
+                <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous">
+                  <ChevronLeft size={18} />
+                </button>
+                <button className="slider-nav-btn" onClick={() => scrollRelated(1)} aria-label="Next">
+                  <ChevronRight size={18} />
+                </button>
+              </div>
             </div>
-            <div className="slider-nav-buttons">
-              <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous">
-                <ChevronLeft size={18} />
-              </button>
-              <button className="slider-nav-btn" onClick={() => scrollRelated(1)} aria-label="Next">
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
 
-          <div className="related-slider" ref={relatedSliderRef}>
-            {relatedProducts.map(rel => (
-              <div className="related-card" key={rel._id}>
-                <Link to={`/product/${rel._id}`} className="related-card-link">
-                  <div className="related-img-wrap">
-                    {rel.images?.[0] ? (
-                      <img
-                        src={resolveImg(rel.images[0])}
-                        alt={rel.name}
-                      />
-                    ) : (
-                      <div className="img-placeholder">{(rel.brand || 'W').charAt(0)}</div>
-                    )}
-                    {rel.oldPrice > rel.price && (
-                      <div className="related-discount-badge">
-                        ৳{(rel.oldPrice - rel.price).toLocaleString()} OFF
-                      </div>
-                    )}
-                  </div>
-                  <div className="related-info">
-                    <h3>{rel.name}</h3>
-                    <div className="related-price-row">
-                      <span className="related-price">৳{rel.price.toLocaleString()}</span>
+            <div className="related-slider" ref={relatedSliderRef}>
+              {relatedProducts.map(rel => (
+                <div className="related-card" key={rel._id}>
+                  <Link to={`/product/${rel._id}`} className="related-card-link">
+                    <div className="related-img-wrap">
+                      {rel.images?.[0] ? (
+                        <img
+                          src={resolveImg(rel.images[0])}
+                          alt={rel.name}
+                        />
+                      ) : (
+                        <div className="img-placeholder">{(rel.brand || 'W').charAt(0)}</div>
+                      )}
                       {rel.oldPrice > rel.price && (
-                        <span className="related-old-price">৳{rel.oldPrice.toLocaleString()}</span>
+                        <div className="related-discount-badge">
+                          ৳{(rel.oldPrice - rel.price).toLocaleString()} OFF
+                        </div>
                       )}
                     </div>
+                    <div className="related-info">
+                      <h3>{rel.name}</h3>
+                      <div className="related-price-row">
+                        <span className="related-price">৳{rel.price.toLocaleString()}</span>
+                        {rel.oldPrice > rel.price && (
+                          <span className="related-old-price">৳{rel.oldPrice.toLocaleString()}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                  <div className="related-card-actions">
+                    <Link to={`/product/${rel._id}`} className="btn-related-buy">Buy Now</Link>
+                    <button
+                      className="btn-related-cart"
+                      onClick={() => addToCart(rel, 1)}
+                      aria-label="Add to cart"
+                    >
+                      <ShoppingBag size={15} />
+                    </button>
                   </div>
-                </Link>
-                <div className="related-card-actions">
-                  <Link to={`/product/${rel._id}`} className="btn-related-buy">Buy Now</Link>
-                  <button
-                    className="btn-related-cart"
-                    onClick={() => addToCart(rel, 1)}
-                    aria-label="Add to cart"
-                  >
-                    <ShoppingBag size={15} />
-                  </button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}

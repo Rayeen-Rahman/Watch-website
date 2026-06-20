@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://www.yourdomain.com/sitemap.xml
+Sitemap: https://artifactbd.com/sitemap.xml
