@@ -101,8 +101,20 @@ router.put('/profile', protect, async (req, res) => {
       user.password = await bcrypt.hash(newPassword, 10);
     }
 
-    if (name)  user.name  = name;
-    if (email) user.email = email.toLowerCase();
+    if (name) user.name = name;
+    if (email && email.toLowerCase() !== user.email) {
+      // Require current password to change email
+      if (!currentPassword) {
+        return res.status(400).json({
+          message: 'Current password is required to change your email address'
+        });
+      }
+      const match = await bcrypt.compare(currentPassword, user.password);
+      if (!match) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+      user.email = email.toLowerCase();
+    }
     if (phone !== undefined) user.phone = phone;
 
     const updated = await user.save();
@@ -142,6 +154,31 @@ router.post('/forgot-password', async (req, res) => {
       subject: 'Reset your Artifact BD password',
       html: `<p>Click to reset: <a href="${resetUrl}">${resetUrl}</a>. Expires in 1 hour.</p>`
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.put('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword)
+      return res.status(400).json({ message: 'Token and new password are required' });
+    if (newPassword.length < 6)
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }
+    });
+    if (!user)
+      return res.status(400).json({ message: 'Reset link is invalid or has expired' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+    res.json({ message: 'Password reset successfully. You can now log in.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

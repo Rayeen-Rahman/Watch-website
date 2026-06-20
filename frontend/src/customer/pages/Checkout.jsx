@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,7 @@ const Checkout = () => {
   const { cartItems, cartTotal, clearCart, setIsCartOpen } = useCart();
   const { user, token, login } = useAuth();
   const navigate = useNavigate();
+  const submittingRef = useRef(false);
 
   const [formData, setFormData] = useState({
     customerName: '',
@@ -79,6 +80,8 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setError('');
 
     // Validate first
@@ -147,6 +150,7 @@ const Checkout = () => {
     } catch (err) {
       setError(err.message);
       setIsSubmitting(false);
+      submittingRef.current = false;
     }
   };
 

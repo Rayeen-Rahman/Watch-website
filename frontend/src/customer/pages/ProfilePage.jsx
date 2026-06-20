@@ -10,6 +10,7 @@ const ProfilePage = () => {
 
   const [name,        setName]        = useState(user?.name    || '');
   const [email,       setEmail]       = useState(user?.email   || '');
+  const [confirmEmail, setConfirmEmail] = useState('');
   const [phone,       setPhone]       = useState(user?.phone   || '');
   const [curPass,     setCurPass]     = useState('');
   const [newPass,     setNewPass]     = useState('');
@@ -44,6 +45,14 @@ const ProfilePage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (email !== user?.email && email !== confirmEmail) {
+      setMsg({ text: 'Email addresses do not match', err: true });
+      return;
+    }
+    if (email !== user?.email && !curPass) {
+      setMsg({ text: 'Current password required to change email', err: true });
+      return;
+    }
     if (newPass && newPass !== confirmPass) {
       setMsg({ text: 'New passwords do not match', err: true }); return;
     }
@@ -98,6 +107,18 @@ const ProfilePage = () => {
               <label><Mail size={14} /> Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
+            {email !== (user?.email || '') && (
+              <div className="profile-field">
+                <label><Mail size={14} /> Confirm New Email</label>
+                <input
+                  type="email"
+                  value={confirmEmail}
+                  onChange={e => setConfirmEmail(e.target.value)}
+                  placeholder="Re-enter new email to confirm"
+                  required
+                />
+              </div>
+            )}
             <div className="profile-field">
               <label><Phone size={14} /> Phone</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" />

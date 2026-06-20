@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { API } from '../../utils/api';
+import { resolveImg } from '../../utils/api';
 import './CartPage.css';
 
 const CartPage = () => {
@@ -31,11 +31,7 @@ const CartPage = () => {
           {/* ── Item List ─────────────────────────────────────── */}
           <div className="cart-items">
             {cartItems.map(item => {
-              const img = item.images?.[0]
-                ? (item.images[0].startsWith('/uploads')
-                  ? `${API}${item.images[0]}`
-                  : item.images[0])
-                : null;
+              const img = resolveImg(item.images?.[0]);
 
               return (
                 <div key={item._id} className="cart-item">

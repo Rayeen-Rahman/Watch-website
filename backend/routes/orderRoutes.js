@@ -28,7 +28,7 @@ router.get('/lookup', lookupLimiter, async (req, res) => {
     const OrderModel = require('../models/Order');
     const orders = await OrderModel.find({ phone: phone.trim() })
       .sort({ createdAt: -1 })
-      .select('_id status total createdAt products')
+      .select('-__v')
       .lean();
     res.json(orders);
   } catch (err) {

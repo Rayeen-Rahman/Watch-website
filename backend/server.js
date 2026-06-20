@@ -117,6 +117,16 @@ app.use(
   })
 );
 
+app.use(
+  '/api/orders',
+  rateLimit({
+    windowMs: 60 * 60 * 1000,   // 1 hour window
+    max: 10,                     // Max 10 orders per IP per hour
+    methods: ['POST'],           // Only limit POST (order creation)
+    message: { message: 'Too many orders placed from this IP. Please try again later.' },
+  })
+);
+
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs

@@ -66,8 +66,28 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // ── Create Order ────────────────────────────────────────────────────────
-    const order = new Order({ customerName, phone, address, products, total });
+    // ── Recalculate total server-side to prevent price tampering ──
+    let recalculatedTotal = 0;
+    for (const item of products) {
+      const prod = await Product.findById(item.product).select('price');
+      if (prod) {
+        recalculatedTotal += prod.price * item.quantity;
+      }
+    }
+
+    // Add shipping: free if order >= 2000, else ৳80 inside Dhaka or ৳120 outside
+    const isDhaka = (address || '').toLowerCase().includes('dhaka');
+    const shipping = recalculatedTotal >= 2000 ? 0 : (isDhaka ? 80 : 120);
+    const verifiedTotal = recalculatedTotal + shipping;
+
+    // ── Create Order with verified total ─────────────
+    const order = new Order({
+      customerName,
+      phone,
+      address,
+      products,
+      total: verifiedTotal   // use server-calculated total, not client total
+    });
     const createdOrder = await order.save();
 
     // ── Decrement Stock (atomic — prevents overselling under concurrent load) ──

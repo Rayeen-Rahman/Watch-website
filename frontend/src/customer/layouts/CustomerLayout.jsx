@@ -12,6 +12,7 @@ import OrderHistoryPage from '../pages/OrderHistoryPage';
 import ProfilePage from '../pages/ProfilePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import InfoPage from '../pages/InfoPage';
+import ResetPasswordPage from '../pages/ResetPasswordPage';
 import CartPanel from '../components/CartPanel';
 import '../customerTheme.css';
 
@@ -42,6 +43,7 @@ const CustomerLayout = () => {
           <Route path="/info/shipping"   element={<InfoPage page="shipping" />} />
           <Route path="/info/privacy"    element={<InfoPage page="privacy" />} />
           <Route path="/info/contact"    element={<InfoPage page="contact" />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="*"               element={<NotFoundPage />} />
         </Routes>
       </main>

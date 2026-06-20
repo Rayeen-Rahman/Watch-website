@@ -96,6 +96,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       showToast('Please add at least one product image.', true);
       return;
     }
+    if (formData.oldPrice && Number(formData.oldPrice) <= Number(formData.price)) {
+      showToast('Original price must be higher than the selling price. If there is no discount, leave Original Price empty.', true);
+      return;
+    }
     setIsSubmitting(true);
     const payload = {
       name:             formData.name,
@@ -472,8 +476,15 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
 
           <div className="panel-footer">
             <button type="button" className="btn-outline" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-primary" disabled={isSubmitting || uploading}>
-              {isSubmitting ? 'Saving...' : (isEdit ? 'Save Changes' : 'Save Watch')}
+            <button type="submit" className="btn-primary"
+              disabled={isSubmitting || uploading}
+              title={uploading ? 'Please wait for image to finish uploading' : ''}>
+              {uploading
+                ? 'Uploading image…'
+                : isSubmitting
+                ? 'Saving...'
+                : (isEdit ? 'Save Changes' : 'Save Watch')
+              }
             </button>
           </div>
         </form>

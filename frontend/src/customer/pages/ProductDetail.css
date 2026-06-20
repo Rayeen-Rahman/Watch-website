@@ -775,9 +775,40 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .related-card { min-width: 200px; }
+  .related-card { min-width: 160px; }
   .detail-container { border-radius: 8px; }
   .info-section { padding: 20px 16px 28px 16px; }
+
+  /* Switch gallery to column layout: image on top, thumbs below */
+  .gallery-section {
+    flex-direction: column-reverse;
+    position: static;          /* un-sticky on mobile */
+  }
+  .thumbnail-list {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+  .thumbnail {
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+  }
+  .main-image {
+    max-height: 320px;
+  }
+
+  .related-products-section {
+    padding-left: 4%;
+    padding-right: 0;     /* let slider scroll to edge */
+  }
+  .related-slider {
+    padding-right: 4%;    /* breathing room on last card */
+  }
+  .related-header {
+    padding-right: 4%;    /* align header with rest of content */
+  }
 }
 
 /* ── Step 30: Brand label + Watch Specs accordion ───────────────────────── */

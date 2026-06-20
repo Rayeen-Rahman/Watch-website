@@ -61,3 +61,26 @@
 }
 
 .btn-info-back:hover { color: #000; }
+
+@media (max-width: 600px) {
+  .info-page {
+    padding: 20px 4% 60px;
+  }
+  .info-title {
+    font-size: 1.5rem;
+    margin: 0 0 32px;
+    padding-bottom: 14px;
+  }
+  .info-container {
+    margin-top: 20px;
+  }
+  .info-sections {
+    gap: 20px;
+  }
+  .info-section {
+    padding-bottom: 20px;
+  }
+  .info-q {
+    font-size: 0.95rem;
+  }
+}

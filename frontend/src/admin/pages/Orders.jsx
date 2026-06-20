@@ -47,7 +47,7 @@ const OrderModal = ({ order, onClose }) => {
             {(order.products || []).map((item, i) => (
               <div key={i} className="order-item-row">
                 <span className="order-item-name">
-                  {item.product?.name || `Product #${i + 1}`}
+                  {item.name || item.product?.name || `Product #${i + 1}`}
                 </span>
                 <span className="order-item-qty">× {item.quantity}</span>
                 <span className="order-item-price">৳{(item.price ?? 0).toLocaleString()}</span>

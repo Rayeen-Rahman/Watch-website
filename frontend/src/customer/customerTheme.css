@@ -876,6 +876,18 @@ body.customer-view {
   z-index: 2;
 }
 
+.trust-feature-middle {
+  border-left: 1px solid var(--store-border);
+  border-right: 1px solid var(--store-border);
+}
+
+@media (max-width: 600px) {
+  .trust-feature-middle {
+    border-left: none;
+    border-right: none;
+  }
+}
+
 
 
 

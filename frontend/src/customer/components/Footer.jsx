@@ -57,8 +57,7 @@ const Footer = () => {
             <span>Secure &amp; tracked shipping</span>
           </div>
         </div>
-        <div className="trust-feature"
-          style={{ borderLeft: '1px solid var(--store-border)', borderRight: '1px solid var(--store-border)' }}>
+        <div className="trust-feature trust-feature-middle">
           <Banknote strokeWidth={1.5} size={36} />
           <div className="trust-text">
             <strong>Cash on Delivery</strong>
