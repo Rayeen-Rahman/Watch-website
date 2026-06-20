@@ -124,22 +124,40 @@ const createOrder = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    
-    // EDGE CASE: Validate status strictly against schema ENUM to prevent fatal Mongoose validation crash
+
     const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
     if (!validStatuses.includes(status)) {
-       return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+      return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     }
 
+    const Product = require('../models/Product');
     const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
 
-    if (order) {
-      order.status = status;
-      const updatedOrder = await order.save();
-      res.json(updatedOrder);
-    } else {
-      res.status(404).json({ message: 'Order not found' });
+    const prevStatus = order.status;
+    order.status = status;
+    const updatedOrder = await order.save();
+
+    // ── Restore stock when cancelling or marking as failed ──────────────────
+    // Only restore if the order wasn't already in a terminal cancelled/failed state
+    // (prevents double-restoring if admin toggles cancelled → cancelled again)
+    const terminalStatuses = ['cancelled', 'failed'];
+    const wasAlreadyCancelled = terminalStatuses.includes(prevStatus);
+    const isNowCancelled = terminalStatuses.includes(status);
+
+    if (isNowCancelled && !wasAlreadyCancelled && order.products?.length > 0) {
+      await Promise.all(
+        order.products.map(item =>
+          Product.findByIdAndUpdate(
+            item.product,
+            { $inc: { stock: item.quantity } },
+            { new: true }
+          )
+        )
+      );
     }
+
+    res.json(updatedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message || 'Failed to update order status' });
   }

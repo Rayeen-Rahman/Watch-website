@@ -11,6 +11,7 @@ import {
   ArrowUpRight, ArrowDownRight, Star, Search, X, Check
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { resolveImg } from '../../utils/api';
 import './DashboardHome.css';
 
 /* ─────────────────────────────────────────────
@@ -156,17 +157,29 @@ const DashboardHome = ({ showToast }) => {
   /* ── Helpers ── */
   const fmt = (n) => `৳${(n ?? 0).toLocaleString()}`;
 
-  // ── Open hero picker: load all products ──
+  // ── Open hero picker: load first page of products ──
   const openHeroPicker = async () => {
     setHeroSearch('');
     setShowHeroPicker(true);
-    if (allProducts.length > 0) return;
     try {
-      const res  = await fetch(`${API}/api/products?limit=100`, { headers });
+      const res  = await fetch(`${API}/api/products?limit=20&pageNumber=1`, { headers });
       if (res.status === 401) {
         handleUnauthorized();
         return;
       }
+      const data = await res.json();
+      setAllProducts(Array.isArray(data.products) ? data.products : []);
+    } catch { /* silently ignore */ }
+  };
+
+  // ── Handle server-side search for hero picker ──
+  const handleHeroSearch = async (query) => {
+    setHeroSearch(query);
+    try {
+      const params = new URLSearchParams({ limit: 20 });
+      if (query.trim()) params.set('search', query.trim());
+      const res = await fetch(`${API}/api/products?${params}`, { headers });
+      if (!res.ok) return;
       const data = await res.json();
       setAllProducts(Array.isArray(data.products) ? data.products : []);
     } catch { /* silently ignore */ }
@@ -198,8 +211,7 @@ const DashboardHome = ({ showToast }) => {
     }
   };
 
-  // ── Resolve image URL (uploaded vs external) ──
-  const resolveImg = (url) => url?.startsWith('/uploads') ? `${API}${url}` : url;
+
 
   /* ── Error state ── */
   if (error) {
@@ -576,7 +588,7 @@ const DashboardHome = ({ showToast }) => {
                   <div className="popular-img-wrap">
                     {p.image ? (
                       <img
-                        src={p.image.startsWith('/uploads') ? `${API}${p.image}` : p.image}
+                        src={resolveImg(p.image)}
                         alt={p.name}
                         className="popular-img"
                         loading="lazy"
@@ -625,39 +637,37 @@ const DashboardHome = ({ showToast }) => {
                 type="search"
                 placeholder="Search products…"
                 value={heroSearch}
-                onChange={e => setHeroSearch(e.target.value)}
+                onChange={e => handleHeroSearch(e.target.value)}
                 autoFocus
               />
             </div>
             <div className="hero-picker-list">
-              {allProducts
-                .filter(p => p.name.toLowerCase().includes(heroSearch.toLowerCase()))
-                .map(p => {
-                  const img = resolveImg(p.images?.[0]);
-                  const isCurrent = heroProduct?._id === p._id;
-                  return (
-                    <button
-                      key={p._id}
-                      className={`hero-picker-item ${isCurrent ? 'is-current' : ''}`}
-                      onClick={() => !isCurrent && setFeatured(p._id)}
-                      disabled={heroSaving}
-                    >
-                      <div className="hpi-img">
-                        {img
-                          ? <img src={img} alt={p.name} />
-                          : <Package size={20} strokeWidth={1.5} />}
-                      </div>
-                      <div className="hpi-info">
-                        <span className="hpi-name">{p.name}</span>
-                        <span className="hpi-price">{fmt(p.price)}</span>
-                      </div>
-                      {isCurrent && (
-                        <span className="hpi-badge"><Check size={12} /> Current</span>
-                      )}
-                    </button>
-                  );
-                })}
-              {allProducts.filter(p => p.name.toLowerCase().includes(heroSearch.toLowerCase())).length === 0 && (
+              {allProducts.map(p => {
+                const img = resolveImg(p.images?.[0]);
+                const isCurrent = heroProduct?._id === p._id;
+                return (
+                  <button
+                    key={p._id}
+                    className={`hero-picker-item ${isCurrent ? 'is-current' : ''}`}
+                    onClick={() => !isCurrent && setFeatured(p._id)}
+                    disabled={heroSaving}
+                  >
+                    <div className="hpi-img">
+                      {img
+                        ? <img src={img} alt={p.name} />
+                        : <Package size={20} strokeWidth={1.5} />}
+                    </div>
+                    <div className="hpi-info">
+                      <span className="hpi-name">{p.name}</span>
+                      <span className="hpi-price">{fmt(p.price)}</span>
+                    </div>
+                    {isCurrent && (
+                      <span className="hpi-badge"><Check size={12} /> Current</span>
+                    )}
+                  </button>
+                );
+              })}
+              {allProducts.length === 0 && (
                 <p className="hpi-empty">No products match your search.</p>
               )}
             </div>

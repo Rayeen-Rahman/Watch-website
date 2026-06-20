@@ -100,6 +100,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       showToast('Original price must be higher than the selling price. If there is no discount, leave Original Price empty.', true);
       return;
     }
+    if (formData.stock !== '' && (isNaN(Number(formData.stock)) || Number(formData.stock) < 0)) {
+      showToast('Stock must be a whole number of 0 or more.', true);
+      return;
+    }
     setIsSubmitting(true);
     const payload = {
       name:             formData.name,
@@ -111,7 +115,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       images,
       category:         formData.category,
       tag:              formData.tag,
-      stock:            Number(formData.stock) || 0,
+      stock:            Math.max(0, Math.floor(Number(formData.stock) || 0)),
       dialColor:        formData.dialColor,
       strapMaterial:    formData.strapMaterial,
       movementType:     formData.movementType,
