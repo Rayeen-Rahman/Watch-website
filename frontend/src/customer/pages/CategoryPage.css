@@ -238,6 +238,19 @@
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
 }
+ 
+@media (max-width: 768px) {
+  .cat-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+ 
+@media (max-width: 480px) {
+  .cat-product-grid {
+    gap: 8px;
+  }
+}
 .cat-skeleton {
   aspect-ratio: 3 / 4;
 }

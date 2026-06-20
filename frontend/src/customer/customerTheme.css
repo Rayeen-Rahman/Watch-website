@@ -206,6 +206,12 @@ body.customer-view {
   justify-content: center;
   padding: 5px;
 }
+ 
+@media (max-width: 768px) {
+  .icon-btn {
+    padding: 12px;
+  }
+}
 
 .icon-btn:hover {
   transform: scale(1.1);
@@ -392,7 +398,7 @@ body.customer-view {
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 16px;
   background: #fff;
   color: var(--store-text);
 }
@@ -590,7 +596,7 @@ body.customer-view {
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 16px;
 }
 .mobile-search-form button {
   background: var(--store-accent);
@@ -661,7 +667,7 @@ body.customer-view {
   padding: 0 14px;
   border: none;
   outline: none;
-  font-size: 0.9rem;
+  font-size: 16px;
   font-family: inherit;
   background: #fff;
   color: #111;
