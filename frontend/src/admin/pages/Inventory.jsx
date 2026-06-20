@@ -16,19 +16,31 @@ const Inventory = ({ showToast }) => {
   const [saving,    setSaving]    = useState({});   // { [productId]: true/false }
   const [threshold, setThreshold] = useState(LOW_STOCK_THRESHOLD);
   const [filterLow, setFilterLow] = useState(false);
+  const [page,       setPage]       = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+
+  // Reset page when any filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [filterLow, threshold]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res  = await fetch(`${API}/api/products?limit=1000`);
+      const params = new URLSearchParams({ limit: 50, pageNumber: page });
+      if (filterLow) params.set('maxStock', threshold);
+      const res  = await fetch(`${API}/api/products?${params}`);
       const data = await res.json();
       setProducts(Array.isArray(data.products) ? data.products : []);
+      setTotalPages(data.pages || 1);
+      setTotalProducts(data.total || 0);
       setLoading(false);
     } catch (err) {
       setError('Failed to load inventory');
       setLoading(false);
     }
-  }, []);
+  }, [page, filterLow, threshold]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -82,16 +94,11 @@ const Inventory = ({ showToast }) => {
           <Package size={20} /> Inventory
         </h2>
         <span style={{ fontSize: '0.82rem', color: 'var(--admin-text-secondary)' }}>
-          {products.length} products
+          {totalProducts} products
         </span>
         {lowStockCount > 0 && (
           <span className="low-stock-badge">
-            <AlertTriangle size={13} /> {lowStockCount} low stock
-          </span>
-        )}
-        {products.length >= 1000 && (
-          <span className="low-stock-badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.3)' }}>
-            <AlertTriangle size={13} /> Showing first 1,000 products
+            <AlertTriangle size={13} /> {lowStockCount} low stock on this page
           </span>
         )}
       </div>
@@ -211,6 +218,41 @@ const Inventory = ({ showToast }) => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', marginTop: 20, marginBottom: 20 }}>
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => p - 1)}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              background: page === 1 ? '#f5f5f5' : '#fff',
+              color: '#333',
+              cursor: page === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            ← Prev
+          </button>
+          <span style={{ padding: '0 12px', lineHeight: '32px', color: '#555', fontSize: '0.88rem' }}>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(p => p + 1)}
+            style={{
+              padding: '6px 12px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              background: page === totalPages ? '#f5f5f5' : '#fff',
+              color: '#333',
+              cursor: page === totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Next →
+          </button>
         </div>
       )}
     </div>

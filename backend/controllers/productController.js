@@ -32,10 +32,12 @@ const getProducts = async (req, res) => {
 
     // ?search=<term>
     if (req.query.search) {
-      const term = req.query.search.trim();
+      // Escape all special regex characters to prevent ReDoS attacks
+      const raw = req.query.search.trim().slice(0, 100); // cap at 100 chars
+      const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { name:  { $regex: term, $options: 'i' } },
-        { brand: { $regex: term, $options: 'i' } },
+        { name:  { $regex: escaped, $options: 'i' } },
+        { brand: { $regex: escaped, $options: 'i' } },
       ];
     }
 

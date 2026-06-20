@@ -159,7 +159,6 @@ const CategoryPage = () => {
               height: '100vh',
               background: 'rgba(0,0,0,0.4)',
               zIndex: 49,
-              display: 'none',
             }}
             className="filter-backdrop"
           />
