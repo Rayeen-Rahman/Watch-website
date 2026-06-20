@@ -6,7 +6,7 @@ import './AddProductPanel.css'; // reuse panel styles
 import { API } from '../../utils/api';
 
 const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', password: '', role: 'customer'
   });
@@ -35,6 +35,10 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to add user');
       showToast('User added successfully');

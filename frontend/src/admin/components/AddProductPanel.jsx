@@ -6,7 +6,7 @@ import './AddProductPanel.css';
 import { API } from '../../utils/api';
 
 const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = null }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name:             '',
@@ -59,6 +59,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
         `${API}/api/products/upload-image`,
         { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formPayload }
       );
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
       setImages(prev => [...prev, data.imageUrl]);
@@ -127,6 +131,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
           body:    JSON.stringify(payload),
         }
       );
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (!res.ok) {
         // Translate technical errors into plain language

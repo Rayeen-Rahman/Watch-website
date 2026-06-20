@@ -96,6 +96,15 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
+  const reloadCartFromStorage = () => {
+    try {
+      const saved = localStorage.getItem('watchCart');
+      if (saved) setCartItems(JSON.parse(saved));
+    } catch {
+      // Ignore parse errors
+    }
+  };
+
   const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const cartCount = cartItems.reduce((acc, item) => acc + item.qty, 0);
 
@@ -106,6 +115,7 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       updateQuantity,
       clearCart,
+      reloadCartFromStorage,
       cartTotal,
       cartCount,
       isCartOpen,

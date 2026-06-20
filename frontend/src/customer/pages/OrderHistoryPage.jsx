@@ -78,6 +78,14 @@ const OrderHistoryPage = () => {
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
+    const prefilledPhone = sessionStorage.getItem('lastOrderPhone');
+    if (prefilledPhone && !user) {
+      setPhone(prefilledPhone);
+      sessionStorage.removeItem('lastOrderPhone');
+    }
+  }, []);
+
+  useEffect(() => {
     if (!token || !user) { setLoading(false); return; }
 
     // Admins see all orders

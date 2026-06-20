@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, Clock, ArrowRight, ShoppingBag } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import './Success.css';
 
 const Success = () => {
@@ -8,6 +9,7 @@ const Success = () => {
   const [allowed, setAllowed] = useState(false);
   const navigate = useNavigate();
   const [oid, setOid] = useState('');
+  const { reloadCartFromStorage } = useCart();
 
   useEffect(() => {
     const placed = sessionStorage.getItem('orderPlaced');
@@ -31,6 +33,7 @@ const Success = () => {
     if (saved) {
       localStorage.setItem("watchCart", saved);
       sessionStorage.removeItem("savedCartBeforeBuyNow");
+      reloadCartFromStorage();   // ← update React state immediately
     }
 
     // Trigger entrance animation after mount

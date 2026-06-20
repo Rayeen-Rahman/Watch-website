@@ -41,8 +41,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('watchCart');  // B-02 fix: clear cart on logout
   };
 
+  // Call this after any API returns 401 to force re-login
+  const handleUnauthorized = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('watchstore_user');
+    localStorage.removeItem('watchstore_token');
+    // Do NOT remove the cart — customer cart should survive re-login
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, handleUnauthorized }}>
       {children}
     </AuthContext.Provider>
   );

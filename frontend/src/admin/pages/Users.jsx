@@ -8,7 +8,7 @@ import './Products.css';
 import { API } from '../../utils/api';
 
 const Users = ({ showToast }) => {
-  const { token, user: loggedInUser } = useAuth();
+  const { token, user: loggedInUser, handleUnauthorized } = useAuth();
   const [users,        setUsers]        = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
@@ -38,6 +38,10 @@ const Users = ({ showToast }) => {
       const res  = await fetch(`${API}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch users');
       const data = await res.json();
       setUsers(Array.isArray(data) ? data : []);
@@ -46,7 +50,7 @@ const Users = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, [token]);
+  }, [token, handleUnauthorized]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
@@ -73,6 +77,10 @@ const Users = ({ showToast }) => {
     if (!window.confirm('Permanently delete this user?')) return;
     try {
       const res = await fetch(`${API}/api/users/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (res.ok) { setOpenKebab(null); fetchUsers(); toast('User deleted.'); }
       else { const d = await res.json(); toast(d.message || 'Delete failed', true); }
     } catch (err) { toast(err.message, true); }
@@ -87,6 +95,10 @@ const Users = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ status: newStatus }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Status update failed');
       setUsers(prev => prev.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
       setOpenKebab(null);

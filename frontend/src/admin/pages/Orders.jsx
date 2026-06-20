@@ -62,7 +62,7 @@ const OrderModal = ({ order, onClose }) => {
 
 // ── Main Orders Page ──────────────────────────────────────────────────────────
 const Orders = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [orders,      setOrders]      = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -117,6 +117,10 @@ const Orders = ({ showToast }) => {
       const res  = await fetch(`${API}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch orders');
       const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
@@ -125,7 +129,7 @@ const Orders = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, [token]);
+  }, [token, handleUnauthorized]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -138,6 +142,10 @@ const Orders = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ status: newStatus }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Status update failed');
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
       setOpenKebab(null);

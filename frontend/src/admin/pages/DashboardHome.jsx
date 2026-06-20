@@ -92,7 +92,7 @@ const CustomTooltip = ({ active, payload, label, currency }) => {
    MAIN DASHBOARD
 ───────────────────────────────────────────── */
 const DashboardHome = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const _raw = import.meta.env.VITE_API_URL || '';
   const API = _raw.includes('localhost') ? '' : _raw;
 
@@ -119,9 +119,9 @@ const DashboardHome = ({ showToast }) => {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/admin/dashboard-stats`,          { headers }).then(r => r.json()),
-      fetch(`${API}/api/admin/recent-orders?limit=8`,    { headers }).then(r => r.json()),
-      fetch(`${API}/api/admin/popular-products?limit=5`, { headers }).then(r => r.json()),
+      fetch(`${API}/api/admin/dashboard-stats`,          { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
+      fetch(`${API}/api/admin/recent-orders?limit=8`,    { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
+      fetch(`${API}/api/admin/popular-products?limit=5`, { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
     ])
       .then(([s, ro, pp]) => {
         setStats(s);
@@ -136,22 +136,22 @@ const DashboardHome = ({ showToast }) => {
 
     // Fetch current hero product
     fetch(`${API}/api/admin/featured-product`, { headers })
-      .then(r => r.json())
+      .then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); })
       .then(p => setHeroProduct(p || null))
       .catch(() => {});
-  }, [token]); // eslint-disable-line
+  }, [token, handleUnauthorized]); // eslint-disable-line
 
   /* ── Fetch chart data when range changes ── */
   useEffect(() => {
     setChartLoading(true);
     fetch(`${API}/api/admin/revenue-chart-fast?days=${chartRange}`, { headers })
-      .then(r => r.json())
+      .then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); })
       .then(data => {
         setRevenueChart(Array.isArray(data) ? data : []);
         setChartLoading(false);
       })
       .catch(() => setChartLoading(false));
-  }, [token, chartRange]); // eslint-disable-line
+  }, [token, chartRange, handleUnauthorized]); // eslint-disable-line
 
   /* ── Helpers ── */
   const fmt = (n) => `৳${(n ?? 0).toLocaleString()}`;
@@ -163,6 +163,10 @@ const DashboardHome = ({ showToast }) => {
     if (allProducts.length > 0) return;
     try {
       const res  = await fetch(`${API}/api/products?limit=100`, { headers });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       setAllProducts(Array.isArray(data.products) ? data.products : []);
     } catch { /* silently ignore */ }
@@ -176,6 +180,10 @@ const DashboardHome = ({ showToast }) => {
         method:  'PUT',
         headers: { ...headers },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setHeroProduct(data);

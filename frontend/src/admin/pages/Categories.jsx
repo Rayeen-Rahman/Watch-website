@@ -8,7 +8,7 @@ import './Products.css';  /* reuse table/page/badge shared styles */
 import { API } from '../../utils/api';
 
 const Categories = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [categories,  setCategories]  = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -68,6 +68,10 @@ const Categories = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ name: newName.trim(), slug: newSlug || toSlug(newName) }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to add category');
       setNewName(''); setNewSlug('');
@@ -97,6 +101,10 @@ const Categories = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ name: editName.trim(), slug: editSlug || toSlug(editName) }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
       setEditingId(null);
@@ -117,6 +125,10 @@ const Categories = ({ showToast }) => {
     if (!window.confirm(`Delete "${cat.name}"?${productWarning}`)) return;
     try {
       const res = await fetch(`${API}/api/categories/${cat._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) { const d = await res.json(); throw new Error(d.message || 'Delete failed'); }
       fetchCategories();
       toast(`"${cat.name}" deleted.`);

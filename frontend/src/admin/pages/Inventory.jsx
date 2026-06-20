@@ -8,7 +8,7 @@ import { API } from '../../utils/api';
 const LOW_STOCK_THRESHOLD = 5;
 
 const Inventory = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [products,  setProducts]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState(null);
@@ -51,6 +51,10 @@ const Inventory = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ stock: newStock }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Update failed');
       // Update local state
       setProducts(prev =>

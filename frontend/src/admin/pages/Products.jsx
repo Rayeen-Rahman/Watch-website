@@ -7,7 +7,7 @@ import './Products.css';
 import { API } from '../../utils/api';
 
 const Products = ({ showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [products,    setProducts]    = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
@@ -75,6 +75,10 @@ const Products = ({ showToast }) => {
           method:  'PUT',
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (res.status === 401) {
+          handleUnauthorized();
+          return;
+        }
         if (!res.ok) throw new Error('Update failed');
         fetchProducts();
         return;
@@ -85,6 +89,10 @@ const Products = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ [flag]: !product[flag] }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Update failed');
       fetchProducts();
     } catch (err) {
@@ -97,6 +105,10 @@ const Products = ({ showToast }) => {
     if (!window.confirm('Delete this product permanently?')) return;
     try {
       const res = await fetch(`${API}/api/products/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (res.ok) {
         setOpenKebab(null);
         fetchProducts();
@@ -118,6 +130,10 @@ const Products = ({ showToast }) => {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body:    JSON.stringify({ productIds: selectedIds }),
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (res.ok) {
         setSelectedIds([]);
         fetchProducts();

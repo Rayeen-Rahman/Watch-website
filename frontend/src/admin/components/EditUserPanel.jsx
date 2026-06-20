@@ -6,7 +6,7 @@ import './EditUserPanel.css';
 import { API } from '../../utils/api';
 
 const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
-  const { token } = useAuth();
+  const { token, handleUnauthorized } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -56,6 +56,11 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
           status: formData.status
         })
       });
+
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to update user');

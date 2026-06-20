@@ -123,6 +123,7 @@ const Checkout = () => {
       }
       sessionStorage.setItem('orderPlaced', 'true');
       sessionStorage.setItem('lastOrderId', data._id || '');
+      sessionStorage.setItem('lastOrderPhone', formData.phone.trim());
 
       // Auto-save the checkout phone to user profile if logged in and no phone saved yet
       if (user && token && !user.phone && formData.phone) {

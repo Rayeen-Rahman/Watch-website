@@ -123,6 +123,13 @@ const CategoryPage = () => {
     ? 'All Watches'
     : categories.find(c => c.slug === slug)?.name || 'Collection';
 
+  useEffect(() => {
+    document.title = `${pageTitle} — Artifact BD`;
+    return () => {
+      document.title = 'Artifact BD — Premium Timepieces in Bangladesh';
+    };
+  }, [pageTitle]);
+
   return (
     <div className="category-page">
 
