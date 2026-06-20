@@ -144,22 +144,22 @@ const CategoryPage = () => {
         {/* ── SIDEBAR FILTERS ─────────────────────────────────────────────── */}
         {showFilter && (
           <div
-            className="filter-backdrop"
             onClick={() => setShowFilter(false)}
             style={{
               position: 'fixed',
-              top: 0,
-              left: 0,
+              top: 0, left: 0,
               width: '100vw',
               height: '100vh',
-              background: 'rgba(0,0,0,0.35)',
+              background: 'rgba(0,0,0,0.4)',
               zIndex: 49,
+              display: 'none',
             }}
+            className="filter-backdrop"
           />
         )}
         <aside
           className={`filter-sidebar ${showFilter ? 'filter-sidebar-open' : ''}`}
-          style={{ zIndex: 50 }}
+          style={{ zIndex: showFilter ? 50 : 'auto' }}
         >
           <div className="filter-header">
             <h3>Filters</h3>

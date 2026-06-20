@@ -100,7 +100,7 @@ const Success = () => {
       </div>
 
       <p className="success-note">
-        Questions? Email us at <strong>rayeenrahman1@gmail.com</strong> or call <strong>+880-1716950416</strong>.{' '}
+        Questions? Email us at <strong>support@artifactbd.com</strong> or call <strong>+880-1716950416</strong>.{' '}
         <Link to="/info/contact" style={{ color: 'inherit', textDecoration: 'underline' }}>Contact page →</Link>
       </p>
     </div>

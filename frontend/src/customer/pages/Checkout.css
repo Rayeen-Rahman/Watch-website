@@ -1,6 +1,7 @@
 .checkout-page {
   padding: 40px 5% 100px 5%;
-  background-color: var(--store-bg);
+  background-color: #ffffff;
+  color-scheme: light;
   min-height: 80vh;
   animation: fadeUp 0.3s ease-out;
 }
@@ -119,10 +120,16 @@
 /* Prevent browser autofill from painting dark backgrounds on mobile */
 .form-group input:-webkit-autofill,
 .form-group input:-webkit-autofill:hover,
-.form-group input:-webkit-autofill:focus {
+.form-group input:-webkit-autofill:focus,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
   -webkit-text-fill-color: #111111 !important;
   caret-color: #111111;
+  background-color: #ffffff !important;
 }
 
 .form-group input:focus {

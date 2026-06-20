@@ -55,7 +55,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'How to Request an Exchange',
-          a: 'Email us at rayeenrahman1@gmail.com or call +880-1716950416 with your order number and a description of the issue. We will respond within 24 hours.',
+          a: 'Email us at support@artifactbd.com or call +880-1716950416 with your order number and a description of the issue. We will respond within 24 hours.',
         },
       ],
     },
@@ -80,7 +80,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Your Rights',
-          a: 'You may request deletion of your account and associated data at any time by contacting us at rayeenrahman1@gmail.com.',
+          a: 'You may request deletion of your account and associated data at any time by contacting us at support@artifactbd.com.',
         },
       ],
     },
@@ -89,11 +89,11 @@ const InfoPage = ({ page }) => {
       sections: [
         {
           q: 'Customer Support',
-          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-1716950416\nEmail: rayeenrahman1@gmail.com\nHours: Sat-Thu, 10:00 AM - 8:00 PM (BD Time)',
+          a: 'For order inquiries, exchanges, or general support:\n\nPhone: +880-1716950416\nEmail: support@artifactbd.com\nHours: Sat-Thu, 10:00 AM - 8:00 PM (BD Time)',
         },
         {
           q: 'Business Inquiries',
-          a: 'For wholesale, brand partnerships, or business collaborations:\n\nEmail: rayeenrahman1@gmail.com',
+          a: 'For wholesale, brand partnerships, or business collaborations:\n\nEmail: support@artifactbd.com',
         },
         {
           q: 'Social Media',

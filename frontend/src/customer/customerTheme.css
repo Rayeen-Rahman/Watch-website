@@ -837,5 +837,39 @@ body.customer-view {
   padding: 0;
 }
 
+/* ── Shared Product Card Badges (used on all pages) ── */
+.discount-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: #22C55E;
+  color: white;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.badge-bs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+
 
 

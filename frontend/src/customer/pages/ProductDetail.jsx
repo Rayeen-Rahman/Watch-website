@@ -72,10 +72,12 @@ const ProductDetail = () => {
         // Step 30: fetch related by same category
         try {
           const catParam = data.category?._id ? `&category=${data.category._id}` : '';
-          const relatedRes = await fetch(`${API}/api/products?limit=8${catParam}`);
+          const relatedRes = await fetch(`${API}/api/products?limit=12${catParam}`);
           if (relatedRes.ok) {
             const relatedData = await relatedRes.json();
-            const filtered = (relatedData.products || []).filter(p => p._id !== id).slice(0, 6);
+            const filtered = (relatedData.products || [])
+              .filter(p => String(p._id) !== String(id))
+              .slice(0, 6);
             setRelatedProducts(filtered);
           }
         } catch (e) {
@@ -427,13 +429,19 @@ const ProductDetail = () => {
             <p>৳{product.price.toLocaleString()}</p>
           </div>
         </div>
-        <button
-          className="btn-add-to-cart"
-          style={{ height: '45px', padding: '0 28px', fontSize: '0.95rem', borderRadius: '6px', width: 'auto', flex: 'none' }}
-          onClick={() => addToCart(product, quantity)}
-        >
-          <ShoppingBag size={18} /> Add to Cart
-        </button>
+        {product.stock === 0 ? (
+          <div style={{ padding: '0 20px', fontWeight: 700, fontSize: '0.9rem', color: '#999' }}>
+            Out of Stock
+          </div>
+        ) : (
+          <button
+            className="btn-add-to-cart"
+            style={{ height: '45px', padding: '0 28px', fontSize: '0.95rem', borderRadius: '6px', width: 'auto', flex: 'none' }}
+            onClick={() => addToCart(product, quantity)}
+          >
+            <ShoppingBag size={18} /> Add to Cart
+          </button>
+        )}
       </div>
 
     </div>
