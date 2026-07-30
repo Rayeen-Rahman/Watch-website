@@ -16,15 +16,29 @@
   .category-layout {
     grid-template-columns: 1fr;
   }
+  /* Sidebar hidden by default on mobile */
   .filter-sidebar {
-    display: none;
+    display: none !important;
   }
+  /* Open state: fixed overlay drawer from left */
   .filter-sidebar.filter-sidebar-open {
-    display: block;
-    border: 1px solid var(--store-border, #e5e5e5);
-    border-radius: 10px;
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(320px, 90vw);
+    z-index: 200;
+    background-color: var(--store-bg, #fff);
+    border-right: 1px solid var(--store-border, #e5e5e5);
     padding: 20px;
-    margin-bottom: 16px;
+    overflow-y: auto;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    animation: slideInFilterPanel 0.25s ease-out;
+  }
+  @keyframes slideInFilterPanel {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0);     opacity: 1; }
   }
 }
 

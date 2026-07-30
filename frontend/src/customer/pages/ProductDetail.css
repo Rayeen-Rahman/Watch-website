@@ -75,9 +75,11 @@
 }
 .gallery-section {
   border-radius: 16px 0 0 16px;
+  /* Note: no overflow:hidden here — it would break the sticky positioning */
 }
 .info-section {
   border-radius: 0 16px 16px 0;
+  overflow: hidden; /* Safari: clip content to own border-radius */
 }
 
 @media (max-width: 900px) {
@@ -263,13 +265,16 @@
 }
 
 .detail-title {
-  font-size: 2.6rem;
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
   font-weight: 800;
   letter-spacing: -1.5px;
   line-height: 1.05;
   margin: 0 0 20px 0;
   color: var(--store-text);
   text-transform: none;
+  /* prevent very long words breaking layout */
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* Price row */
@@ -766,7 +771,7 @@
 
 @media (max-width: 600px) {
   .detail-outer { padding: 0 4%; }
-  .detail-title { font-size: 1.9rem; }
+  /* Title already clamped via clamp() */
   .sticky-product-info h4 {
     display: block;
     font-size: 0.78rem;
@@ -796,7 +801,7 @@
     flex-shrink: 0;
   }
   .main-image {
-    max-height: 320px;
+    max-height: 300px;  /* tighter on phones so gallery doesn't dominate */
   }
 
   .related-products-section {
@@ -808,6 +813,11 @@
   }
   .related-header {
     padding-right: 4%;    /* align header with rest of content */
+  }
+
+  /* Sticky cart bar: add bottom padding for iOS home indicator */
+  .sticky-cart-bar {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
   }
 }
 

@@ -94,7 +94,8 @@
 
 .cart-item-img {
   width: 80px;
-  height: 100px;
+  height: 80px;
+  flex-shrink: 0;
   background-color: var(--store-surface);
   border-radius: 8px;
   overflow: hidden;

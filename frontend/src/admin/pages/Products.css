@@ -486,6 +486,17 @@
   animation: fadeUp 0.25s ease-out;
 }
 
-
-
+/* ── Mobile: page-header wraps on phones ─────────────────────────────────── */
+@media (max-width: 600px) {
+  .page-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  /* Action buttons group (e.g. Add Watch + Delete) */
+  .page-header > div {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+}
 

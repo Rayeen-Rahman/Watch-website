@@ -144,3 +144,22 @@
   font-weight: 700;
   color: var(--admin-text-primary);
 }
+
+/* ── Mobile: wrap orders filter row ─────────────────────────────────────── */
+@media (max-width: 600px) {
+  .orders-filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .status-filter-tabs {
+    flex-wrap: wrap;
+    margin-left: 0;
+    gap: 6px;
+  }
+  .filter-tab {
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 6px 10px;
+  }
+}
+

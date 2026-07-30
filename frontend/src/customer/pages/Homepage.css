@@ -428,6 +428,22 @@
 }
 
 @media (max-width: 480px) {
+  /* Hide the hero image panel entirely on very small phones */
+  .hero-panel-right {
+    display: none;
+  }
+  /* Let the text panel take full width */
+  .hero-inner {
+    gap: 0;
+  }
+  .hero-section {
+    min-height: auto;
+    padding: 28px 5%;
+  }
+}
+
+
+@media (max-width: 480px) {
   .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
 

@@ -40,6 +40,17 @@
   }
 }
 
+/* Extra tight for 375px / SE-size phones */
+@media (max-width: 375px) {
+  .checkout-page {
+    padding: 16px 3% 80px 3%;
+  }
+  .checkout-title {
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+  }
+}
+
 @media (max-width: 600px) {
   .form-row {
     grid-template-columns: 1fr;

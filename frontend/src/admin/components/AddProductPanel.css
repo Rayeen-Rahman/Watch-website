@@ -327,3 +327,17 @@
   text-transform: uppercase;
 }
 
+/* ── Mobile: full-width panels ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .slide-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  /* Price row: stack the three narrow fields vertically */
+  .form-row-price {
+    grid-template-columns: 1fr !important;
+  }
+  .form-group-narrow {
+    max-width: 100% !important;
+  }
+}

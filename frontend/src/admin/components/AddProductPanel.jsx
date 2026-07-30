@@ -37,40 +37,58 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       .catch(() => {});
   }, [isOpen]);
 
-  const [images, setImages]           = useState([]);   // array of URL strings
-  const [urlInput, setUrlInput]       = useState('');
-  const [uploading, setUploading]     = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages]               = useState([]);   // array of URL strings
+  const [urlInput, setUrlInput]           = useState('');
+  const [uploading, setUploading]         = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');  // e.g. "Uploading 2/3..."
+  const [isSubmitting, setIsSubmitting]   = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
-  // ── Image upload from computer ──────────────────────────────────────────────
+  // ── Image upload from computer (supports multiple files) ───────────────────
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const formPayload = new FormData();
-    formPayload.append('image', file);
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
     setUploading(true);
-    try {
-      const res = await fetch(
-        `${API}/api/products/upload-image`,
-        { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formPayload }
-      );
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
+    let successCount = 0;
+    let firstError   = null;
+    for (let i = 0; i < files.length; i++) {
+      setUploadProgress(`Uploading ${i + 1}/${files.length}…`);
+      const formPayload = new FormData();
+      formPayload.append('image', files[i]);
+      try {
+        const res = await fetch(
+          `${API}/api/products/upload-image`,
+          { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formPayload }
+        );
+        if (res.status === 401) {
+          handleUnauthorized();
+          break;
+        }
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || `Upload failed (${res.status})`);
+        }
+        const data = await res.json();
+        setImages(prev => [...prev, data.imageUrl]);
+        successCount++;
+      } catch (err) {
+        if (!firstError) firstError = err.message;
       }
-      if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
-      setImages(prev => [...prev, data.imageUrl]);
-    } catch (err) {
-      showToast(`Upload error: ${err.message}`, true);
-    } finally {
-      setUploading(false);
-      e.target.value = ''; // reset file input so same file can be re-uploaded
+    }
+    setUploading(false);
+    setUploadProgress('');
+    e.target.value = ''; // reset so the same file(s) can be re-selected
+    if (firstError) {
+      showToast(
+        successCount > 0
+          ? `${successCount}/${files.length} uploaded — error: ${firstError}`
+          : `Upload error: ${firstError}`,
+        true
+      );
     }
   };
 
@@ -301,12 +319,13 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
               onClick={() => document.getElementById('imgFileInput').click()}
             >
               <Upload size={20} />
-              <span>{uploading ? 'Uploading...' : 'Click to upload from computer'}</span>
-              <small>JPEG, PNG, WebP — max 5MB</small>
+              <span>{uploading ? (uploadProgress || 'Uploading…') : 'Click to upload from computer'}</span>
+              <small>JPEG, PNG, WebP — max 5MB · Select multiple files at once</small>
               <input
                 id="imgFileInput"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                multiple
                 style={{ display: 'none' }}
                 onChange={handleFileUpload}
                 disabled={uploading}

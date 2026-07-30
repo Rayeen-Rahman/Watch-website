@@ -18,16 +18,25 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 
 // ── Step 12: Image upload route ──────────────────────────────────────────────
 // POST /api/products/upload-image
-router.post('/upload-image', protect, isAdmin, upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded' });
-  }
-  // Cloudinary returns a full URL in req.file.path
-  // Local disk returns a filename — build a relative URL
-  const imageUrl = req.file.path
-    ? req.file.path                                        // Cloudinary URL (https://...)
-    : `/uploads/products/${req.file.filename}`;           // Local fallback
-  res.json({ imageUrl });
+router.post('/upload-image', protect, isAdmin, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      // Multer-specific errors (file too large, wrong type, etc.)
+      const message = err.code === 'LIMIT_FILE_SIZE'
+        ? 'File too large. Maximum size is 5 MB.'
+        : err.message || 'Upload failed. Please try a different file.';
+      return res.status(400).json({ message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+    // Cloudinary returns a full URL in req.file.path
+    // Local disk returns a filename — build a relative URL
+    const imageUrl = req.file.path
+      ? req.file.path                                        // Cloudinary URL (https://...)
+      : `/uploads/products/${req.file.filename}`;           // Local fallback
+    res.json({ imageUrl });
+  });
 });
 
 

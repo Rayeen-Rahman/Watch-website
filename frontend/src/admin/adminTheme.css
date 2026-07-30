@@ -446,3 +446,10 @@ body {
   }
 }
 
+/* ── Tablet: table overflow (769px – 900px) ──────────────────────────────── */
+@media (max-width: 900px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

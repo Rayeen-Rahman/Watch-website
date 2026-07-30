@@ -47,3 +47,11 @@
   border-color: #6366f1 !important;
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
+
+/* ── Mobile: full-width panel ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .category-slide-panel {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+}
