@@ -256,15 +256,19 @@ router.get('/featured-product', async (req, res) => {
 ───────────────────────────────────────────── */
 router.put('/set-featured/:id', async (req, res) => {
   try {
+    // Check if target product exists first to avoid clearing feature state if ID is invalid (Bug #17)
+    const exists = await Product.findById(req.params.id);
+    if (!exists) return res.status(404).json({ message: 'Product not found' });
+
     // Unset all featured products first
     await Product.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });
+    
     // Set the chosen product as featured
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       { $set: { isFeatured: true } },
       { new: true, select: 'name shortDescription price images _id movementType caseSize' }
     );
-    if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });

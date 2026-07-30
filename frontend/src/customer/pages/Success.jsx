@@ -28,13 +28,16 @@ const Success = () => {
     }
     setAllowed(true);
 
-    // Restore cart if it was saved during Buy Now
+    // Restore cart if it was saved during Buy Now AND we actually completed it (Bug #25)
+    const completedBuyNow = sessionStorage.getItem("completedBuyNow");
     const saved = sessionStorage.getItem("savedCartBeforeBuyNow");
-    if (saved) {
+    if (completedBuyNow === "true" && saved) {
       localStorage.setItem("watchCart", saved);
-      sessionStorage.removeItem("savedCartBeforeBuyNow");
       reloadCartFromStorage();   // ← update React state immediately
     }
+    // Always clean up the flags
+    sessionStorage.removeItem("savedCartBeforeBuyNow");
+    sessionStorage.removeItem("completedBuyNow");
 
     // Trigger entrance animation after mount
     requestAnimationFrame(() => setAnimate(true));

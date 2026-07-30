@@ -12,25 +12,29 @@ const lookupLimiter = rateLimit({
 const {
   getOrders,
   getOrderById,
+  getMyOrders,
   createOrder,
   updateOrderStatus
 } = require('../controllers/orderController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-// PUBLIC: phone-based order lookup for guest order tracking
-// GET /api/orders/lookup?phone=+8801700000000
+// PUBLIC: token-based order lookup for secure guest order tracking (non-enumerable)
+// GET /api/orders/lookup?token=tr_xxxx
 router.get('/lookup', lookupLimiter, async (req, res) => {
   try {
-    const { phone } = req.query;
-    if (!phone || !phone.trim()) {
-      return res.status(400).json({ message: 'Phone number is required' });
+    const { token } = req.query;
+    if (!token || !token.trim()) {
+      return res.status(400).json({ message: 'Tracking token is required' });
     }
     const OrderModel = require('../models/Order');
-    const orders = await OrderModel.find({ phone: phone.trim() })
-      .sort({ createdAt: -1 })
+    const order = await OrderModel.findOne({ guestTrackingToken: token.trim() })
+      .populate('products.product', 'name price images')
       .select('-__v')
       .lean();
-    res.json(orders);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    res.json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -40,6 +44,10 @@ router.get('/lookup', lookupLimiter, async (req, res) => {
 router.route('/')
   .get(protect, isAdmin, getOrders)
   .post(createOrder);
+
+// GET logged-in user's orders
+router.route('/myorders')
+  .get(protect, getMyOrders);
 
 // Detail view — requires auth token
 router.route('/:id')

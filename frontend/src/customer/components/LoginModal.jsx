@@ -118,7 +118,7 @@ const LoginModal = ({ onClose }) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box" ref={modalRef} onClick={e => e.stopPropagation()}>
+      <div className="modal-box" ref={modalRef} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="modal-title">
 
         {/* Close button */}
         <button className="modal-close-btn" onClick={onClose} aria-label="Close">
@@ -126,7 +126,7 @@ const LoginModal = ({ onClose }) => {
         </button>
 
         {/* Brand mark */}
-        <div className="modal-brand">
+        <div id="modal-title" className="modal-brand">
           <img src="/logo.png" alt="Artifact BD Logo" style={{ width: '22px', height: '22px', objectFit: 'contain', verticalAlign: 'middle', marginRight: '6px' }} />
           Artifact BD
         </div>
@@ -149,21 +149,23 @@ const LoginModal = ({ onClose }) => {
         {/* ── LOGIN FORM ── */}
         {tab === 'login' && (
           <form onSubmit={handleLogin} className="modal-form">
-            <label>Email Address</label>
+            <label htmlFor="login-email">Email Address</label>
             <input
+              id="login-email"
               type="email" required autoFocus
               placeholder="you@example.com"
               value={email} onChange={e => setEmail(e.target.value)}
             />
 
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
             <div className="pass-input-wrap">
               <input
+                id="login-password"
                 type={showPass ? 'text' : 'password'} required
                 placeholder="Enter your password"
                 value={password} onChange={e => setPassword(e.target.value)}
               />
-              <button type="button" className="toggle-pass" onClick={() => setShowPass(p => !p)}>
+              <button type="button" className="toggle-pass" onClick={() => setShowPass(p => !p)} aria-label={showPass ? "Hide password" : "Show password"}>
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
@@ -191,34 +193,38 @@ const LoginModal = ({ onClose }) => {
         {/* ── REGISTER FORM ── */}
         {tab === 'register' && (
           <form onSubmit={handleRegister} className="modal-form">
-            <label>Full Name</label>
+            <label htmlFor="register-name">Full Name</label>
             <input
+              id="register-name"
               type="text" required autoFocus
               placeholder="Your full name"
               value={name} onChange={e => setName(e.target.value)}
             />
 
-            <label>Email Address</label>
+            <label htmlFor="register-email">Email Address</label>
             <input
+              id="register-email"
               type="email" required
               placeholder="you@example.com"
               value={email} onChange={e => setEmail(e.target.value)}
             />
 
-            <label>Password</label>
+            <label htmlFor="register-password">Password</label>
             <div className="pass-input-wrap">
               <input
+                id="register-password"
                 type={showPass ? 'text' : 'password'} required
                 placeholder="Min. 6 characters"
                 value={password} onChange={e => setPassword(e.target.value)}
               />
-              <button type="button" className="toggle-pass" onClick={() => setShowPass(p => !p)}>
+              <button type="button" className="toggle-pass" onClick={() => setShowPass(p => !p)} aria-label={showPass ? "Hide password" : "Show password"}>
                 {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
 
-            <label>Confirm Password</label>
+            <label htmlFor="register-confirm">Confirm Password</label>
             <input
+              id="register-confirm"
               type="password" required
               placeholder="Repeat your password"
               value={confirmPass} onChange={e => setConfirmPass(e.target.value)}
@@ -243,8 +249,9 @@ const LoginModal = ({ onClose }) => {
             <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '12px' }}>
               Enter your email address and we will send you a reset link.
             </p>
-            <label>Email Address</label>
+            <label htmlFor="forgot-email">Email Address</label>
             <input
+              id="forgot-email"
               type="email" required autoFocus
               placeholder="you@example.com"
               value={email} onChange={e => setEmail(e.target.value)}

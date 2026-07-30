@@ -5,11 +5,43 @@ const Product = require('../models/Product');
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const pageSize = Number(req.query.limit) || 12;
-    const page     = Number(req.query.pageNumber) || 1;
+    let pageSize = parseInt(req.query.limit, 10) || 12;
+    let page     = parseInt(req.query.pageNumber, 10) || 1;
+
+    // Validate positive integers and cap limit (Bug #14)
+    if (pageSize < 1) pageSize = 12;
+    if (pageSize > 100) pageSize = 100;
+    if (page < 1) page = 1;
+
+    // Decode token if authenticated to see if it is an admin (Bug #23)
+    let isAdminUser = false;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.role === 'admin') {
+          isAdminUser = true;
+        }
+      } catch (err) {
+        // Ignore invalid token
+      }
+    }
 
     // ── Build filter ──────────────────────────────────────────────────────────
-    const filter = { isActive: true };
+    const filter = {};
+    if (!isAdminUser) {
+      filter.isActive = true;
+    }
+
+    // ?maxStock=5 (Bug #15)
+    if (req.query.maxStock) {
+      const maxStock = Number(req.query.maxStock);
+      if (!isNaN(maxStock)) {
+        filter.stock = { $lte: maxStock };
+      }
+    }
 
     // ?bestSeller=true
     if (req.query.bestSeller === 'true') filter.isBestSeller = true;
@@ -85,7 +117,27 @@ const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category', 'name slug');
     if (product) {
-      res.json(product);
+      // Check if product is active OR if the caller is an admin (Bug #23)
+      let isAdminUser = false;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.split(' ')[1];
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          if (decoded.role === 'admin') {
+            isAdminUser = true;
+          }
+        } catch (err) {
+          // Ignore
+        }
+      }
+      
+      if (product.isActive || isAdminUser) {
+        res.json(product);
+      } else {
+        res.status(404).json({ message: 'Product not found' });
+      }
     } else {
       res.status(404).json({ message: 'Product not found' });
     }

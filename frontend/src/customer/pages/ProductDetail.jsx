@@ -210,13 +210,17 @@ const ProductDetail = () => {
                 {product.images.map((img, index) => {
                   const resolved = resolveImg(img);
                   return (
-                    <div
+                    <button
                       key={index}
+                      type="button"
                       className={`thumbnail ${activeImage === resolved ? 'active' : ''}`}
                       onClick={() => setActiveImage(resolved)}
+                      aria-label={`View image ${index + 1} of ${product.name}`}
+                      aria-current={activeImage === resolved ? 'true' : 'false'}
+                      style={{ background: 'none', padding: 0, cursor: 'pointer' }}
                     >
                       <img src={resolved} alt={`${product.name} view ${index + 1}`} />
-                    </div>
+                    </button>
                   );
                 })}
               </div>

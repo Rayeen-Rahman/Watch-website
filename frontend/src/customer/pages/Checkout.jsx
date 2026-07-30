@@ -49,6 +49,11 @@ const Checkout = () => {
   // Close cart panel + redirect empty carts
   useEffect(() => {
     setIsCartOpen(false);
+    // If not in Buy Now mode, ensure abandoned buy-now items are cleared (Bug #25)
+    if (!isBuyNow) {
+      sessionStorage.removeItem('savedCartBeforeBuyNow');
+      sessionStorage.removeItem('buyNowItem');
+    }
     // Only redirect to home if cart is empty AND we have NOT just submitted an order
     // The 500ms delay prevents the race condition where clearCart fires before
     // navigate('/success') has been called by handleSubmit
@@ -57,7 +62,7 @@ const Checkout = () => {
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkoutItems.length, orderSubmitted]);
+  }, [checkoutItems.length, orderSubmitted, isBuyNow]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -86,7 +91,11 @@ const Checkout = () => {
 
     // Validate first
     const errs = validate();
-    if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
+    if (Object.keys(errs).length > 0) { 
+      setFieldErrors(errs); 
+      submittingRef.current = false; // Bug #9 fix: release lock on validation failure
+      return; 
+    }
 
     setIsSubmitting(true);
 
@@ -121,8 +130,10 @@ const Checkout = () => {
       setOrderSubmitted(true);
       if (isBuyNow) {
         sessionStorage.removeItem('buyNowItem');
+        sessionStorage.setItem('completedBuyNow', 'true'); // Bug #25: flag buy-now success
       } else {
         clearCart();
+        sessionStorage.removeItem('completedBuyNow');
       }
       sessionStorage.setItem('orderPlaced', 'true');
       sessionStorage.setItem('lastOrderId', data._id || '');

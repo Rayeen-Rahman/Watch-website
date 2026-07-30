@@ -37,7 +37,9 @@ const Products = ({ showToast }) => {
         limit: rowsPerPage,
         ...(search && { search }),
       });
-      const res  = await fetch(`${API}/api/products?${params}`);
+      const res  = await fetch(`${API}/api/products?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
       setProducts(data.products || []);

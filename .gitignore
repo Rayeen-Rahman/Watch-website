@@ -4,4 +4,9 @@ node_modules/
 .env.local
 dist/
 .DS_Store
-
+*.zip
+_deploy_staging/
+_hostinger_upload_temp/
+*.txt
+mobile_docx_extracted/
+package.ps1

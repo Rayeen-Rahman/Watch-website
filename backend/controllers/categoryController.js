@@ -76,6 +76,16 @@ const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
+
+    // Check if any products are associated with this category (Bug #18)
+    const Product = require('../models/Product');
+    const linkedProduct = await Product.findOne({ category: req.params.id });
+    if (linkedProduct) {
+      return res.status(400).json({
+        message: 'Cannot delete category: There are products still assigned to it.'
+      });
+    }
+
     await category.deleteOne();
     res.json({ message: 'Category removed' });
   } catch (error) {

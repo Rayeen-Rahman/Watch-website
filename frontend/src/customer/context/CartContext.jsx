@@ -51,9 +51,11 @@ export const CartProvider = ({ children }) => {
   }, []); // Run only once on app load
 
   const addToCart = (product, quantity = 1, openCart = true) => {
+    const maxStock = product.stock ?? Infinity;
+    if (maxStock <= 0 || quantity <= 0) return; // Block out-of-stock / zero additions (Bug #24)
+
     setCartItems(prev => {
       const existing = prev.find(item => item._id === product._id);
-      const maxStock = product.stock ?? Infinity;
       // Store only the fields needed for display + ordering
       // This keeps localStorage small and avoids deeply stale product data
       const cartItem = {

@@ -12,8 +12,13 @@ const createAdmin = async () => {
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB...');
 
-    const adminEmail = 'admin@watchvault.com';
-    const adminPass  = 'admin123';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPass  = process.env.ADMIN_PASSWORD || process.env.ADMIN_PASS;
+    
+    if (!adminEmail || !adminPass) {
+      console.error('Error: ADMIN_EMAIL and ADMIN_PASSWORD/ADMIN_PASS environment variables are required.');
+      process.exit(1);
+    }
     
     // Check if exists
     let user = await User.findOne({ email: adminEmail });

@@ -18,8 +18,31 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const app = express();
 
-// ── STEP 5: Morgan request logging ───────────────────────────────────────────
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// ── STEP 5: Morgan request logging (Bug #20) ─────────────────────────────────
+const redactUrl = (url) => {
+  if (!url) return url;
+  try {
+    const parts = url.split('?');
+    if (parts.length < 2) return url;
+    const params = new URLSearchParams(parts[1]);
+    for (const key of ['phone', 'token', 'email', 'password', 'currentPassword', 'newPassword']) {
+      if (params.has(key)) {
+        params.set(key, '[REDACTED]');
+      }
+    }
+    return parts[0] + '?' + params.toString();
+  } catch (err) {
+    return url;
+  }
+};
+morgan.token('url-redacted', (req) => redactUrl(req.originalUrl || req.url));
+app.use(
+  morgan(
+    process.env.NODE_ENV === 'production'
+      ? ':remote-addr - :remote-user [:date[clf]] ":method :url-redacted HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+      : 'dev'
+  )
+);
 
 // ── STEP 6: Compression (gzip) ───────────────────────────────────────────────
 app.use(compression());
@@ -32,7 +55,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc:  ["'self'"],
-        scriptSrc:   ["'self'", "'unsafe-inline'"],
+        scriptSrc:   ["'self'"],
         styleSrc:    ["'self'", "'unsafe-inline'", 'https:'],
         fontSrc:     ["'self'", 'https:', 'data:'],
         imgSrc:      ["'self'", 'data:', 'blob:', 'https:', 'http:'],
@@ -202,6 +225,47 @@ app.get('/health', (req, res) => {
     dbState:   mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
   });
+});
+
+// ── STEP 10: Dynamic Sitemap Generator (Bug #29) ─────────────────────────────
+app.get('/sitemap.xml', async (req, res) => {
+  try {
+    const Product = require('./models/Product');
+    const Category = require('./models/Category');
+
+    const [categories, products] = await Promise.all([
+      Category.find({}),
+      Product.find({ isActive: true }).select('_id')
+    ]);
+
+    const baseUrl = process.env.FRONTEND_URL || 'https://artifactbd.com';
+    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    // Root
+    xml += `  <url>\n    <loc>${cleanBaseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${cleanBaseUrl}/category/all</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+
+    // Categories
+    for (const cat of categories) {
+      xml += `  <url>\n    <loc>${cleanBaseUrl}/category/${cat.slug || cat._id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+    }
+
+    // Products
+    for (const prod of products) {
+      xml += `  <url>\n    <loc>${cleanBaseUrl}/product/${prod._id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+    }
+
+    xml += `</urlset>`;
+
+    res.header('Content-Type', 'application/xml');
+    res.send(xml);
+  } catch (err) {
+    console.error('Error generating sitemap:', err.message);
+    res.status(500).send('Error generating sitemap');
+  }
 });
 
 // Root route — only in development (production serves the React SPA from /)

@@ -9,7 +9,8 @@ dotenv.config();
 
 const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/watch-store';
 
-console.log('Connecting to:', mongoUri);
+const redactedUri = mongoUri.replace(/\/\/[^@]+@/, '//<credentials>@');
+console.log('Connecting to:', redactedUri);
 
 mongoose.connect(mongoUri)
   .then(async () => {

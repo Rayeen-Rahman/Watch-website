@@ -90,7 +90,7 @@ const Homepage = () => {
                   className="hero-watch-img"
                   width="480"
                   height="480"
-                  fetchpriority="high"
+                  fetchPriority="high"
                 />}
 
                 {/* Floating featured product card */}

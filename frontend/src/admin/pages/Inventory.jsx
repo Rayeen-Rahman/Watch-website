@@ -30,7 +30,9 @@ const Inventory = ({ showToast }) => {
     try {
       const params = new URLSearchParams({ limit: 50, pageNumber: page });
       if (filterLow) params.set('maxStock', threshold);
-      const res  = await fetch(`${API}/api/products?${params}`);
+      const res  = await fetch(`${API}/api/products?${params}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const data = await res.json();
       setProducts(Array.isArray(data.products) ? data.products : []);
       setTotalPages(data.pages || 1);

@@ -54,7 +54,7 @@ body.customer-view {
 /* Glass Navbar */
 .store-navbar {
   position: sticky;
-  top: 0;
+  top: 38px; /* Offset below the sticky campaign bar on desktop/tablet */
   width: 100%;
   height: 60px;
   background-color: #ffffff;
@@ -70,7 +70,7 @@ body.customer-view {
 
 @media (max-width: 600px) {
   .store-navbar {
-    top: 0;
+    top: 0; /* No campaign bar stickiness on mobile, stick to top: 0 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
   }
 }
@@ -888,6 +888,15 @@ body.customer-view {
   }
 }
 
-
-
-
+/* Respect reduced motion preferences (Bug #35) */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: scroll !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}

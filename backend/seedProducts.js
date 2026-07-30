@@ -10,9 +10,18 @@ dotenv.config();
 const Product = require('./models/Product');
 const Category = require('./models/Category');
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/watch-store';
+const redactedUri = mongoUri.replace(/\/\/[^@]+@/, '//<credentials>@');
+console.log('Connecting to:', redactedUri);
 
-console.log('Connecting to:', mongoUri);
+// Destructive seed scripts safety check (Bug #32)
+const isProduction = process.env.NODE_ENV === 'production' || mongoUri.includes('mongodb+srv');
+const hasForceFlag = process.argv.includes('--force');
+
+if (isProduction && !hasForceFlag) {
+  console.error('❌ Error: Destructive seed scripts are locked in production to prevent accidental data loss.');
+  console.error('   To run this anyway, pass the --force flag (e.g. node seedProducts.js --force)');
+  process.exit(1);
+}
 
 mongoose.connect(mongoUri)
   .then(async () => {

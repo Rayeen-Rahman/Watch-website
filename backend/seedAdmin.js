@@ -17,10 +17,16 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const User = require('./models/User');
 
-// ── Change these before running ───────────────────────────────────────────────
-const ADMIN_NAME     = 'Admin';
-const ADMIN_EMAIL    = 'admin@watchvault.com';
-const ADMIN_PASSWORD = 'Admin@1234';        // Change this to your desired password
+// ── Read from environment variables to prevent hardcoded credential leaks ────
+const ADMIN_NAME     = process.env.ADMIN_NAME || 'Super Admin';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('❌ Error: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required.');
+  console.error('   Please define them in your environment or .env file before seeding.');
+  process.exit(1);
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 const seed = async () => {

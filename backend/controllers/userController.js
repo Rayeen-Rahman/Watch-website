@@ -6,7 +6,23 @@ const bcrypt  = require('bcryptjs');
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select('-password');
+    // Optional server-side pagination for scalability
+    if (req.query.limit || req.query.pageNumber) {
+      let limit = parseInt(req.query.limit, 10) || 20;
+      let page  = parseInt(req.query.pageNumber, 10) || 1;
+      if (limit < 1) limit = 20;
+      if (page < 1) page = 1;
+
+      const count = await User.countDocuments({});
+      const users = await User.find({})
+        .select('-password')
+        .limit(limit)
+        .skip(limit * (page - 1))
+        .sort({ createdAt: -1 });
+      return res.json({ users, page, pages: Math.ceil(count / limit), total: count });
+    }
+
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
@@ -98,7 +114,8 @@ const updateUser = async (req, res) => {
       user.status = status || user.status;
 
       const updatedUser = await user.save();
-      res.json(updatedUser);
+      const { password: _pw, resetToken: _rt, resetTokenExpiry: _rte, ...safeUser } = updatedUser.toObject();
+      res.json(safeUser);
     } else {
       res.status(404).json({ message: 'User not found' });
     }

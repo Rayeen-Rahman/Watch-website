@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type:     String,
     default:  '',   // empty for admin-created users without a password set
+    select:   false // secure by default: do not serialize password hash
   },
   role: {
     type:    String,
@@ -44,8 +45,8 @@ const userSchema = new mongoose.Schema({
     city:   String,
     zip:    String,
   },
-  resetToken: { type: String },
-  resetTokenExpiry: { type: Date },
+  resetToken: { type: String, select: false },
+  resetTokenExpiry: { type: Date, select: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

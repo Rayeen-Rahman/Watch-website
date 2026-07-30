@@ -9,7 +9,7 @@
         "mongodb-mcp-server@<3"
       ],
       "env": {
-        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://rayeenrahman1_db_user:KMxuRiXDwwsb6El8@rayeen.zwcd5j6.mongodb.net/watch-store?appName=Rayeen"
+        "MDB_MCP_CONNECTION_STRING": "mongodb://127.0.0.1:27017/watch-store"
       },
       "enabled": true
     },
@@ -21,9 +21,9 @@
         "cloudinary-mcp-server"
       ],
       "env": {
-        "CLOUDINARY_CLOUD_NAME": "dqhjomvql",
-        "CLOUDINARY_API_KEY": "232123675282333",
-        "CLOUDINARY_API_SECRET": "5eVCAgnRbKku1XqAEDwBwLhiriA"
+        "CLOUDINARY_CLOUD_NAME": "your_cloudinary_name",
+        "CLOUDINARY_API_KEY": "your_cloudinary_api_key",
+        "CLOUDINARY_API_SECRET": "your_cloudinary_api_secret"
       },
       "enabled": true
     },
@@ -33,7 +33,7 @@
         "hostinger-api-mcp"
       ],
       "env": {
-        "HOSTINGER_API_TOKEN": "T8zlX0WGexV1coABq9FlZakHkcHQjcNX7nH9il1q5162ef30"
+        "HOSTINGER_API_TOKEN": "your_hostinger_api_token_here"
       },
       "enabled": true
     }

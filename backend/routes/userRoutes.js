@@ -22,6 +22,8 @@ router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password)
       return res.status(400).json({ message: 'All fields are required' });
+    if (password.length < 6)
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
 
     const exists = await User.findOne({ email });
     if (exists)
@@ -91,28 +93,28 @@ router.put('/profile', protect, async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // If password change requested, verify current password first
-    if (newPassword) {
-      if (!currentPassword)
-        return res.status(400).json({ message: 'Current password is required to set a new one' });
-      const match = await bcrypt.compare(currentPassword, user.password);
-      if (!match)
-        return res.status(401).json({ message: 'Current password is incorrect' });
-      user.password = await bcrypt.hash(newPassword, 10);
-    }
+    const emailChanging = email && email.toLowerCase() !== user.email;
+    const passwordChanging = !!newPassword;
 
-    if (name) user.name = name;
-    if (email && email.toLowerCase() !== user.email) {
-      // Require current password to change email
+    // Verify current password first to prevent comparing against updated hash (Bug #19)
+    if (emailChanging || passwordChanging) {
       if (!currentPassword) {
         return res.status(400).json({
-          message: 'Current password is required to change your email address'
+          message: 'Current password is required to change email or password'
         });
       }
       const match = await bcrypt.compare(currentPassword, user.password);
       if (!match) {
         return res.status(401).json({ message: 'Current password is incorrect' });
       }
+    }
+
+    // Mutate after verification succeeds
+    if (newPassword) {
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+    if (name) user.name = name;
+    if (emailChanging) {
       user.email = email.toLowerCase();
     }
     if (phone !== undefined) user.phone = phone;
@@ -136,25 +138,38 @@ router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required' });
     const user = await User.findOne({ email: email.toLowerCase().trim() });
+    
+    // If user exists, generate & save token before responding to ensure database write is successful
+    if (user) {
+      const token = crypto.randomBytes(32).toString('hex');
+      // Hash token before storing it (Bug #20)
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      
+      user.resetToken = hashedToken;
+      user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
+      await user.save();
+      
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+      });
+      
+      // Send email asynchronously in background, catching errors separately to prevent double response
+      transporter.sendMail({
+        from: `"Artifact BD" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: 'Reset your Artifact BD password',
+        html: `<p>Click to reset: <a href="${resetUrl}">${resetUrl}</a>. Expires in 1 hour.</p>`
+      }).catch(err => {
+        console.error('Mail transport error in forgot-password:', err.message);
+      });
+    }
+
     // Always return success — never reveal if email exists (security)
     res.json({ message: 'If this email exists, a reset link has been sent.' });
-    if (!user) return;  // stop here silently
-    const token = crypto.randomBytes(32).toString('hex');
-    user.resetToken = token;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
-    await user.save();
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-    });
-    await transporter.sendMail({
-      from: `"Artifact BD" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'Reset your Artifact BD password',
-      html: `<p>Click to reset: <a href="${resetUrl}">${resetUrl}</a>. Expires in 1 hour.</p>`
-    });
   } catch (err) {
+    // Only here if db query or token save fails before res.json is called
     res.status(500).json({ message: err.message });
   }
 });
@@ -167,8 +182,11 @@ router.put('/reset-password', async (req, res) => {
     if (newPassword.length < 6)
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
 
+    // Hash the token to compare against database (Bug #20)
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
     const user = await User.findOne({
-      resetToken: token,
+      resetToken: hashedToken,
       resetTokenExpiry: { $gt: Date.now() }
     });
     if (!user)

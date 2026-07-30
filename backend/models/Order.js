@@ -23,6 +23,15 @@ const orderItemSchema = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  guestTrackingToken: {
+    type: String,
+    default: null
+  },
   customerName: {
     type: String,
     required: [true, 'Customer name is required'],
@@ -52,5 +61,9 @@ const orderSchema = new mongoose.Schema({
 }, { 
   timestamps: true 
 });
+
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ phone: 1 });
+orderSchema.index({ guestTrackingToken: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);
