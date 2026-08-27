@@ -21,7 +21,9 @@ const getProducts = async (req, res) => {
         const token = authHeader.split(' ')[1];
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded.role === 'admin') {
+        const User = require('../models/User');
+        const currentUser = await User.findById(decoded.id).select('role status isActive');
+        if (currentUser && currentUser.role === 'admin' && currentUser.status === 'Active' && currentUser.isActive) {
           isAdminUser = true;
         }
       } catch (err) {
@@ -125,7 +127,9 @@ const getProductById = async (req, res) => {
           const token = authHeader.split(' ')[1];
           const jwt = require('jsonwebtoken');
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          if (decoded.role === 'admin') {
+          const User = require('../models/User');
+          const currentUser = await User.findById(decoded.id).select('role status isActive');
+          if (currentUser && currentUser.role === 'admin' && currentUser.status === 'Active' && currentUser.isActive) {
             isAdminUser = true;
           }
         } catch (err) {

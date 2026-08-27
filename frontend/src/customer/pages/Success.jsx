@@ -9,6 +9,7 @@ const Success = () => {
   const [allowed, setAllowed] = useState(false);
   const navigate = useNavigate();
   const [oid, setOid] = useState('');
+  const [trackingToken, setTrackingToken] = useState('');
   const { reloadCartFromStorage } = useCart();
 
   useEffect(() => {
@@ -25,6 +26,11 @@ const Success = () => {
     if (orderId) {
       setOid(orderId);
       sessionStorage.removeItem('lastOrderId');
+    }
+    const tToken = sessionStorage.getItem('lastOrderTrackingToken');
+    if (tToken) {
+      setTrackingToken(tToken);
+      sessionStorage.removeItem('lastOrderTrackingToken');
     }
     setAllowed(true);
 
@@ -62,6 +68,13 @@ const Success = () => {
         <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '-8px', marginBottom: '16px' }}>
           Order Reference: <strong style={{ color: '#333' }}>#{oid.slice(-8).toUpperCase()}</strong>
         </p>
+      )}
+      {trackingToken && (
+        <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px auto', border: '1px solid #e0e0e0' }}>
+          <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#555' }}>Your Guest Tracking Token:</p>
+          <code style={{ display: 'block', fontSize: '1rem', color: '#111', fontWeight: 'bold', userSelect: 'all', padding: '8px', background: '#fff', borderRadius: '4px', border: '1px dashed #ccc' }}>{trackingToken}</code>
+          <p style={{ margin: '8px 0 0 0', fontSize: '0.8rem', color: '#888' }}>Please save this token. You will need it to track your order.</p>
+        </div>
       )}
       <p className="success-sub">
         Your timepiece is on its way. You'll receive it shortly via Cash on Delivery.

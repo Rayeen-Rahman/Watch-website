@@ -132,7 +132,15 @@ code {
 .customer-view input:focus,
 .customer-view textarea:focus,
 .customer-view select:focus {
-  outline: none;
+  outline: none; /* Remove default focus for mouse clicks */
+}
+
+.customer-view input:focus-visible,
+.customer-view textarea:focus-visible,
+.customer-view select:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
 }
 
 /* ── 2. ADMIN SIDE ─────────────────────────────────────────────────────────── */

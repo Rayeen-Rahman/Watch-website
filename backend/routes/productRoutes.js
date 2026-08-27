@@ -21,10 +21,13 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 router.post('/upload-image', protect, isAdmin, (req, res, next) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
-      // Multer-specific errors (file too large, wrong type, etc.)
-      const message = err.code === 'LIMIT_FILE_SIZE'
-        ? 'File too large. Maximum size is 5 MB.'
-        : err.message || 'Upload failed. Please try a different file.';
+      // Multer/Cloudinary-specific errors (file too large, wrong type, etc.)
+      let message = err.message || 'Upload failed. Please try a different file.';
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        message = 'File too large. Maximum size is 5 MB.';
+      } else if (message.includes('not allowed')) {
+        message = `Upload rejected: ${message}. The file appears to be an unsupported format (e.g., AVIF or HEIC) despite its file extension. Please convert it to a standard JPEG, PNG, or WebP.`;
+      }
       return res.status(400).json({ message });
     }
     if (!req.file) {

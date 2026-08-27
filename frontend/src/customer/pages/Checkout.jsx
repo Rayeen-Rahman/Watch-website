@@ -38,8 +38,14 @@ const Checkout = () => {
 
   // BUY NOW mode: read a single item from sessionStorage instead of full cart
   const isBuyNow = new URLSearchParams(window.location.search).get('mode') === 'buynow';
-  const buyNowRaw = sessionStorage.getItem('buyNowItem');
-  const buyNowItem = buyNowRaw ? JSON.parse(buyNowRaw) : null;
+  let buyNowItem = null;
+  try {
+    const buyNowRaw = sessionStorage.getItem('buyNowItem');
+    if (buyNowRaw) buyNowItem = JSON.parse(buyNowRaw);
+  } catch (e) {
+    console.error('Failed to parse buyNowItem', e);
+    sessionStorage.removeItem('buyNowItem');
+  }
   // The items we actually check out: either just the Buy Now product, or the full cart
   const checkoutItems = isBuyNow && buyNowItem
     ? [{ ...buyNowItem.product, qty: buyNowItem.quantity }]
@@ -118,9 +124,12 @@ const Checkout = () => {
     };
 
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API}/api/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(orderPayload),
       });
       const data = await res.json();
@@ -138,6 +147,9 @@ const Checkout = () => {
       sessionStorage.setItem('orderPlaced', 'true');
       sessionStorage.setItem('lastOrderId', data._id || '');
       sessionStorage.setItem('lastOrderPhone', formData.phone.trim());
+      if (data.rawGuestTrackingToken) {
+        sessionStorage.setItem('lastOrderTrackingToken', data.rawGuestTrackingToken);
+      }
 
       // Auto-save the checkout phone to user profile if logged in and no phone saved yet
       if (user && token && !user.phone && formData.phone) {

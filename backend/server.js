@@ -227,9 +227,31 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ── STEP 10: Dynamic Sitemap Generator (Bug #29) ─────────────────────────────
+let cachedSitemap = null;
+let sitemapTimestamp = null;
+const SITEMAP_CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+const escapeXml = (unsafe) => {
+  if (!unsafe) return '';
+  return String(unsafe).replace(/[<>&'"]/g, function (c) {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+};
+
 app.get('/sitemap.xml', async (req, res) => {
   try {
+    if (cachedSitemap && sitemapTimestamp && (Date.now() - sitemapTimestamp < SITEMAP_CACHE_DURATION)) {
+      res.header('Content-Type', 'application/xml');
+      return res.send(cachedSitemap);
+    }
+
     const Product = require('./models/Product');
     const Category = require('./models/Category');
 
@@ -245,20 +267,24 @@ app.get('/sitemap.xml', async (req, res) => {
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
 
     // Root
-    xml += `  <url>\n    <loc>${cleanBaseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
-    xml += `  <url>\n    <loc>${cleanBaseUrl}/category/all</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+    xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/category/all</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 
     // Categories
     for (const cat of categories) {
-      xml += `  <url>\n    <loc>${cleanBaseUrl}/category/${cat.slug || cat._id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
+      const slug = cat.slug || cat._id;
+      xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/category/${escapeXml(slug)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     }
 
     // Products
     for (const prod of products) {
-      xml += `  <url>\n    <loc>${cleanBaseUrl}/product/${prod._id}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/product/${escapeXml(prod._id)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
 
     xml += `</urlset>`;
+
+    cachedSitemap = xml;
+    sitemapTimestamp = Date.now();
 
     res.header('Content-Type', 'application/xml');
     res.send(xml);

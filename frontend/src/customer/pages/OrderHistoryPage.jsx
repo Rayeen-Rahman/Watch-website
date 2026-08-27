@@ -74,16 +74,16 @@ const OrderHistoryPage = () => {
   const [orders,   setOrders]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
-  const [phone,    setPhone]    = useState('');
+  const [trackingToken, setTrackingToken] = useState('');
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    const prefilledPhone = sessionStorage.getItem('lastOrderPhone');
-    if (prefilledPhone && !user) {
-      setPhone(prefilledPhone);
-      sessionStorage.removeItem('lastOrderPhone');
+    const prefilledToken = sessionStorage.getItem('lastOrderTrackingToken');
+    if (prefilledToken && !user) {
+      setTrackingToken(prefilledToken);
+      sessionStorage.removeItem('lastOrderTrackingToken');
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!token || !user) { setLoading(false); return; }
@@ -97,46 +97,28 @@ const OrderHistoryPage = () => {
         .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
         .catch(() => { setError('Failed to load orders'); setLoading(false); });
     } else {
-      // Regular customers: orders are guest-based (phone lookup).
-      // Only auto-search if the user has a saved phone number.
-      if (user.phone && user.phone.trim()) {
-        setPhone(user.phone.trim());
-        setLoading(true);
-        fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(user.phone.trim())}`)
-          .then(r => r.json())
-          .then(data => {
-            setOrders(Array.isArray(data) ? data : []);
-            setSearched(true);
-            setLoading(false);
-          })
-          .catch(() => {
-            setError('Failed to load orders');
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
-      }
-      // If no phone saved — the authenticated view renders the phone lookup form below
+      // Regular customers: GET /api/orders/myorders
+      fetch(`${API}/api/orders/myorders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(r => r.json())
+        .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
+        .catch(() => { setError('Failed to load orders'); setLoading(false); });
     }
   }, [token, user]);
 
-  const handlePhoneLookup = async (e) => {
+  const handleTokenLookup = async (e) => {
     e.preventDefault();
-    if (!phone.trim()) return;
-    const cleaned = phone.trim().replace(/[\s\-()]/g, '');
-    if (!/^(\+?880|0)[1-9]\d{8,9}$/.test(cleaned)) {
-      setError('Please enter a valid Bangladeshi phone number (e.g. 01700000000)');
-      return;
-    }
+    if (!trackingToken.trim()) return;
     setLoading(true);
     setError('');
     try {
-      const res  = await fetch(`${API}/api/orders/lookup?phone=${encodeURIComponent(cleaned)}`);
+      const res  = await fetch(`${API}/api/orders/lookup?token=${encodeURIComponent(trackingToken.trim())}`);
       const data = await res.json();
-      setOrders(Array.isArray(data) ? data : []);
+      setOrders(data && data._id ? [data] : []);
       setSearched(true);
     } catch {
-      setError('Failed to search orders. Please try again.');
+      setError('Failed to search orders. Please check your token and try again.');
     } finally {
       setLoading(false);
     }
@@ -148,32 +130,32 @@ const OrderHistoryPage = () => {
       <div className="orders-empty">
         <Package size={60} strokeWidth={1} />
         <h2>Track Your Order</h2>
-        <p>Enter the phone number you used at checkout to find your orders.</p>
+        <p>Enter your guest tracking token to find your order.</p>
         <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
           For security, you can search up to 5 times every 15 minutes.
         </p>
         <form
-          onSubmit={handlePhoneLookup}
+          onSubmit={handleTokenLookup}
           style={{ marginTop: '24px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
         >
           <input
-            type="tel"
-            placeholder="+880 1700 000000"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
+            type="text"
+            placeholder="tr_xxxxxxxxxxxxxxxx"
+            value={trackingToken}
+            onChange={e => setTrackingToken(e.target.value)}
             style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
           />
           <button
             type="submit"
             style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <PhoneCall size={14} /> Find Orders
+            <CheckCircle size={14} /> Track Order
           </button>
         </form>
         {loading && <p style={{ marginTop: '16px', color: '#888' }}>Searching…</p>}
         {error   && <p style={{ marginTop: '16px', color: '#e44', fontSize: '0.9rem' }}>{error}</p>}
         {searched && !loading && orders.length === 0 && (
-          <p style={{ marginTop: '16px', color: '#888', fontSize: '0.9rem' }}>No orders found for that phone number.</p>
+          <p style={{ marginTop: '16px', color: '#888', fontSize: '0.9rem' }}>No order found for that token.</p>
         )}
         {searched && !loading && orders.length > 0 && (
           <div className="orders-list" style={{ marginTop: '24px', maxWidth: '700px', margin: '24px auto 0' }}>
@@ -193,43 +175,13 @@ const OrderHistoryPage = () => {
         {loading && <p className="orders-loading">Loading your orders…</p>}
         {error   && <p className="orders-error">{error}</p>}
 
-        {/* No phone saved — show inline lookup form instead of dead-end link */}
-        {!loading && !searched && !user.phone?.trim() && (
+        {/* Since authenticated customers fetch automatically, we don't need a lookup form here anymore.
+            If orders list is empty after load, we just show "No orders yet". */}
+        {!loading && orders.length === 0 && (
           <div className="orders-empty-inner">
             <Package size={48} strokeWidth={1} />
-            <h3>Track your order</h3>
-            <p>Enter the phone number you used at checkout to find your orders, or add one to your <Link to="/profile" style={{ color: 'inherit', textDecoration: 'underline' }}>Profile</Link>.</p>
-            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
-              For security, you can search up to 5 times every 15 minutes.
-            </p>
-            <form
-              onSubmit={handlePhoneLookup}
-              style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
-            >
-              <input
-                type="tel"
-                placeholder="+880 1700 000000"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
-              />
-              <button
-                type="submit"
-                style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <PhoneCall size={14} /> Find Orders
-              </button>
-            </form>
-            {error && <p style={{ marginTop: '16px', color: '#e44', fontSize: '0.9rem' }}>{error}</p>}
-          </div>
-        )}
-
-        {/* Phone searched but no orders found */}
-        {!loading && searched && orders.length === 0 && (
-          <div className="orders-empty-inner">
-            <Package size={48} strokeWidth={1} />
-            <h3>No orders found</h3>
-            <p>No orders were found for that phone number.</p>
+            <h3>No orders yet</h3>
+            <p>You haven't placed any orders yet.</p>
             <Link to="/category/all" className="btn-orders-shop">Start Shopping</Link>
           </div>
         )}

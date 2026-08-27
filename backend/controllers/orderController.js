@@ -115,14 +115,24 @@ const createOrder = async (req, res) => {
     }
 
     const crypto = require('crypto');
-    const guestTrackingToken = orderUserId ? null : 'tr_' + crypto.randomBytes(16).toString('hex');
+    const rawGuestTrackingToken = orderUserId ? null : 'tr_' + crypto.randomBytes(16).toString('hex');
+    let hashedGuestTrackingToken = null;
+    if (rawGuestTrackingToken) {
+      hashedGuestTrackingToken = crypto.createHash('sha256').update(rawGuestTrackingToken).digest('hex');
+    }
 
-    // ── Stock Validation ────────────────────────────────────────────────────
+    // ── Stock Validation & Snapshot Construction (Bulk - Bug #5) ──────────────────────────────────
     const Product = require('../models/Product');
     const stockErrors = [];
+    const validatedProducts = [];
+    let recalculatedTotal = 0;
+
+    const productIds = consolidatedProducts.map(item => item.product);
+    const productsDb = await Product.find({ _id: { $in: productIds } }).select('name price stock');
+    const productMap = new Map(productsDb.map(p => [String(p._id), p]));
 
     for (const item of consolidatedProducts) {
-      const prod = await Product.findById(item.product).select('name stock');
+      const prod = productMap.get(String(item.product));
       if (!prod) {
         stockErrors.push(`Product not found`);
         continue;
@@ -131,21 +141,7 @@ const createOrder = async (req, res) => {
         stockErrors.push(
           `"${prod.name}" only has ${prod.stock} unit${prod.stock !== 1 ? 's' : ''} in stock (you ordered ${item.quantity})`
         );
-      }
-    }
-
-    if (stockErrors.length > 0) {
-      return res.status(400).json({
-        message: `Order failed due to stock issues:\n• ${stockErrors.join('\n• ')}`,
-      });
-    }
-
-    // ── Recalculate total server-side & build snapshot (Bug #6) ──
-    const validatedProducts = [];
-    let recalculatedTotal = 0;
-    for (const item of consolidatedProducts) {
-      const prod = await Product.findById(item.product).select('name price stock');
-      if (prod) {
+      } else {
         recalculatedTotal += prod.price * item.quantity;
         validatedProducts.push({
           product: prod._id,
@@ -153,9 +149,13 @@ const createOrder = async (req, res) => {
           price: prod.price,
           quantity: item.quantity
         });
-      } else {
-        return res.status(404).json({ message: `Product not found` });
       }
+    }
+
+    if (stockErrors.length > 0) {
+      return res.status(400).json({
+        message: `Order failed due to stock issues:\n• ${stockErrors.join('\n• ')}`,
+      });
     }
 
     // Add shipping: free if order >= 2000, else ৳80 inside Dhaka or ৳120 outside
@@ -166,7 +166,7 @@ const createOrder = async (req, res) => {
     // ── Create Order with verified total ─────────────
     const order = new Order({
       user: orderUserId,
-      guestTrackingToken,
+      guestTrackingToken: hashedGuestTrackingToken,
       customerName,
       phone,
       address,
@@ -204,7 +204,11 @@ const createOrder = async (req, res) => {
       });
     }
 
-    res.status(201).json(createdOrder);
+    const orderData = createdOrder.toObject();
+    if (rawGuestTrackingToken) {
+      orderData.rawGuestTrackingToken = rawGuestTrackingToken;
+    }
+    res.status(201).json(orderData);
   } catch (error) {
     res.status(400).json({ message: error.message || 'Invalid order data. Ensure all required fields are filled.' });
   }

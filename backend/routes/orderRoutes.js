@@ -26,8 +26,12 @@ router.get('/lookup', lookupLimiter, async (req, res) => {
     if (!token || !token.trim()) {
       return res.status(400).json({ message: 'Tracking token is required' });
     }
+    
+    const crypto = require('crypto');
+    const hashedToken = crypto.createHash('sha256').update(token.trim()).digest('hex');
+
     const OrderModel = require('../models/Order');
-    const order = await OrderModel.findOne({ guestTrackingToken: token.trim() })
+    const order = await OrderModel.findOne({ guestTrackingToken: hashedToken })
       .populate('products.product', 'name price images')
       .select('-__v')
       .lean();
