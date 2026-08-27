@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: 'Email and password are required' });
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user)
       return res.status(401).json({ message: 'Invalid email or password' });
 
@@ -90,7 +90,7 @@ router.get('/profile', protect, async (req, res) => {
 router.put('/profile', protect, async (req, res) => {
   try {
     const { name, email, phone, currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('+password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const emailChanging = email && email.toLowerCase() !== user.email;
