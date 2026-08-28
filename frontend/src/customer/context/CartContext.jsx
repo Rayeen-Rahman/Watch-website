@@ -30,7 +30,12 @@ export const CartProvider = ({ children }) => {
         cartItems.map(async (item) => {
           try {
             const res = await fetch(`${API}/api/products/${item._id}`);
-            if (!res.ok) return item;
+            if (!res.ok) {
+              if (res.status === 404) {
+                return { ...item, unavailable: true };
+              }
+              return item;
+            }
             const fresh = await res.json();
             return {
               ...item,

@@ -76,5 +76,6 @@ productSchema.index({ category: 1 });
 productSchema.index({ isActive: 1, isFeatured: 1 });
 productSchema.index({ isActive: 1, isBestSeller: 1 });
 productSchema.index({ createdAt: -1 });
+productSchema.index({ name: 'text', brand: 'text' });
 
 module.exports = mongoose.model('Product', productSchema);

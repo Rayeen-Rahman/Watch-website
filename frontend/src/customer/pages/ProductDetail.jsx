@@ -17,6 +17,8 @@ const ProductDetail = () => {
   const [activeAccordion, setActiveAccordion] = useState('details');
   const [showStickyCart, setShowStickyCart] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const relatedSliderRef = useRef(null);
   const { addToCart, setIsCartOpen, clearCart } = useCart();
 
@@ -135,6 +137,26 @@ const ProductDetail = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [id]);
 
+  const updateScrollState = React.useCallback(() => {
+    if (!relatedSliderRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = relatedSliderRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+  }, []);
+
+  useEffect(() => {
+    const el = relatedSliderRef.current;
+    if (el) {
+      el.addEventListener('scroll', updateScrollState);
+      window.addEventListener('resize', updateScrollState);
+      setTimeout(updateScrollState, 100);
+    }
+    return () => {
+      if (el) el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, [relatedProducts, updateScrollState]);
+
   const toggleAccordion = (section) => {
     setActiveAccordion(activeAccordion === section ? null : section);
   };
@@ -179,6 +201,10 @@ const ProductDetail = () => {
       </div>
     );
   }
+
+  const discountPercent = product.oldPrice > product.price
+    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+    : 0;
 
   return (
     <div className="product-detail-page">
@@ -228,12 +254,12 @@ const ProductDetail = () => {
 
             <div className="main-image">
               {activeImage ? (
-                <img src={activeImage} alt={product.name} />
+                <img src={activeImage} alt={product.name} width="600" height="600" />
               ) : (
                 <div className="img-placeholder" style={{ color: '#999' }}>No Image Available</div>
               )}
-              {product.discount > 0 && (
-                <div className="product-page-discount">-{product.discount}%</div>
+              {discountPercent > 0 && (
+                <div className="product-page-discount">-{discountPercent}%</div>
               )}
             </div>
           </div>
@@ -407,10 +433,10 @@ const ProductDetail = () => {
                 <p className="related-subtitle">More from the same collection, handpicked for you.</p>
               </div>
               <div className="slider-nav-buttons">
-                <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous">
+                <button className="slider-nav-btn" onClick={() => scrollRelated(-1)} aria-label="Previous" disabled={!canScrollLeft}>
                   <ChevronLeft size={18} />
                 </button>
-                <button className="slider-nav-btn" onClick={() => scrollRelated(1)} aria-label="Next">
+                <button className="slider-nav-btn" onClick={() => scrollRelated(1)} aria-label="Next" disabled={!canScrollRight}>
                   <ChevronRight size={18} />
                 </button>
               </div>

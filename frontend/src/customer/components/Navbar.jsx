@@ -4,6 +4,7 @@ import { ShoppingBag, User, LogOut, Settings, Search, Menu, X as XIcon } from 'l
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from './LoginModal';
+import { useCategories } from '../../context/CategoryContext';
 
 import { API } from '../../utils/api';
 
@@ -17,19 +18,12 @@ const Navbar = () => {
   const [searchQuery,    setSearchQuery]    = useState('');
   const [mobileSearch,   setMobileSearch]   = useState(false);
   const [mobileQuery,    setMobileQuery]    = useState('');
-  const [categories,     setCategories]     = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isBumping,      setIsBumping]      = useState(false);
+  const { categories: allCategories } = useCategories();
+  const categories = allCategories.slice(0, 6);
 
   const userMenuRef = useRef(null);
-
-  // Fetch categories for nav links
-  useEffect(() => {
-    fetch(`${API}/api/categories`)
-      .then(r => r.json())
-      .then(d => setCategories(Array.isArray(d) ? d.slice(0, 6) : []))
-      .catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (cartCount === 0) return;

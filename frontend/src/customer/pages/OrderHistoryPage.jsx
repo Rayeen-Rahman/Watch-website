@@ -70,12 +70,15 @@ function renderOrderList(orders) {
 }
 
 const OrderHistoryPage = () => {
-  const { user, token } = useAuth();
+  const { user, token, handleUnauthorized } = useAuth();
   const [orders,   setOrders]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
   const [trackingToken, setTrackingToken] = useState('');
   const [searched, setSearched] = useState(false);
+  const [activeTab, setActiveTab] = useState('token'); // 'token' or 'phone'
+  const [orderIdInput, setOrderIdInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
 
   useEffect(() => {
     const prefilledToken = sessionStorage.getItem('lastOrderTrackingToken');
@@ -93,17 +96,25 @@ const OrderHistoryPage = () => {
       fetch(`${API}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then(r => r.json())
+        .then(r => {
+          if (r.status === 401) { handleUnauthorized(); throw new Error('Session expired'); }
+          if (!r.ok) throw new Error('Failed to load orders');
+          return r.json();
+        })
         .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
-        .catch(() => { setError('Failed to load orders'); setLoading(false); });
+        .catch((err) => { setError(err.message === 'Session expired' ? 'Session expired — please log in again.' : 'Failed to load orders'); setLoading(false); });
     } else {
       // Regular customers: GET /api/orders/myorders
       fetch(`${API}/api/orders/myorders`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then(r => r.json())
+        .then(r => {
+          if (r.status === 401) { handleUnauthorized(); throw new Error('Session expired'); }
+          if (!r.ok) throw new Error('Failed to load orders');
+          return r.json();
+        })
         .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
-        .catch(() => { setError('Failed to load orders'); setLoading(false); });
+        .catch((err) => { setError(err.message === 'Session expired' ? 'Session expired — please log in again.' : 'Failed to load orders'); setLoading(false); });
     }
   }, [token, user]);
 
@@ -112,13 +123,38 @@ const OrderHistoryPage = () => {
     if (!trackingToken.trim()) return;
     setLoading(true);
     setError('');
+    setSearched(false);
     try {
       const res  = await fetch(`${API}/api/orders/lookup?token=${encodeURIComponent(trackingToken.trim())}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'No order found');
       setOrders(data && data._id ? [data] : []);
       setSearched(true);
-    } catch {
-      setError('Failed to search orders. Please check your token and try again.');
+    } catch (err) {
+      setError(err.message || 'Failed to search orders. Please check your token and try again.');
+      setOrders([]);
+      setSearched(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneLookup = async (e) => {
+    e.preventDefault();
+    if (!orderIdInput.trim() || !phoneInput.trim()) return;
+    setLoading(true);
+    setError('');
+    setSearched(false);
+    try {
+      const res = await fetch(`${API}/api/orders/lookup-by-phone?orderId=${encodeURIComponent(orderIdInput.trim())}&phone=${encodeURIComponent(phoneInput.trim())}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'No order found');
+      setOrders(data && data._id ? [data] : []);
+      setSearched(true);
+    } catch (err) {
+      setError(err.message || 'Failed to search orders. Please check details and try again.');
+      setOrders([]);
+      setSearched(true);
     } finally {
       setLoading(false);
     }
@@ -130,32 +166,102 @@ const OrderHistoryPage = () => {
       <div className="orders-empty">
         <Package size={60} strokeWidth={1} />
         <h2>Track Your Order</h2>
-        <p>Enter your guest tracking token to find your order.</p>
+        <p style={{ fontSize: '0.88rem', color: '#666', marginTop: '4px' }}>
+          For security, you can search up to 5 times every 15 minutes.
+        </p>
+
+        {/* Tab Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+          <button
+            onClick={() => { setActiveTab('token'); setError(''); setSearched(false); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              color: activeTab === 'token' ? '#000' : '#888',
+              borderBottom: activeTab === 'token' ? '2px solid #000' : 'none',
+              paddingBottom: '5px'
+            }}
+          >
+            Track with Token
+          </button>
+          <button
+            onClick={() => { setActiveTab('phone'); setError(''); setSearched(false); }}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              color: activeTab === 'phone' ? '#000' : '#888',
+              borderBottom: activeTab === 'phone' ? '2px solid #000' : 'none',
+              paddingBottom: '5px'
+            }}
+            style={{ background: 'none', border: 'none', borderBottom: activeTab === 'phone' ? '2px solid #000' : '2px solid transparent', padding: '8px 16px', cursor: 'pointer', fontWeight: activeTab === 'phone' ? 600 : 400, color: activeTab === 'phone' ? '#000' : '#666', fontFamily: 'inherit' }}
+          >
+            Track with Phone & ID
+          </button>
+        </div>
+
         <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
           For security, you can search up to 5 times every 15 minutes.
         </p>
-        <form
-          onSubmit={handleTokenLookup}
-          style={{ marginTop: '24px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
-        >
-          <input
-            type="text"
-            placeholder="tr_xxxxxxxxxxxxxxxx"
-            value={trackingToken}
-            onChange={e => setTrackingToken(e.target.value)}
-            style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
-          />
-          <button
-            type="submit"
-            style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+
+        {activeTab === 'token' ? (
+          <form
+            onSubmit={handleTokenLookup}
+            style={{ marginTop: '24px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}
           >
-            <CheckCircle size={14} /> Track Order
-          </button>
-        </form>
+            <input
+              type="text"
+              placeholder="Guest Tracking Token (e.g. tr_xxx)"
+              value={trackingToken}
+              onChange={e => setTrackingToken(e.target.value)}
+              style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '280px' }}
+            />
+            <button
+              type="submit"
+              style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <CheckCircle size={14} /> Track Order
+            </button>
+          </form>
+        ) : (
+          <form
+            onSubmit={handlePhoneLookup}
+            style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}
+          >
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <input
+                type="text"
+                placeholder="Order ID (e.g. 64b3ef...)"
+                value={orderIdInput}
+                onChange={e => setOrderIdInput(e.target.value)}
+                style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
+              />
+              <input
+                type="text"
+                placeholder="Phone Number (e.g. 017xx)"
+                value={phoneInput}
+                onChange={e => setPhoneInput(e.target.value)}
+                style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}
+              />
+            </div>
+            <button
+              type="submit"
+              style={{ padding: '10px 20px', background: '#000', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <CheckCircle size={14} /> Track Order
+            </button>
+          </form>
+        )}
+
         {loading && <p style={{ marginTop: '16px', color: '#888' }}>Searching…</p>}
         {error   && <p style={{ marginTop: '16px', color: '#e44', fontSize: '0.9rem' }}>{error}</p>}
         {searched && !loading && orders.length === 0 && (
-          <p style={{ marginTop: '16px', color: '#888', fontSize: '0.9rem' }}>No order found for that token.</p>
+          <p style={{ marginTop: '16px', color: '#888', fontSize: '0.9rem' }}>No order found with those details.</p>
         )}
         {searched && !loading && orders.length > 0 && (
           <div className="orders-list" style={{ marginTop: '24px', maxWidth: '700px', margin: '24px auto 0' }}>

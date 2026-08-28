@@ -14,7 +14,14 @@ const Inventory = ({ showToast }) => {
   const [error,     setError]     = useState(null);
   const [edits,     setEdits]     = useState({});   // { [productId]: newStockValue }
   const [saving,    setSaving]    = useState({});   // { [productId]: true/false }
-  const [threshold, setThreshold] = useState(LOW_STOCK_THRESHOLD);
+  const [threshold, setThreshold] = useState(() => {
+    const saved = localStorage.getItem('lowStockThreshold');
+    return saved ? parseInt(saved, 10) : LOW_STOCK_THRESHOLD;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lowStockThreshold', threshold);
+  }, [threshold]);
   const [filterLow, setFilterLow] = useState(false);
   const [page,       setPage]       = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -30,7 +37,7 @@ const Inventory = ({ showToast }) => {
     try {
       const params = new URLSearchParams({ limit: 50, pageNumber: page });
       if (filterLow) params.set('maxStock', threshold);
-      const res  = await fetch(`${API}/api/products?${params}`, {
+      const res  = await fetch(`${API}/api/products/admin?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

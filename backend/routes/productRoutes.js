@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 
 const {
   getProducts,
+  getAdminProducts,
   getFeaturedProduct,
   getProductById,
   createProduct,
@@ -47,6 +48,9 @@ router.post('/upload-image', protect, isAdmin, (req, res, next) => {
 // GET /api/products/featured
 router.get('/featured', getFeaturedProduct);
 
+// GET /api/products/admin
+router.get('/admin', protect, isAdmin, getAdminProducts);
+
 // ── Bulk delete before /:id ──────────────────────────────────────────────────
 // POST /api/products/bulk-delete
 router.post('/bulk-delete', protect, isAdmin, deleteBulkProducts);
@@ -75,7 +79,7 @@ router.route('/')
 // ── ID-based routes ──────────────────────────────────────────────────────────
 router.route('/:id')
   .get(getProductById)
-  .put(protect, isAdmin, updateProduct)
+  .put(protect, isAdmin, validateProduct, updateProduct)
   .delete(protect, isAdmin, deleteProduct);
 
 module.exports = router;

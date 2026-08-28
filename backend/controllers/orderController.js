@@ -158,9 +158,10 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Add shipping: free if order >= 2000, else ৳80 inside Dhaka or ৳120 outside
+    // Add shipping based on config
+    const shippingConfig = require('../config/shipping');
     const isDhaka = (address || '').toLowerCase().includes('dhaka');
-    const shipping = recalculatedTotal >= 2000 ? 0 : (isDhaka ? 80 : 120);
+    const shipping = recalculatedTotal >= shippingConfig.freeShippingThreshold ? 0 : (isDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
     const verifiedTotal = recalculatedTotal + shipping;
 
     // ── Create Order with verified total ─────────────

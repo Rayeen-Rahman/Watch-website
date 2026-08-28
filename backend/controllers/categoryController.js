@@ -8,19 +8,23 @@ const getCategories = async (req, res) => {
   try {
     const categories = await Category.find({}).lean();
 
-    // Attach product count to each category
-    const counts = await Product.aggregate([
-      { $group: { _id: '$category', count: { $sum: 1 } } }
-    ]);
-    const countMap = {};
-    counts.forEach(c => { if (c._id) countMap[c._id.toString()] = c.count; });
+    if (req.query.withCounts === 'true') {
+      // Attach product count to each category
+      const counts = await Product.aggregate([
+        { $group: { _id: '$category', count: { $sum: 1 } } }
+      ]);
+      const countMap = {};
+      counts.forEach(c => { if (c._id) countMap[c._id.toString()] = c.count; });
 
-    const enriched = categories.map(c => ({
-      ...c,
-      productCount: countMap[c._id.toString()] || 0,
-    }));
+      const enriched = categories.map(c => ({
+        ...c,
+        productCount: countMap[c._id.toString()] || 0,
+      }));
 
-    res.json(enriched);
+      return res.json(enriched);
+    }
+
+    res.json(categories);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
   }

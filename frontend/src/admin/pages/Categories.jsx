@@ -35,7 +35,7 @@ const Categories = ({ showToast }) => {
   // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchCategories = useCallback(async () => {
     try {
-      const res  = await fetch(`${API}/api/categories`);
+      const res  = await fetch(`${API}/api/categories?withCounts=true`);
       if (!res.ok) throw new Error('Failed to load categories');
       const data = await res.json();
       setCategories(Array.isArray(data) ? data : []);

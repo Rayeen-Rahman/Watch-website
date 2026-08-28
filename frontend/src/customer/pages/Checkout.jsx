@@ -24,6 +24,14 @@ const Checkout = () => {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [orderSubmitted, setOrderSubmitted] = useState(false);
+  const [shippingConfig, setShippingConfig] = useState({ freeShippingThreshold: 2000, insideDhaka: 80, outsideDhaka: 120 });
+
+  useEffect(() => {
+    fetch(`${API}/api/settings/shipping`)
+      .then(res => res.json())
+      .then(data => setShippingConfig(data))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     const hasData = Object.values(formData).some(v => v.trim().length > 0);
@@ -107,7 +115,7 @@ const Checkout = () => {
 
     // B-04 fix: city-aware shipping cost (matches InfoPage shipping info)
     const isInsideDhaka = formData.city.trim().toLowerCase().includes('dhaka');
-    const shippingCost  = checkoutTotal >= 2000 ? 0 : (isInsideDhaka ? 80 : 120);
+    const shippingCost  = checkoutTotal >= shippingConfig.freeShippingThreshold ? 0 : (isInsideDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
 
     const orderPayload = {
       customerName: formData.customerName.trim(),
@@ -321,22 +329,22 @@ const Checkout = () => {
                     </small>
                   )}
                 </span>
-                <span className={checkoutTotal >= 2000 ? 'free-shipping' : ''}>
-                  {checkoutTotal >= 2000
+                <span className={checkoutTotal >= shippingConfig.freeShippingThreshold ? 'free-shipping' : ''}>
+                  {checkoutTotal >= shippingConfig.freeShippingThreshold
                     ? 'FREE'
                     : !formData.city.trim()
                     ? 'Enter city'
-                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120}`}
+                    : `৳${formData.city.trim().toLowerCase().includes('dhaka') ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka}`}
                 </span>
               </div>
               <div className="total-row final-total">
                 <span>Total</span>
                 <span>
-                  {checkoutTotal >= 2000
+                  {checkoutTotal >= shippingConfig.freeShippingThreshold
                     ? `৳${checkoutTotal.toLocaleString()} (Free shipping)`
                     : !formData.city.trim()
-                    ? `৳${(checkoutTotal + 80).toLocaleString()} (estimated)`
-                    : `৳${(checkoutTotal + (formData.city.trim().toLowerCase().includes('dhaka') ? 80 : 120)).toLocaleString()}`
+                    ? `৳${(checkoutTotal + shippingConfig.insideDhaka).toLocaleString()} (estimated)`
+                    : `৳${(checkoutTotal + (formData.city.trim().toLowerCase().includes('dhaka') ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka)).toLocaleString()}`
                   }
                 </span>
               </div>

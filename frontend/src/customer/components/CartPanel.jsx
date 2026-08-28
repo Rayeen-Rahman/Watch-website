@@ -14,7 +14,11 @@ const CartPanel = () => {
     if (!isCartOpen) return;
     const handlePopState = () => setIsCartOpen(false);
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      document.body.style.overflow = '';
+    };
   }, [isCartOpen, setIsCartOpen]);
 
   if (!isCartOpen) return null;
@@ -38,7 +42,14 @@ const CartPanel = () => {
                 </div>
                 <div className="cart-item-details">
                   <div className="cart-item-top">
-                    <h4>{item.name}</h4>
+                    <h4>
+                      {item.name}
+                      {item.unavailable && (
+                        <span style={{ color: '#E44', fontSize: '0.75rem', display: 'block', fontWeight: 600, marginTop: '4px' }}>
+                          No longer available — please remove
+                        </span>
+                      )}
+                    </h4>
                     <button className="cart-item-remove" aria-label="Remove item" onClick={() => removeFromCart(item._id)}>
                       <Trash2 size={16} />
                     </button>
@@ -67,13 +78,13 @@ const CartPanel = () => {
           <p className="cart-disclaimer">Shipping & taxes calculated at checkout</p>
           <button
             className="btn-checkout"
-            disabled={cartItems.length === 0}
+            disabled={cartItems.length === 0 || cartItems.some(i => i.unavailable)}
             onClick={() => {
               setIsCartOpen(false);
               navigate('/checkout');
             }}
           >
-            GO TO CHECKOUT
+            {cartItems.some(i => i.unavailable) ? 'REMOVE UNAVAILABLE ITEMS' : 'GO TO CHECKOUT'}
           </button>
         </div>
       </div>

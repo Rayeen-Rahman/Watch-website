@@ -76,7 +76,7 @@ const InfoPage = ({ page }) => {
         },
         {
           q: 'Cookies',
-          a: 'We use cookies to keep you logged in and to remember your cart. No third-party advertising cookies are used.',
+          a: 'We use browser local storage to keep you logged in and to remember your cart. No third-party advertising cookies are used.',
         },
         {
           q: 'Your Rights',

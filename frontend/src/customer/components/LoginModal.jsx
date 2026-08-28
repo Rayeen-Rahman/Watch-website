@@ -116,6 +116,13 @@ const LoginModal = ({ onClose }) => {
     return () => modal.removeEventListener('keydown', handleKeyDown);
   }, [tab, onClose]);
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-box" ref={modalRef} onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="modal-title">

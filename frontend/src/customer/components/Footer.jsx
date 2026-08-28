@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Banknote, RefreshCcw, ArrowRight, Mail } from 'lucide-react';
+import { useCategories } from '../../context/CategoryContext';
 
 import { API } from '../../utils/api';
 
 const Footer = () => {
-  const [categories, setCategories] = useState([]);
+  const { categories: allCategories } = useCategories();
+  const categories = allCategories.slice(0, 5);
   const [email, setEmail]           = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [subError, setSubError]     = useState('');
-
-  useEffect(() => {
-    fetch(`${API}/api/categories`)
-      .then(r => r.json())
-      .then(d => setCategories(Array.isArray(d) ? d.slice(0, 5) : []))
-      .catch(() => {});
-  }, []);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();

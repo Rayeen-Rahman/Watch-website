@@ -3,6 +3,7 @@ import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import { API } from '../../utils/api';  // B-09 fix
+import { useCategories } from '../../context/CategoryContext';
 import './CategoryPage.css';
 
 const SORT_OPTIONS = [
@@ -23,7 +24,7 @@ const CategoryPage = () => {
   const urlSearch = new URLSearchParams(location.search).get('search') || '';
 
   const [products,    setProducts]    = useState([]);
-  const [categories,  setCategories]  = useState([]);
+  const { categories } = useCategories();
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
   const [totalCount,  setTotalCount]  = useState(0);
@@ -35,6 +36,7 @@ const CategoryPage = () => {
   const [movement,   setMovement]    = useState('');
   const [gender,     setGender]      = useState('');
   const [maxPrice,   setMaxPrice]    = useState(500000);
+  const [maxPriceDraft, setMaxPriceDraft] = useState(500000);
   const [showFilter, setShowFilter]  = useState(false);
   const [searchText, setSearchText]  = useState(urlSearch);
 
@@ -51,13 +53,7 @@ const CategoryPage = () => {
     prevSearchRef.current = q;
   }, [location.search]);
 
-  // ── Fetch categories for sidebar ────────────────────────────────────────────
-  useEffect(() => {
-    fetch(`${API}/api/categories`)
-      .then(r => r.json())
-      .then(d => setCategories(Array.isArray(d) ? d : []))
-      .catch(() => {});
-  }, []);
+
 
   // ── Fetch products ───────────────────────────────────────────────────────────
   const fetchProducts = useCallback(async () => {
@@ -100,12 +96,15 @@ const CategoryPage = () => {
     setMovement('');
     setGender('');
     setMaxPrice(500000);
+    setMaxPriceDraft(500000);
     setSort('newest');
     if (!q) setSearchText('');
   }, [slug]);
 
   // Reset page when any filter changes
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
+
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [page]);
 
   useEffect(() => {
     fetchProducts();
@@ -114,7 +113,7 @@ const CategoryPage = () => {
   const navigate = useNavigate();
 
   const clearFilters = () => {
-    setMovement(''); setGender(''); setMaxPrice(500000); setSort('newest'); setPage(1);
+    setMovement(''); setGender(''); setMaxPrice(500000); setMaxPriceDraft(500000); setSort('newest'); setPage(1);
     setSearchText('');
     navigate(`/category/${slug || 'all'}`, { replace: true });
   };
@@ -229,10 +228,12 @@ const CategoryPage = () => {
 
           {/* Price range */}
           <div className="filter-section">
-            <h4>Max Price <span className="price-display">৳{maxPrice.toLocaleString()}</span></h4>
+            <h4>Max Price <span className="price-display">৳{maxPriceDraft.toLocaleString()}</span></h4>
             <input type="range" min={1000} max={500000} step={1000}
-              value={maxPrice}
-              onChange={e => setMaxPrice(Number(e.target.value))}
+              value={maxPriceDraft}
+              onChange={e => setMaxPriceDraft(Number(e.target.value))}
+              onMouseUp={() => setMaxPrice(maxPriceDraft)}
+              onTouchEnd={() => setMaxPrice(maxPriceDraft)}
               className="price-slider" />
             <div className="price-range-labels">
               <span>৳1,000</span>
@@ -337,13 +338,36 @@ const CategoryPage = () => {
               {pages > 1 && (
                 <div className="cat-pagination">
                   <button disabled={page === 1}     onClick={() => setPage(p => p - 1)} className="cat-page-btn">← Prev</button>
-                  {[...Array(pages)].map((_, i) => (
-                    <button key={i}
-                      className={`cat-page-btn ${page === i + 1 ? 'cat-page-active' : ''}`}
-                      onClick={() => setPage(i + 1)}>
-                      {i + 1}
-                    </button>
-                  ))}
+                  {(() => {
+                    const pageButtons = [];
+                    const maxVisible = 5;
+                    let start = Math.max(1, page - 2);
+                    let end = Math.min(pages, page + 2);
+                    if (page <= 3) end = Math.min(pages, maxVisible);
+                    if (page >= pages - 2) start = Math.max(1, pages - maxVisible + 1);
+
+                    for (let i = start; i <= end; i++) {
+                      pageButtons.push(
+                        <button key={i}
+                          className={`cat-page-btn ${page === i ? 'cat-page-active' : ''}`}
+                          onClick={() => setPage(i)}>
+                          {i}
+                        </button>
+                      );
+                    }
+                    
+                    const result = [];
+                    if (start > 1) {
+                      result.push(<button key="first" className="cat-page-btn" onClick={() => setPage(1)}>1</button>);
+                      if (start > 2) result.push(<span key="ellipsis1" style={{ margin: '0 8px', color: '#888' }}>...</span>);
+                    }
+                    result.push(...pageButtons);
+                    if (end < pages) {
+                      if (end < pages - 1) result.push(<span key="ellipsis2" style={{ margin: '0 8px', color: '#888' }}>...</span>);
+                      result.push(<button key="last" className="cat-page-btn" onClick={() => setPage(pages)}>{pages}</button>);
+                    }
+                    return result;
+                  })()}
                   <button disabled={page === pages} onClick={() => setPage(p => p + 1)} className="cat-page-btn">Next →</button>
                 </div>
               )}

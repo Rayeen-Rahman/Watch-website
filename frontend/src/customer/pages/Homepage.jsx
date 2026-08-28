@@ -14,6 +14,9 @@ const Homepage = () => {
   const [featuredProd, setFeaturedProd] = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
+  
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   const bestSellersRef = useRef(null);
 
@@ -46,6 +49,26 @@ const Homepage = () => {
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const updateScrollState = useCallback(() => {
+    if (!bestSellersRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = bestSellersRef.current;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth);
+  }, []);
+
+  useEffect(() => {
+    const el = bestSellersRef.current;
+    if (el) {
+      el.addEventListener('scroll', updateScrollState);
+      window.addEventListener('resize', updateScrollState);
+      setTimeout(updateScrollState, 100);
+    }
+    return () => {
+      if (el) el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+    };
+  }, [bestSellers, updateScrollState]);
 
   const scrollBestSellers = (dir) =>
     bestSellersRef.current?.scrollBy({ left: dir * 320, behavior: 'smooth' });
@@ -177,6 +200,7 @@ const Homepage = () => {
                   className="slider-nav-btn"
                   onClick={() => scrollBestSellers(-1)}
                   aria-label="Previous"
+                  disabled={!canScrollLeft}
                 >
                   <ChevronLeft size={18} />
                 </button>
@@ -184,6 +208,7 @@ const Homepage = () => {
                   className="slider-nav-btn"
                   onClick={() => scrollBestSellers(1)}
                   aria-label="Next"
+                  disabled={!canScrollRight}
                 >
                   <ChevronRight size={18} />
                 </button>

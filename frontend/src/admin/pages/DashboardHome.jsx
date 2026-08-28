@@ -120,7 +120,7 @@ const DashboardHome = ({ showToast }) => {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/admin/dashboard-stats`,          { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
+      fetch(`${API}/api/admin/dashboard-stats?lowStockThreshold=${localStorage.getItem('lowStockThreshold') || 5}`,          { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
       fetch(`${API}/api/admin/recent-orders?limit=8`,    { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
       fetch(`${API}/api/admin/popular-products?limit=5`, { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
     ])
@@ -145,7 +145,7 @@ const DashboardHome = ({ showToast }) => {
   /* ── Fetch chart data when range changes ── */
   useEffect(() => {
     setChartLoading(true);
-    fetch(`${API}/api/admin/revenue-chart-fast?days=${chartRange}`, { headers })
+    fetch(`${API}/api/admin/revenue-chart?days=${chartRange}`, { headers })
       .then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); })
       .then(data => {
         setRevenueChart(Array.isArray(data) ? data : []);
@@ -162,7 +162,7 @@ const DashboardHome = ({ showToast }) => {
     setHeroSearch('');
     setShowHeroPicker(true);
     try {
-      const res  = await fetch(`${API}/api/products?limit=20&pageNumber=1`, { headers });
+      const res  = await fetch(`${API}/api/products/admin?limit=20&pageNumber=1`, { headers });
       if (res.status === 401) {
         handleUnauthorized();
         return;
@@ -178,7 +178,7 @@ const DashboardHome = ({ showToast }) => {
     try {
       const params = new URLSearchParams({ limit: 20 });
       if (query.trim()) params.set('search', query.trim());
-      const res = await fetch(`${API}/api/products?${params}`, { headers });
+      const res = await fetch(`${API}/api/products/admin?${params}`, { headers });
       if (!res.ok) return;
       const data = await res.json();
       setAllProducts(Array.isArray(data.products) ? data.products : []);

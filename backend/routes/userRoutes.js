@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
     if (password.length < 6)
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
 
-    const exists = await User.findOne({ email });
+    const exists = await User.findOne({ email: email.toLowerCase().trim() });
     if (exists)
       return res.status(400).json({ message: 'An account with this email already exists' });
 
@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: 'Email and password are required' });
 
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
     if (!user)
       return res.status(401).json({ message: 'Invalid email or password' });
 

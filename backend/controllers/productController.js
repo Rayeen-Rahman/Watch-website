@@ -13,29 +13,8 @@ const getProducts = async (req, res) => {
     if (pageSize > 100) pageSize = 100;
     if (page < 1) page = 1;
 
-    // Decode token if authenticated to see if it is an admin (Bug #23)
-    let isAdminUser = false;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const token = authHeader.split(' ')[1];
-        const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const User = require('../models/User');
-        const currentUser = await User.findById(decoded.id).select('role status isActive');
-        if (currentUser && currentUser.role === 'admin' && currentUser.status === 'Active' && currentUser.isActive) {
-          isAdminUser = true;
-        }
-      } catch (err) {
-        // Ignore invalid token
-      }
-    }
-
     // ── Build filter ──────────────────────────────────────────────────────────
-    const filter = {};
-    if (!isAdminUser) {
-      filter.isActive = true;
-    }
+    const filter = { isActive: true };
 
     // ?maxStock=5 (Bug #15)
     if (req.query.maxStock) {
@@ -66,17 +45,64 @@ const getProducts = async (req, res) => {
 
     // ?search=<term>
     if (req.query.search) {
-      // Escape all special regex characters to prevent ReDoS attacks
-      const raw = req.query.search.trim().slice(0, 100); // cap at 100 chars
-      const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.$or = [
-        { name:  { $regex: escaped, $options: 'i' } },
-        { brand: { $regex: escaped, $options: 'i' } },
-      ];
+      // Use index-backed text search (Bug #7)
+      const raw = req.query.search.trim().slice(0, 100);
+      filter.$text = { $search: raw };
     }
 
     // ── Sort ─────────────────────────────────────────────────────────────────
     let sortObj = { createdAt: -1 };  // default: newest
+    if (req.query.sortBy === 'price') {
+      sortObj = { price: req.query.order === 'desc' ? -1 : 1 };
+    }
+
+    const count    = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
+      .populate('category', 'name slug')
+      .sort(sortObj)
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
+    res.json({ products, page, pages: Math.ceil(count / pageSize), total: count });
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Server Error' });
+  }
+};
+
+// @desc    Get all products for admin (includes inactive, no filter.isActive constraint)
+// @route   GET /api/products/admin
+// @access  Private/Admin
+const getAdminProducts = async (req, res) => {
+  try {
+    let pageSize = parseInt(req.query.limit, 10) || 12;
+    let page     = parseInt(req.query.pageNumber, 10) || 1;
+
+    if (pageSize < 1) pageSize = 12;
+    if (pageSize > 100) pageSize = 100;
+    if (page < 1) page = 1;
+
+    const filter = {};
+
+    if (req.query.maxStock) {
+      const maxStock = Number(req.query.maxStock);
+      if (!isNaN(maxStock)) filter.stock = { $lte: maxStock };
+    }
+    if (req.query.bestSeller === 'true') filter.isBestSeller = true;
+    if (req.query.category) {
+      const Category = require('../models/Category');
+      const cat = await Category.findOne({ slug: req.query.category });
+      filter.category = cat ? cat._id : req.query.category;
+    }
+    if (req.query.movementType) filter.movementType = req.query.movementType;
+    if (req.query.gender) filter.gender = req.query.gender;
+    if (req.query.maxPrice) filter.price = { $lte: Number(req.query.maxPrice) };
+
+    if (req.query.search) {
+      const raw = req.query.search.trim().slice(0, 100);
+      filter.$text = { $search: raw };
+    }
+
+    let sortObj = { createdAt: -1 };
     if (req.query.sortBy === 'price') {
       sortObj = { price: req.query.order === 'desc' ? -1 : 1 };
     }
@@ -119,25 +145,7 @@ const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category', 'name slug');
     if (product) {
-      // Check if product is active OR if the caller is an admin (Bug #23)
-      let isAdminUser = false;
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        try {
-          const token = authHeader.split(' ')[1];
-          const jwt = require('jsonwebtoken');
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          const User = require('../models/User');
-          const currentUser = await User.findById(decoded.id).select('role status isActive');
-          if (currentUser && currentUser.role === 'admin' && currentUser.status === 'Active' && currentUser.isActive) {
-            isAdminUser = true;
-          }
-        } catch (err) {
-          // Ignore
-        }
-      }
-      
-      if (product.isActive || isAdminUser) {
+      if (product.isActive) {
         res.json(product);
       } else {
         res.status(404).json({ message: 'Product not found' });
@@ -216,8 +224,16 @@ const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (product) {
-      await product.deleteOne();
-      res.json({ message: 'Product removed successfully' });
+      const Order = require('../models/Order');
+      const orderCount = await Order.countDocuments({ 'products.product': product._id });
+      if (orderCount > 0) {
+        product.isActive = false;
+        await product.save();
+        res.json({ message: 'Product is linked to historical orders. Deactivated (discontinued) successfully.' });
+      } else {
+        await product.deleteOne();
+        res.json({ message: 'Product removed successfully' });
+      }
     } else {
       res.status(404).json({ message: 'Product not found' });
     }
@@ -226,7 +242,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
-// @desc    Bulk delete products
+// @desc    Bulk delete products (soft-delete if ordered, otherwise hard-delete)
 // @route   POST /api/products/bulk-delete
 // @access  Private/Admin
 const deleteBulkProducts = async (req, res) => {
@@ -235,8 +251,28 @@ const deleteBulkProducts = async (req, res) => {
     if (!productIds || productIds.length === 0) {
       return res.status(400).json({ message: 'No product IDs provided' });
     }
-    await Product.deleteMany({ _id: { $in: productIds } });
-    res.json({ message: 'Bulk products removed successfully' });
+
+    const Order = require('../models/Order');
+    const referencedProducts = await Order.distinct('products.product', { 'products.product': { $in: productIds } });
+    const referencedIds = referencedProducts.map(id => String(id));
+    
+    const toDeleteIds = productIds.filter(id => !referencedIds.includes(String(id)));
+    const toDeactivateIds = productIds.filter(id => referencedIds.includes(String(id)));
+
+    if (toDeleteIds.length > 0) {
+      await Product.deleteMany({ _id: { $in: toDeleteIds } });
+    }
+    if (toDeactivateIds.length > 0) {
+      await Product.updateMany({ _id: { $in: toDeactivateIds } }, { $set: { isActive: false } });
+    }
+
+    if (toDeactivateIds.length > 0) {
+      res.json({
+        message: `Removed ${toDeleteIds.length} product(s) and deactivated ${toDeactivateIds.length} product(s) referenced in existing orders.`
+      });
+    } else {
+      res.json({ message: 'Bulk products removed successfully' });
+    }
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
   }
@@ -244,6 +280,7 @@ const deleteBulkProducts = async (req, res) => {
 
 module.exports = {
   getProducts,
+  getAdminProducts,
   getFeaturedProduct,
   getProductById,
   createProduct,

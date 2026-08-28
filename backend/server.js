@@ -257,7 +257,7 @@ app.get('/sitemap.xml', async (req, res) => {
 
     const [categories, products] = await Promise.all([
       Category.find({}),
-      Product.find({ isActive: true }).select('_id')
+      Product.find({ isActive: true }).select('_id updatedAt')
     ]);
 
     const baseUrl = process.env.FRONTEND_URL || 'https://artifactbd.com';
@@ -278,7 +278,8 @@ app.get('/sitemap.xml', async (req, res) => {
 
     // Products
     for (const prod of products) {
-      xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/product/${escapeXml(prod._id)}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+      const lastmod = prod.updatedAt ? prod.updatedAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      xml += `  <url>\n    <loc>${escapeXml(cleanBaseUrl)}/product/${escapeXml(prod._id)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
 
     xml += `</urlset>`;
@@ -310,6 +311,10 @@ app.use('/api/admin',      adminRoutes);    // Steps 14-16: dashboard stats/orde
 app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
 app.use('/api/newsletter', newsletterRoutes);
 
+app.get('/api/settings/shipping', (req, res) => {
+  res.json(require('./config/shipping'));
+});
+
 
 // ── STEP 9: Serve React SPA build in production ──────────────────────────────
 // MUST be registered BEFORE the error handlers so that:
@@ -329,23 +334,45 @@ if (process.env.NODE_ENV === 'production') {
   );
 
   // ── index.html: NEVER cache — always fetch fresh so new bundles load ────
-  // All other static files (favicon, robots.txt etc): short revalidation
+  // All other static files (favicon, robots.txt etc): 1 day cache
   app.use(
     express.static(frontendBuildPath, {
-      maxAge: 0,
       etag: true,
       setHeaders(res, filePath) {
         if (filePath.endsWith('index.html')) {
           res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
           res.setHeader('Pragma', 'no-cache');
           res.setHeader('Expires', '0');
+        } else {
+          res.setHeader('Cache-Control', 'public, max-age=86400');
         }
       },
     })
   );
 
-  // SPA fallback — send index.html for all non-API GET requests
+  // SPA fallback — send index.html for all non-API GET requests with soft 404 prevention
+  const validRoutes = [
+    /^\/$/,
+    /^\/product\/[a-f0-9]{24}$/,
+    /^\/category\/[a-zA-Z0-9_-]+$/,
+    /^\/category$/,
+    /^\/checkout$/,
+    /^\/success$/,
+    /^\/orders$/,
+    /^\/profile$/,
+    /^\/info\/[a-zA-Z0-9_-]+$/,
+    /^\/reset-password$/,
+    /^\/admin(\/.*)?$/,
+  ];
+
   app.get('*any', (req, res) => {
+    const isApiOrUploads = req.path.startsWith('/api') || req.path.startsWith('/uploads');
+    if (!isApiOrUploads) {
+      const isValid = validRoutes.some(regex => regex.test(req.path));
+      if (!isValid) {
+        res.status(404);
+      }
+    }
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');

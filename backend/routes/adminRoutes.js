@@ -16,11 +16,13 @@ router.use(protect, isAdmin);
 /* ─────────────────────────────────────────────
    GET /api/admin/dashboard-stats
    Returns all 6 KPI card values in one call
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 router.get('/dashboard-stats', async (req, res) => {
   try {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
+
+    const lowStockThreshold = parseInt(req.query.lowStockThreshold, 10) || 5;
 
     const [
       revenueAgg,
@@ -43,9 +45,9 @@ router.get('/dashboard-stats', async (req, res) => {
       Product.countDocuments({ isActive: { $ne: false } }),
       // Count orders waiting to be processed
       Order.countDocuments({ status: 'pending' }),
-      // Products with stock at or below 5
+      // Products with stock at or below the threshold
       Product.countDocuments({
-        stock: { $lte: 5 },
+        stock: { $lte: lowStockThreshold },
         isActive: { $ne: false },
       }),
     ]);
@@ -66,7 +68,7 @@ router.get('/dashboard-stats', async (req, res) => {
 /* ─────────────────────────────────────────────
    GET /api/admin/recent-orders?limit=8
    Returns latest N orders with customer info
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 router.get('/recent-orders', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 8, 50);
@@ -84,7 +86,7 @@ router.get('/recent-orders', async (req, res) => {
 /* ─────────────────────────────────────────────
    GET /api/admin/popular-products?limit=5
    Returns top N products by units sold
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 router.get('/popular-products', async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 5, 20);
@@ -136,54 +138,9 @@ router.get('/popular-products', async (req, res) => {
    GET /api/admin/revenue-chart?days=7
    Returns daily revenue + order count for chart
    Supports: ?days=7  ?days=14  ?days=30
-───────────────────────────────────────────── */
+   Optimized with single aggregation query to prevent N+1 DB lookups
+ ───────────────────────────────────────────── */
 router.get('/revenue-chart', async (req, res) => {
-  try {
-    const days   = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
-    const result = [];
-
-    for (let i = days - 1; i >= 0; i--) {
-      const start = new Date();
-      start.setDate(start.getDate() - i);
-      start.setHours(0, 0, 0, 0);
-
-      const end = new Date(start);
-      end.setHours(23, 59, 59, 999);
-
-      const [ordersCount, revAgg] = await Promise.all([
-        // All orders on that day (any status)
-        Order.countDocuments({ createdAt: { $gte: start, $lte: end } }),
-        // Revenue only from delivered orders
-        Order.aggregate([
-          {
-            $match: {
-              createdAt: { $gte: start, $lte: end },
-              status:    'delivered',
-            },
-          },
-          { $group: { _id: null, total: { $sum: '$total' } } },
-        ]),
-      ]);
-
-      result.push({
-        name:    start.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' }),
-        orders:  ordersCount,
-        revenue: revAgg[0]?.total || 0,
-      });
-    }
-
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* ─────────────────────────────────────────────
-   GET /api/admin/revenue-chart-fast
-   Single aggregation version — faster for large DBs
-   Use this instead if you have 10k+ orders
-───────────────────────────────────────────── */
-router.get('/revenue-chart-fast', async (req, res) => {
   try {
     const days      = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
     const startDate = new Date();
@@ -239,7 +196,7 @@ router.get('/revenue-chart-fast', async (req, res) => {
 /* ─────────────────────────────────────────────
    GET /api/admin/featured-product
    Returns current hero-featured product
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 router.get('/featured-product', async (req, res) => {
   try {
     const product = await Product.findOne({ isFeatured: true, isActive: true })
@@ -253,7 +210,7 @@ router.get('/featured-product', async (req, res) => {
 /* ─────────────────────────────────────────────
    PUT /api/admin/set-featured/:id
    Atomically swaps the hero featured product
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 router.put('/set-featured/:id', async (req, res) => {
   try {
     // Check if target product exists first to avoid clearing feature state if ID is invalid (Bug #17)
