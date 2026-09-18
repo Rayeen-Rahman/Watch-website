@@ -72,9 +72,9 @@ const Footer = () => {
       <div className="footer-content">
 
         {/* Col 1: Brand */}
-        <div className="footer-col">
+        <div className="footer-col footer-col-brand">
           <Link to="/" className="footer-brand-logo" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src="/logo.png" alt="Artifact BD Logo" style={{ height: '30px', marginRight: '10px', filter: 'brightness(0) invert(1)' }} />
+            <img src="/logo.png" alt="Artifact BD Logo" className="footer-logo-img" />
             Artifact BD
           </Link>
           <p className="footer-brand-desc">
@@ -92,7 +92,7 @@ const Footer = () => {
         </div>
 
         {/* Col 2: Collections */}
-        <div className="footer-col">
+        <div className="footer-col footer-col-collections">
           <h4>Collections</h4>
           <ul>
             <li><Link to="/category/all">All Watches</Link></li>
@@ -103,7 +103,7 @@ const Footer = () => {
         </div>
 
         {/* Col 3: Customer Care — link to real pages */}
-        <div className="footer-col">
+        <div className="footer-col footer-col-care">
           <h4>Customer Care</h4>
           <ul>
             <li><Link to="/category/all">Shop All</Link></li>
@@ -115,7 +115,7 @@ const Footer = () => {
         </div>
 
         {/* Col 4: Newsletter */}
-        <div className="footer-col">
+        <div className="footer-col footer-col-newsletter">
           <h4>Stay Updated</h4>
           <p className="footer-newsletter-desc">
             Stay updated on new releases and exclusive offers.

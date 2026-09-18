@@ -43,18 +43,10 @@ body.customer-view {
   z-index: 1002;
 }
 
-@media (max-width: 600px) {
-  .campaign-bar {
-    position: relative; /* don't sticky on mobile — avoids overlap with navbar */
-    font-size: 0.75rem;
-    padding: 6px 10px;
-  }
-}
-
-/* Glass Navbar */
+/* Glass Navbar (Desktop Base) */
 .store-navbar {
   position: sticky;
-  top: 38px; /* Offset below the sticky campaign bar on desktop/tablet */
+  top: 38px;
   width: 100%;
   height: 60px;
   background-color: #ffffff;
@@ -68,10 +60,34 @@ body.customer-view {
   gap: 24px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .campaign-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1002;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 7px 12px;
+    letter-spacing: 0.02em;
+    background-color: #0f0f11;
+    color: #f5f5f5;
+  }
   .store-navbar {
-    top: 0; /* No campaign bar stickiness on mobile, stick to top: 0 */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    position: sticky;
+    top: 31px;
+    height: 52px;
+    padding: 0 16px !important;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #f3f4f6;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
 }
 
@@ -694,11 +710,16 @@ body.customer-view {
 
 /* Responsive: on mobile hide the desktop search, show the toggle icon */
 @media (max-width: 768px) {
-  .navbar-cats          { display: none; }
-  .navbar-search        { display: none; }
-  .mobile-search-toggle { display: flex; }
-  .mobile-menu-toggle   { display: flex; }
-  .store-navbar         { padding: 0 4%; }
+  .navbar-cats          { display: none !important; }
+  .navbar-search        { display: none !important; }
+  .mobile-search-toggle { display: flex !important; }
+  .mobile-menu-toggle   { display: flex !important; }
+  .store-navbar         { padding: 0 16px !important; display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: center !important; }
+  .navbar-logo          { display: flex !important; align-items: center !important; flex-shrink: 0 !important; white-space: nowrap !important; font-size: 1.05rem !important; }
+  .navbar-icons         { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 14px !important; flex-shrink: 0 !important; }
+  .navbar-icons .icon-btn { padding: 4px !important; color: #0f0f11 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+  .mobile-search-bar    { top: 83px; }
+  .mobile-menu-drawer   { position: sticky; top: 83px; z-index: 998; }
 }
 
 /* ── Step 35: Footer social icons ────────────────────────────────────────── */
@@ -900,3 +921,174 @@ body.customer-view {
     transition-delay: 0s !important;
   }
 }
+
+/* ── Stitch Mobile Streamlined Footer (Mobile Only) ── */
+@media (max-width: 768px) {
+  /* Hide trust features section on mobile per Stitch design */
+  .trust-features-section {
+    display: none !important;
+  }
+
+  /* Light clean background matching Stitch design */
+  .store-footer {
+    background-color: #fafafa !important;
+    border-top: 1px solid #e5e7eb !important;
+    padding: 24px 20px 20px 20px !important;
+  }
+
+  .store-footer .footer-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    margin: 0 auto !important;
+    max-width: 448px !important;
+  }
+
+  /* Brand Logo & Socials */
+  .footer-col-brand {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  .footer-brand-logo {
+    color: #0f0f11 !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .footer-logo-img {
+    height: 24px !important;
+    width: 24px !important;
+    object-fit: contain !important;
+    filter: none !important;
+    margin-right: 0 !important;
+  }
+  .footer-brand-desc {
+    display: none !important;
+  }
+  .footer-social {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding-top: 2px !important;
+  }
+  .footer-social .social-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 1px solid #e5e7eb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #52525b !important;
+    background-color: transparent !important;
+    transition: all 0.2s ease !important;
+  }
+  .footer-social .social-icon:hover {
+    border-color: #a1a1aa !important;
+    color: #0f0f11 !important;
+  }
+
+  /* Collections column omitted on mobile per Stitch design */
+  .footer-col-collections {
+    display: none !important;
+  }
+
+  /* Customer Care */
+  .footer-col-care {
+    padding-top: 6px !important;
+  }
+  .footer-col-care h4 {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #0f0f11 !important;
+    margin-bottom: 8px !important;
+  }
+  .footer-col-care ul {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .footer-col-care a {
+    font-size: 12px !important;
+    color: #52525b !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+  }
+  .footer-col-care a:hover {
+    color: #0f0f11 !important;
+  }
+
+  /* Newsletter / Stay Updated */
+  .footer-col-newsletter {
+    padding-top: 6px !important;
+  }
+  .footer-col-newsletter h4 {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #0f0f11 !important;
+    margin-bottom: 6px !important;
+  }
+  .footer-newsletter-desc {
+    font-size: 12px !important;
+    color: #52525b !important;
+    margin-bottom: 8px !important;
+  }
+  .newsletter-form {
+    display: flex !important;
+    align-items: center !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    max-width: 100% !important;
+  }
+  .newsletter-form input {
+    flex: 1 !important;
+    background-color: #ffffff !important;
+    border: none !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    color: #0f0f11 !important;
+    outline: none !important;
+  }
+  .newsletter-form input::placeholder {
+    color: #71717a !important;
+  }
+  .newsletter-form button {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 8px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    border-radius: 0 4px 4px 0 !important;
+    transition: background-color 0.2s ease !important;
+  }
+  .newsletter-form button:hover {
+    background-color: #27272a !important;
+  }
+  .footer-privacy-note {
+    font-size: 11px !important;
+    color: #71717a !important;
+    margin-top: 6px !important;
+  }
+  .footer-bottom {
+    border-top: 1px solid #e5e7eb !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    color: #71717a !important;
+    padding-top: 14px !important;
+    margin-top: 16px !important;
+  }
+}
+

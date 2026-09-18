@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Star } from 'lucide-react';
+import { ShoppingCart, Star, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 import { API, resolveImg } from '../../utils/api';
@@ -107,7 +107,7 @@ const ProductCard = ({ product, sliderCard = false }) => {
             onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
             disabled={added}
           >
-            {added ? '✓' : <ShoppingCart size={15} />}
+            {added ? '✓' : <ShoppingCart size={16} strokeWidth={1.8} />}
           </button>
         </div>
       )}
