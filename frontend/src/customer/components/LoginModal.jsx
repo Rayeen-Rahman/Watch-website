@@ -19,12 +19,13 @@ const LoginModal = ({ onClose }) => {
 
 
 
-  const resetForm = () => {
+  const resetForm = (keepSuccess = false) => {
     setEmail(''); setPassword(''); setName('');
-    setConfirmPass(''); setError(''); setSuccess('');
+    setConfirmPass(''); setError('');
+    if (!keepSuccess) setSuccess('');
   };
 
-  const switchTab = (t) => { setTab(t); resetForm(); };
+  const switchTab = (t, keepSuccess = false) => { setTab(t); resetForm(keepSuccess); };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -58,7 +59,7 @@ const LoginModal = ({ onClose }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to send reset email');
       setSuccess('If this email exists, a reset link has been sent.');
-      switchTab('login');
+      switchTab('login', true);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -81,7 +82,7 @@ const LoginModal = ({ onClose }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');
       setSuccess('Account created! You can now log in.');
-      switchTab('login');
+      switchTab('login', true);
     } catch (err) {
       setError(err.message);
     } finally {

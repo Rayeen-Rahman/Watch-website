@@ -8,7 +8,7 @@ import './Checkout.css';
 import { API, resolveImg } from '../../utils/api';
 
 const Checkout = () => {
-  const { cartItems, cartTotal, clearCart, setIsCartOpen } = useCart();
+  const { cartItems, clearCart, setIsCartOpen } = useCart();
   const { user, token, login } = useAuth();
   const navigate = useNavigate();
   const submittingRef = useRef(false);
@@ -67,6 +67,7 @@ const Checkout = () => {
     if (!isBuyNow) {
       sessionStorage.removeItem('savedCartBeforeBuyNow');
       sessionStorage.removeItem('buyNowItem');
+      sessionStorage.removeItem('buyNowProductId');
     }
     // Only redirect to home if cart is empty AND we have NOT just submitted an order
     // The 500ms delay prevents the race condition where clearCart fires before

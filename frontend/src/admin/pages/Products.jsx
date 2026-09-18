@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trash2, MoreHorizontal, Star, Zap, Search, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
@@ -22,9 +22,6 @@ const Products = ({ showToast }) => {
   const [searchInput, setSearchInput] = useState('');
   const [isAddOpen,   setIsAddOpen]   = useState(false);
   const [editProduct, setEditProduct] = useState(null);
-
-  // Ref used to skip the initial click event that opened the menu
-  const kebabOpenId = useRef(null);
 
   // Internal toast fallback
   const toast = showToast || ((msg, err) => err ? alert(msg) : null);
@@ -50,7 +47,7 @@ const Products = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, [page, rowsPerPage, search]);
+  }, [page, rowsPerPage, search, token]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 

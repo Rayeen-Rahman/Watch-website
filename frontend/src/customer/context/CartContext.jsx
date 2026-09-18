@@ -21,36 +21,38 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('watchCart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Refresh cart item prices/stock from server on mount
+  // Refresh cart item prices/stock from server on mount with single batch request
   useEffect(() => {
     if (cartItems.length === 0) return;
     const API = import.meta.env.VITE_API_URL || '';
     const refreshCart = async () => {
-      const updated = await Promise.all(
-        cartItems.map(async (item) => {
-          try {
-            const res = await fetch(`${API}/api/products/${item._id}`);
-            if (!res.ok) {
-              if (res.status === 404) {
-                return { ...item, unavailable: true };
-              }
-              return item;
-            }
-            const fresh = await res.json();
-            return {
-              ...item,
-              price: fresh.price,
-              stock: fresh.stock,
-              name: fresh.name,
-              images: fresh.images,
-              outOfStock: fresh.stock === 0,
-            };
-          } catch {
-            return item;
+      try {
+        const ids = cartItems.map(item => item._id).filter(Boolean);
+        if (ids.length === 0) return;
+        const res = await fetch(`${API}/api/products/batch?ids=${encodeURIComponent(ids.join(','))}`);
+        if (!res.ok) return;
+        const freshProducts = await res.json();
+        const freshMap = new Map(freshProducts.map(p => [String(p._id), p]));
+
+        const updated = cartItems.map(item => {
+          const fresh = freshMap.get(String(item._id));
+          if (!fresh || fresh.isActive === false) {
+            return { ...item, unavailable: true };
           }
-        })
-      );
-      setCartItems(updated);
+          return {
+            ...item,
+            price: fresh.price,
+            stock: fresh.stock,
+            name: fresh.name,
+            images: fresh.images,
+            outOfStock: fresh.stock === 0,
+            unavailable: false,
+          };
+        });
+        setCartItems(updated);
+      } catch {
+        // Keep existing cart items on network error
+      }
     };
     refreshCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,6 +104,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('watchCart');
   };
 
   const reloadCartFromStorage = () => {

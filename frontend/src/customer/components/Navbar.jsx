@@ -9,7 +9,7 @@ import { useCategories } from '../../context/CategoryContext';
 import { API } from '../../utils/api';
 
 const Navbar = () => {
-  const { cartCount, setIsCartOpen } = useCart();
+  const { cartCount, setIsCartOpen, clearCart } = useCart();
   const { user, logout }             = useAuth();
   const navigate = useNavigate();
 
@@ -48,6 +48,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    clearCart();
     setShowUserMenu(false);
     navigate('/');
   };

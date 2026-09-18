@@ -8,6 +8,7 @@ const {
   getAdminProducts,
   getFeaturedProduct,
   getProductById,
+  getProductsBatch,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -43,6 +44,10 @@ router.post('/upload-image', protect, isAdmin, (req, res, next) => {
   });
 });
 
+
+// ── Batch products before /:id ──────────────────────────────────────────────
+// GET /api/products/batch?ids=id1,id2,id3
+router.get('/batch', getProductsBatch);
 
 // ── Step 10: /featured before /:id ──────────────────────────────────────────
 // GET /api/products/featured

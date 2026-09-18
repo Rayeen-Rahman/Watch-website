@@ -108,9 +108,16 @@ const createOrder = async (req, res) => {
         const token = authHeader.split(' ')[1];
         const jwt = require('jsonwebtoken');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        orderUserId = decoded.id;
+        const User = require('../models/User');
+        const authUser = await User.findById(decoded.id).select('status isActive');
+        if (authUser) {
+          if (authUser.status === 'Banned' || authUser.isActive === false) {
+            return res.status(403).json({ message: 'Your account has been suspended. Please contact support.' });
+          }
+          orderUserId = authUser._id;
+        }
       } catch (err) {
-        // Ignore invalid token
+        // Ignore invalid token, proceed as guest
       }
     }
 
@@ -128,13 +135,16 @@ const createOrder = async (req, res) => {
     let recalculatedTotal = 0;
 
     const productIds = consolidatedProducts.map(item => item.product);
-    const productsDb = await Product.find({ _id: { $in: productIds } }).select('name price stock');
+    const productsDb = await Product.find({
+      _id: { $in: productIds },
+      isActive: { $ne: false },
+    }).select('name price stock isActive');
     const productMap = new Map(productsDb.map(p => [String(p._id), p]));
 
     for (const item of consolidatedProducts) {
       const prod = productMap.get(String(item.product));
       if (!prod) {
-        stockErrors.push(`Product not found`);
+        stockErrors.push(`Product is unavailable or discontinued`);
         continue;
       }
       if (prod.stock < item.quantity) {

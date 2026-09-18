@@ -38,7 +38,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('watchstore_user');
     localStorage.removeItem('watchstore_token');
-    localStorage.removeItem('watchCart');  // B-02 fix: clear cart on logout
   };
 
   // Call this after any API returns 401 to force re-login

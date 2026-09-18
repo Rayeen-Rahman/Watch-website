@@ -20,7 +20,7 @@ const ProductDetail = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const relatedSliderRef = useRef(null);
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -165,6 +165,7 @@ const ProductDetail = () => {
     // Save current cart so we can restore it on the Success page
     const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
     sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
+    sessionStorage.setItem('buyNowProductId', product._id);
     // Do NOT call clearCart() here — instead set a flag and let Checkout
     // send only this product while keeping the rest of the cart intact.
     sessionStorage.setItem('buyNowItem', JSON.stringify({ product, quantity }));

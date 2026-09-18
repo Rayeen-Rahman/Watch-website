@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Truck, Banknote, RefreshCcw, ArrowRight, Mail } from 'lucide-react';
 import { useCategories } from '../../context/CategoryContext';

@@ -30,8 +30,15 @@ const getProducts = async (req, res) => {
     // ?category=<slug or id> — try slug first via Category lookup
     if (req.query.category) {
       const Category = require('../models/Category');
+      const mongoose = require('mongoose');
       const cat = await Category.findOne({ slug: req.query.category });
-      filter.category = cat ? cat._id : req.query.category;
+      if (cat) {
+        filter.category = cat._id;
+      } else if (mongoose.Types.ObjectId.isValid(req.query.category)) {
+        filter.category = req.query.category;
+      } else {
+        return res.json({ products: [], page: 1, pages: 0, total: 0 });
+      }
     }
 
     // ?movementType=Automatic
@@ -90,8 +97,15 @@ const getAdminProducts = async (req, res) => {
     if (req.query.bestSeller === 'true') filter.isBestSeller = true;
     if (req.query.category) {
       const Category = require('../models/Category');
+      const mongoose = require('mongoose');
       const cat = await Category.findOne({ slug: req.query.category });
-      filter.category = cat ? cat._id : req.query.category;
+      if (cat) {
+        filter.category = cat._id;
+      } else if (mongoose.Types.ObjectId.isValid(req.query.category)) {
+        filter.category = req.query.category;
+      } else {
+        return res.json({ products: [], page: 1, pages: 0, total: 0 });
+      }
     }
     if (req.query.movementType) filter.movementType = req.query.movementType;
     if (req.query.gender) filter.gender = req.query.gender;
@@ -143,6 +157,10 @@ const getFeaturedProduct = async (req, res) => {
 // @access  Public
 const getProductById = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id).populate('category', 'name slug');
     if (product) {
       if (product.isActive) {
@@ -153,6 +171,31 @@ const getProductById = async (req, res) => {
     } else {
       res.status(404).json({ message: 'Product not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message || 'Server Error' });
+  }
+};
+
+// @desc    Batch get products by comma-separated IDs (single round-trip cart refresh)
+// @route   GET /api/products/batch?ids=id1,id2,id3
+// @access  Public
+const getProductsBatch = async (req, res) => {
+  try {
+    const rawIds = req.query.ids;
+    if (!rawIds) return res.json([]);
+    const mongoose = require('mongoose');
+    const ids = String(rawIds)
+      .split(',')
+      .map(id => id.trim())
+      .filter(id => mongoose.Types.ObjectId.isValid(id));
+
+    if (ids.length === 0) return res.json([]);
+
+    const products = await Product.find({ _id: { $in: ids } })
+      .select('name price stock images isActive')
+      .lean();
+
+    res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message || 'Server Error' });
   }
@@ -283,6 +326,7 @@ module.exports = {
   getAdminProducts,
   getFeaturedProduct,
   getProductById,
+  getProductsBatch,
   createProduct,
   updateProduct,
   deleteProduct,

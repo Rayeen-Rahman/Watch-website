@@ -149,6 +149,8 @@ const Users = ({ showToast }) => {
     setOpenKebab(id);
   };
 
+  const activeKebabUser = openKebab ? pageRows.find(u => u._id === openKebab) : null;
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -277,30 +279,26 @@ const Users = ({ showToast }) => {
       )}
 
       {/* ── Fixed-position kebab menu ── */}
-      {openKebab && (() => {
-        const user = pageRows.find(u => u._id === openKebab);
-        if (!user) return null;
-        return (
-          <div className="kebab-menu kebab-menu-fixed" style={{ top: menuPos.top, right: menuPos.right }}>
-            <button onClick={() => { setSelectedUser(user); setIsEditOpen(true); setOpenKebab(null); }}>
-              ✏️ Edit
-            </button>
-            <button onClick={() => { toggleBan(user); setOpenKebab(null); }}>
-              {user.status === 'Active'
-                ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
-                : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}
-            </button>
-            <button className="kebab-danger"
-              onClick={() => handleDeleteUser(user._id)}
-              disabled={user._id === loggedInUser?._id}
-              title={user._id === loggedInUser?._id ? 'Cannot delete your own account' : ''}
-              style={user._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
-            >
-              🗑️ Delete
-            </button>
-          </div>
-        );
-      })()}
+      {activeKebabUser && (
+        <div className="kebab-menu kebab-menu-fixed" style={{ top: menuPos.top, right: menuPos.right }}>
+          <button onClick={() => { setSelectedUser(activeKebabUser); setIsEditOpen(true); setOpenKebab(null); }}>
+            ✏️ Edit
+          </button>
+          <button onClick={() => { toggleBan(activeKebabUser); setOpenKebab(null); }}>
+            {activeKebabUser.status === 'Active'
+              ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
+              : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}
+          </button>
+          <button className="kebab-danger"
+            onClick={() => handleDeleteUser(activeKebabUser._id)}
+            disabled={activeKebabUser._id === loggedInUser?._id}
+            title={activeKebabUser._id === loggedInUser?._id ? 'Cannot delete your own account' : ''}
+            style={activeKebabUser._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      )}
 
       {localToast && <div className="local-toast">{localToast}</div>}
 

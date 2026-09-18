@@ -61,7 +61,7 @@ const seed = async () => {
     console.log('🎉 Admin account created successfully!');
     console.log('─────────────────────────────────────');
     console.log(`   Email    : ${ADMIN_EMAIL}`);
-    console.log(`   Password : ${ADMIN_PASSWORD}`);
+    console.log(`   Password : [REDACTED]`);
     console.log(`   Role     : admin`);
     console.log('─────────────────────────────────────');
     console.log('   Login at : http://localhost:5173/admin/login');

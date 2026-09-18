@@ -99,7 +99,7 @@ const CategoryPage = () => {
     setMaxPriceDraft(500000);
     setSort('newest');
     if (!q) setSearchText('');
-  }, [slug]);
+  }, [slug, location.search]);
 
   // Reset page when any filter changes
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);

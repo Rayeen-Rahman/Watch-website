@@ -45,11 +45,11 @@ const Inventory = ({ showToast }) => {
       setTotalPages(data.pages || 1);
       setTotalProducts(data.total || 0);
       setLoading(false);
-    } catch (err) {
+    } catch {
       setError('Failed to load inventory');
       setLoading(false);
     }
-  }, [page, filterLow, threshold]);
+  }, [page, filterLow, threshold, token]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 

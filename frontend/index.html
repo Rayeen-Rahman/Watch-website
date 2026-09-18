@@ -30,8 +30,7 @@
     <!-- ── Icons ──────────────────────────────────────────── -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Preload hero fallback image so LCP is fast even before React loads -->
-    <link rel="preload" as="image" href="/hero_watch.png" />
+    <!-- Preload featured product API so it begins resolving early -->
     <link rel="preload" href="/api/products/featured" as="fetch" crossorigin="anonymous" />
 
     <!-- ── Google Fonts (non-blocking preload strategy) ───── -->

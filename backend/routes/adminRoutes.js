@@ -216,6 +216,9 @@ router.put('/set-featured/:id', async (req, res) => {
     // Check if target product exists first to avoid clearing feature state if ID is invalid (Bug #17)
     const exists = await Product.findById(req.params.id);
     if (!exists) return res.status(404).json({ message: 'Product not found' });
+    if (exists.isActive === false) {
+      return res.status(400).json({ message: 'Cannot feature an inactive product. Please activate it first.' });
+    }
 
     // Unset all featured products first
     await Product.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });

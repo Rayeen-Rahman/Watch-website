@@ -1,3 +1,4 @@
+const crypto  = require('crypto');
 const User    = require('../models/User');
 const bcrypt  = require('bcryptjs');
 
@@ -59,12 +60,14 @@ const createUser = async (req, res) => {
     }
 
     // Hash password if provided, otherwise use a random secure default
-    // (admin-created users should receive a "Set Password" email in a future feature)
     let hashedPassword = '';
     if (password && password.trim().length >= 6) {
       hashedPassword = await bcrypt.hash(password.trim(), 10);
     } else if (password) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    } else {
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      hashedPassword = await bcrypt.hash(randomPassword, 10);
     }
 
     const user = new User({
@@ -92,9 +95,35 @@ const updateUser = async (req, res) => {
   try {
     const { name, email, phone, role, status } = req.body;
     
+    // Prevent admins from demoting or deactivating their own account
+    if (req.user && String(req.user._id) === req.params.id) {
+      if (role && role !== 'admin') {
+        return res.status(400).json({ message: 'You cannot demote your own account.' });
+      }
+      if (status && status !== 'Active') {
+        return res.status(400).json({ message: 'You cannot deactivate or ban your own account.' });
+      }
+    }
+
     const user = await User.findById(req.params.id);
 
     if (user) {
+      // Prevent demoting or deactivating the last remaining active administrator
+      if ((role && role !== 'admin') || (status && status !== 'Active')) {
+        if (user.role === 'admin' && user.status === 'Active') {
+          const otherAdmins = await User.countDocuments({
+            role: 'admin',
+            status: 'Active',
+            _id: { $ne: user._id }
+          });
+          if (otherAdmins === 0) {
+            return res.status(400).json({
+              message: 'Cannot demote or deactivate the last remaining active administrator.'
+            });
+          }
+        }
+      }
+
       user.name = name || user.name;
       if (email && email.toLowerCase() !== user.email) {
         // Check no other user already has this email
@@ -139,6 +168,19 @@ const deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
+      if (user.role === 'admin' && user.status === 'Active') {
+        const otherAdmins = await User.countDocuments({
+          role: 'admin',
+          status: 'Active',
+          _id: { $ne: user._id }
+        });
+        if (otherAdmins === 0) {
+          return res.status(400).json({
+            message: 'Cannot delete the last remaining active administrator.'
+          });
+        }
+      }
+
       await user.deleteOne();
       res.json({ message: 'User removed successfully' });
     } else {

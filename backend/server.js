@@ -18,6 +18,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 const app = express();
 
+// Trust reverse proxy (Hostinger / Nginx) so client IP is forwarded to rate limiters
+app.set('trust proxy', 1);
+
 // ── STEP 5: Morgan request logging (Bug #20) ─────────────────────────────────
 const redactUrl = (url) => {
   if (!url) return url;
@@ -54,9 +57,10 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        defaultSrc:  ["'self'"],
-        scriptSrc:   ["'self'"],
-        styleSrc:    ["'self'", "'unsafe-inline'", 'https:'],
+        defaultSrc:    ["'self'"],
+        scriptSrc:     ["'self'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
+        styleSrc:      ["'self'", "'unsafe-inline'", 'https:'],
         fontSrc:     ["'self'", 'https:', 'data:'],
         imgSrc:      ["'self'", 'data:', 'blob:', 'https:', 'http:'],
         connectSrc:  ["'self'",
@@ -147,6 +151,24 @@ app.use(
     max: 10,                     // Max 10 orders per IP per hour
     skip: (req, res) => req.method !== 'POST', // Only limit POST (order creation)
     message: { message: 'Too many orders placed from this IP. Please try again later.' },
+  })
+);
+
+app.use(
+  '/api/users/forgot-password',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { message: 'Too many password reset requests. Please try again in 15 minutes.' },
+  })
+);
+
+app.use(
+  '/api/newsletter',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { message: 'Too many newsletter subscription attempts. Please try again later.' },
   })
 );
 
@@ -404,6 +426,15 @@ const startServer = async () => {
         process.exit(0);
       });
     });
+  });
+
+  process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Promise Rejection:', err?.message || err);
+  });
+
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err?.message || err);
+    process.exit(1);
   });
 };
 

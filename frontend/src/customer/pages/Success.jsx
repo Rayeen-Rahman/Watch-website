@@ -30,26 +30,36 @@ const Success = () => {
     const tToken = sessionStorage.getItem('lastOrderTrackingToken');
     if (tToken) {
       setTrackingToken(tToken);
-      sessionStorage.removeItem('lastOrderTrackingToken');
     }
     setAllowed(true);
 
     // Restore cart if it was saved during Buy Now AND we actually completed it (Bug #25)
     const completedBuyNow = sessionStorage.getItem("completedBuyNow");
     const saved = sessionStorage.getItem("savedCartBeforeBuyNow");
+    const buyNowProductId = sessionStorage.getItem("buyNowProductId");
     if (completedBuyNow === "true" && saved) {
-      localStorage.setItem("watchCart", saved);
-      reloadCartFromStorage();   // ← update React state immediately
+      try {
+        let parsed = JSON.parse(saved);
+        if (buyNowProductId && Array.isArray(parsed)) {
+          // Reconcile by filtering out the item that was just bought via Buy Now
+          parsed = parsed.filter(item => (item._id || item.product) !== buyNowProductId);
+        }
+        localStorage.setItem("watchCart", JSON.stringify(parsed));
+        reloadCartFromStorage();   // ← update React state immediately
+      } catch (e) {
+        console.error('Error reconciling Buy Now cart', e);
+      }
     }
     // Always clean up the flags
     sessionStorage.removeItem("savedCartBeforeBuyNow");
     sessionStorage.removeItem("completedBuyNow");
+    sessionStorage.removeItem("buyNowProductId");
 
     // Trigger entrance animation after mount
     requestAnimationFrame(() => setAnimate(true));
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [navigate, reloadCartFromStorage]);
 
   // Don't render anything until guard passes — prevents flash + back-button replay
   if (!allowed) return null;
@@ -107,7 +117,10 @@ const Success = () => {
 
       {/* ── CTA buttons ────────────────────────────────────────────────── */}
       <div className="success-actions">
-        <Link to="/orders" className="btn-success-primary">
+        <Link
+          to={trackingToken ? `/orders?token=${encodeURIComponent(trackingToken)}` : "/orders"}
+          className="btn-success-primary"
+        >
           Track My Order <ArrowRight size={16} />
         </Link>
         <Link to="/" className="btn-success-ghost">

@@ -10,6 +10,7 @@ dotenv.config();
 const Product = require('./models/Product');
 const Category = require('./models/Category');
 
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/watch-store';
 const redactedUri = mongoUri.replace(/\/\/[^@]+@/, '//<credentials>@');
 console.log('Connecting to:', redactedUri);
 

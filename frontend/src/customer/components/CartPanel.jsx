@@ -28,7 +28,7 @@ const CartPanel = () => {
       <div className="cart-slide-panel" onClick={e => e.stopPropagation()}>
         <div className="cart-header">
           <h3>Your Bag ({cartCount})</h3>
-          <button className="cart-close-btn" onClick={() => setIsCartOpen(false)}><X size={20} /></button>
+          <button className="cart-close-btn" onClick={() => setIsCartOpen(false)} aria-label="Close cart"><X size={20} /></button>
         </div>
 
         <div className="cart-items-container">
@@ -61,12 +61,13 @@ const CartPanel = () => {
                   </div>
                   <p className="cart-item-price">৳{item.price.toLocaleString()}</p>
                   <div className="cart-item-qty">
-                    <button onClick={() => updateQuantity(item._id, item.qty - 1)}>-</button>
+                    <button onClick={() => updateQuantity(item._id, item.qty - 1)} aria-label="Decrease quantity">-</button>
                     <span>{item.qty}</span>
                     <button
                       onClick={() => updateQuantity(item._id, item.qty + 1)}
                       disabled={item.stock != null && item.qty >= item.stock}
                       title={item.stock != null && item.qty >= item.stock ? 'Max stock reached' : ''}
+                      aria-label="Increase quantity"
                     >+</button>
                   </div>
                 </div>

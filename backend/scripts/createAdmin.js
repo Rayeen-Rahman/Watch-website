@@ -49,7 +49,7 @@ const createAdmin = async () => {
     console.log('\n-----------------------------------');
     console.log('LOGIN DETAILS:');
     console.log(`Email:    ${adminEmail}`);
-    console.log(`Password: ${adminPass}`);
+    console.log(`Password: [REDACTED]`);
     console.log('-----------------------------------\n');
 
     process.exit(0);

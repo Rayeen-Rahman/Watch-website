@@ -83,10 +83,29 @@ const OrderHistoryPage = () => {
   const [phoneInput, setPhoneInput] = useState('');
 
   useEffect(() => {
-    const prefilledToken = sessionStorage.getItem('lastOrderTrackingToken');
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryToken = searchParams.get('token');
+    const prefilledToken = queryToken || sessionStorage.getItem('lastOrderTrackingToken');
     if (prefilledToken && !user) {
       setTrackingToken(prefilledToken);
       sessionStorage.removeItem('lastOrderTrackingToken');
+      (async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const res = await fetch(`${API}/api/orders/lookup?token=${encodeURIComponent(prefilledToken.trim())}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'No order found');
+          setOrders(data && data._id ? [data] : []);
+          setSearched(true);
+        } catch (err) {
+          setError(err.message || 'Failed to search orders. Please check your token and try again.');
+          setOrders([]);
+          setSearched(true);
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
   }, [user]);
 
@@ -118,7 +137,7 @@ const OrderHistoryPage = () => {
         .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
         .catch((err) => { setError(err.message === 'Session expired' ? 'Session expired — please log in again.' : 'Failed to load orders'); setLoading(false); });
     }
-  }, [token, user]);
+  }, [token, user, handleUnauthorized]);
 
   const handleTokenLookup = async (e) => {
     e.preventDefault();
