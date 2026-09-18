@@ -47,7 +47,7 @@ router.get('/dashboard-stats', async (req, res) => {
       Order.countDocuments({ status: 'pending' }),
       // Products with stock at or below the threshold
       Product.countDocuments({
-        stock: { $lte: lowStockThreshold },
+        stock: { $gt: 0, $lte: lowStockThreshold },
         isActive: { $ne: false },
       }),
     ]);

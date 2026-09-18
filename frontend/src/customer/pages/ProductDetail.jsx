@@ -20,7 +20,7 @@ const ProductDetail = () => {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const relatedSliderRef = useRef(null);
-  const { addToCart, setIsCartOpen, clearCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
 
   useEffect(() => {
     window.scrollTo(0, 0);

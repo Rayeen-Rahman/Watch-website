@@ -81,12 +81,14 @@ const Footer = () => {
             Crafting timeless pieces for the modern individual. Designed with precision, worn with purpose.
           </p>
           <div className="footer-social">
-            <a href="mailto:support@artifactbd.com" aria-label="Email" className="social-icon"><Mail size={16} strokeWidth={1.5} /></a>
+            <a href="mailto:support@artifactbd.com" aria-label="Email" className="social-icon">
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            </a>
             <a href="https://www.instagram.com/artifact.bd/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="social-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect height="20" rx="5" width="20" x="2" y="2"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
             </a>
             <a href="https://www.facebook.com/profile.php?id=61590235957563" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="social-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
             </a>
           </div>
         </div>
@@ -106,7 +108,7 @@ const Footer = () => {
         <div className="footer-col footer-col-care">
           <h4>Customer Care</h4>
           <ul>
-            <li><Link to="/category/all">Shop All</Link></li>
+            <li className="footer-shop-all-link"><Link to="/category/all">Shop All</Link></li>
             <li><Link to="/info/faq">FAQ</Link></li>
             <li><Link to="/info/shipping">Shipping &amp; Returns</Link></li>
             <li><Link to="/info/privacy">Privacy Policy</Link></li>
@@ -118,7 +120,7 @@ const Footer = () => {
         <div className="footer-col footer-col-newsletter">
           <h4>Stay Updated</h4>
           <p className="footer-newsletter-desc">
-            Stay updated on new releases and exclusive offers.
+            Subscribe to receive exclusive releases and member-only pricing.
           </p>
           {subscribed ? (
             <p className="footer-subscribed" style={{ color: '#22C55E', fontWeight: 600 }}>
@@ -129,14 +131,14 @@ const Footer = () => {
               <form className="newsletter-form" onSubmit={handleSubscribe}>
                 <input
                   type="email"
-                  placeholder="Email address…"
+                  placeholder="Enter your email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
                   aria-label="Email for newsletter"
                 />
                 <button type="submit" aria-label="Subscribe">
-                  <ArrowRight size={16} />
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" strokeLinecap="round" strokeLinejoin="round"></path></svg>
                 </button>
               </form>
               {subError && <p style={{ color: '#E44', fontSize: '0.85rem', marginTop: '6px' }}>{subError}</p>}
@@ -150,7 +152,7 @@ const Footer = () => {
       </div>
 
       <div className="footer-bottom">
-        &copy; {new Date().getFullYear()} Artifact BD. All rights reserved. Made with ❤️ in Bangladesh.
+        &copy; {new Date().getFullYear()} Artifact BD. All rights reserved. <span className="footer-made-in">Made with ❤️ in Bangladesh.</span>
       </div>
     </footer>
   );

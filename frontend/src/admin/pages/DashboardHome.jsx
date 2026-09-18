@@ -11,7 +11,7 @@ import {
   ArrowUpRight, ArrowDownRight, Star, Search, X, Check
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { resolveImg } from '../../utils/api';
+import { API, resolveImg } from '../../utils/api';
 import './DashboardHome.css';
 
 /* ─────────────────────────────────────────────
@@ -94,8 +94,6 @@ const CustomTooltip = ({ active, payload, label, currency }) => {
 ───────────────────────────────────────────── */
 const DashboardHome = ({ showToast }) => {
   const { token, handleUnauthorized } = useAuth();
-  const _raw = import.meta.env.VITE_API_URL || '';
-  const API = _raw.includes('localhost') ? '' : _raw;
 
   /* ── State ── */
   const [stats,         setStats]         = useState(null);

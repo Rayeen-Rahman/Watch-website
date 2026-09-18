@@ -19,36 +19,6 @@ const {
 } = require('../controllers/orderController');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 
-// GET /api/orders/lookup-by-phone?phone=X&orderId=Y
-router.get('/lookup-by-phone', lookupLimiter, async (req, res) => {
-  try {
-    const { phone, orderId } = req.query;
-    if (!phone || !phone.trim() || !orderId || !orderId.trim()) {
-      return res.status(400).json({ message: 'Phone number and Order ID are required' });
-    }
-    const cleanOrderId = orderId.trim();
-    const mongoose = require('mongoose');
-    if (!mongoose.Types.ObjectId.isValid(cleanOrderId)) {
-      return res.status(400).json({ message: 'Invalid Order ID format' });
-    }
-
-    const OrderModel = require('../models/Order');
-    const order = await OrderModel.findOne({
-      _id: cleanOrderId,
-      phone: phone.trim()
-    })
-      .populate('products.product', 'name price images')
-      .select('-__v')
-      .lean();
-
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found with those details' });
-    }
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
 
 // PUBLIC: token-based order lookup for secure guest order tracking (non-enumerable)
 // GET /api/orders/lookup?token=tr_xxxx

@@ -77,7 +77,7 @@ const Success = () => {
         </div>
       )}
       <p className="success-sub">
-        Your timepiece is on its way. You'll receive it shortly via Cash on Delivery.
+        Your timepiece is on its way. Our team is preparing your order and it will be delivered soon.
       </p>
 
       {/* ── Info cards ─────────────────────────────────────────────────── */}
@@ -99,8 +99,8 @@ const Success = () => {
         <div className="success-card">
           <ShoppingBag size={24} strokeWidth={1.5} />
           <div>
-            <strong>Cash on Delivery</strong>
-            <span>No payment needed until your order arrives.</span>
+            <strong>Payment</strong>
+            <span>Your payment details have been recorded with your order.</span>
           </div>
         </div>
       </div>

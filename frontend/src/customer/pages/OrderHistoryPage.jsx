@@ -58,7 +58,9 @@ function renderOrderList(orders) {
         </div>
 
         <div className="order-card-footer">
-          <span className="order-payment">COD</span>
+          <span className="order-payment">
+            {order.paymentMethod === 'bkash' ? 'bKash' : 'COD'}
+          </span>
           {/* Support both field names: total (current schema) and totalPrice (legacy) */}
           <span className="order-total">
             Total: <strong>৳{(order.total ?? order.totalPrice ?? 0).toLocaleString()}</strong>
@@ -177,12 +179,13 @@ const OrderHistoryPage = () => {
             style={{
               background: 'none',
               border: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
+              borderBottom: activeTab === 'token' ? '2px solid #000' : '2px solid transparent',
+              padding: '8px 16px',
               cursor: 'pointer',
-              color: activeTab === 'token' ? '#000' : '#888',
-              borderBottom: activeTab === 'token' ? '2px solid #000' : 'none',
-              paddingBottom: '5px'
+              fontWeight: activeTab === 'token' ? 600 : 400,
+              color: activeTab === 'token' ? '#000' : '#666',
+              fontFamily: 'inherit',
+              fontSize: '0.9rem',
             }}
           >
             Track with Token
@@ -192,14 +195,14 @@ const OrderHistoryPage = () => {
             style={{
               background: 'none',
               border: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
+              borderBottom: activeTab === 'phone' ? '2px solid #000' : '2px solid transparent',
+              padding: '8px 16px',
               cursor: 'pointer',
-              color: activeTab === 'phone' ? '#000' : '#888',
-              borderBottom: activeTab === 'phone' ? '2px solid #000' : 'none',
-              paddingBottom: '5px'
+              fontWeight: activeTab === 'phone' ? 600 : 400,
+              color: activeTab === 'phone' ? '#000' : '#666',
+              fontFamily: 'inherit',
+              fontSize: '0.9rem',
             }}
-            style={{ background: 'none', border: 'none', borderBottom: activeTab === 'phone' ? '2px solid #000' : '2px solid transparent', padding: '8px 16px', cursor: 'pointer', fontWeight: activeTab === 'phone' ? 600 : 400, color: activeTab === 'phone' ? '#000' : '#666', fontFamily: 'inherit' }}
           >
             Track with Phone & ID
           </button>

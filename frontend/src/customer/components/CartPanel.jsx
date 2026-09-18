@@ -49,6 +49,11 @@ const CartPanel = () => {
                           No longer available — please remove
                         </span>
                       )}
+                      {!item.unavailable && item.outOfStock && (
+                        <span style={{ color: '#E44', fontSize: '0.75rem', display: 'block', fontWeight: 600, marginTop: '4px' }}>
+                          Out of stock — please remove
+                        </span>
+                      )}
                     </h4>
                     <button className="cart-item-remove" aria-label="Remove item" onClick={() => removeFromCart(item._id)}>
                       <Trash2 size={16} />
@@ -78,13 +83,13 @@ const CartPanel = () => {
           <p className="cart-disclaimer">Shipping & taxes calculated at checkout</p>
           <button
             className="btn-checkout"
-            disabled={cartItems.length === 0 || cartItems.some(i => i.unavailable)}
+            disabled={cartItems.length === 0 || cartItems.some(i => i.unavailable || i.outOfStock)}
             onClick={() => {
               setIsCartOpen(false);
               navigate('/checkout');
             }}
           >
-            {cartItems.some(i => i.unavailable) ? 'REMOVE UNAVAILABLE ITEMS' : 'GO TO CHECKOUT'}
+            {cartItems.some(i => i.unavailable || i.outOfStock) ? 'REMOVE UNAVAILABLE ITEMS' : 'GO TO CHECKOUT'}
           </button>
         </div>
       </div>

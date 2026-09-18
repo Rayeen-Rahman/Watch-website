@@ -43,6 +43,7 @@ export const CartProvider = ({ children }) => {
               stock: fresh.stock,
               name: fresh.name,
               images: fresh.images,
+              outOfStock: fresh.stock === 0,
             };
           } catch {
             return item;

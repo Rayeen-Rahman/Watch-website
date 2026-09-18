@@ -306,9 +306,10 @@ const Orders = ({ showToast }) => {
       )}
 
       {/* ── Fixed-position kebab menu ── */}
-      {openKebab && (() => {
+      {(() => {
+        if (!openKebab) return null;
         const order = pageRows.find(o => o._id === openKebab);
-        if (!order) return null;
+        if (!order) { return null; }
         return (
           <div className="kebab-menu kebab-menu-fixed" style={{ top: menuPos.top, right: menuPos.right }}>
             <button onClick={() => { setViewOrder(order); setOpenKebab(null); }}>

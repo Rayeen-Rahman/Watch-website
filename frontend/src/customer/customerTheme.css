@@ -939,7 +939,7 @@ body.customer-view {
   .store-footer .footer-content {
     display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 20px !important;
     margin: 0 auto !important;
     max-width: 448px !important;
   }
@@ -952,9 +952,9 @@ body.customer-view {
   }
   .footer-brand-logo {
     color: #0f0f11 !important;
-    font-size: 1.05rem !important;
+    font-size: 1.1rem !important;
     font-weight: 700 !important;
-    letter-spacing: -0.01em !important;
+    letter-spacing: -0.02em !important;
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
@@ -967,13 +967,17 @@ body.customer-view {
     margin-right: 0 !important;
   }
   .footer-brand-desc {
-    display: none !important;
+    display: block !important;
+    font-size: 12px !important;
+    color: #71717a !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
   }
   .footer-social {
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
-    padding-top: 2px !important;
+    padding-top: 4px !important;
   }
   .footer-social .social-icon {
     width: 32px !important;
@@ -999,7 +1003,7 @@ body.customer-view {
 
   /* Customer Care */
   .footer-col-care {
-    padding-top: 6px !important;
+    padding-top: 4px !important;
   }
   .footer-col-care h4 {
     font-size: 12px !important;
@@ -1009,10 +1013,16 @@ body.customer-view {
     color: #0f0f11 !important;
     margin-bottom: 8px !important;
   }
+  .footer-shop-all-link {
+    display: none !important;
+  }
   .footer-col-care ul {
-    display: flex !important;
-    flex-direction: column !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
   }
   .footer-col-care a {
     font-size: 12px !important;
@@ -1026,7 +1036,7 @@ body.customer-view {
 
   /* Newsletter / Stay Updated */
   .footer-col-newsletter {
-    padding-top: 6px !important;
+    padding-top: 4px !important;
   }
   .footer-col-newsletter h4 {
     font-size: 12px !important;
@@ -1043,7 +1053,7 @@ body.customer-view {
   }
   .newsletter-form {
     display: flex !important;
-    align-items: center !important;
+    align-items: stretch !important;
     border: 1px solid #d1d5db !important;
     border-radius: 4px !important;
     overflow: hidden !important;
@@ -1081,6 +1091,9 @@ body.customer-view {
     font-size: 11px !important;
     color: #71717a !important;
     margin-top: 6px !important;
+  }
+  .footer-made-in {
+    display: none !important;
   }
   .footer-bottom {
     border-top: 1px solid #e5e7eb !important;
