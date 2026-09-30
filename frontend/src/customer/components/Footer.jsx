@@ -27,16 +27,15 @@ const Footer = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setSubscribed(true);
         setEmail('');
       } else {
-        setSubError('Could not subscribe. Please try again.');
-        setEmail('');
+        setSubError(data.message || 'Could not subscribe. Please try again.');
       }
     } catch {
-      setSubError('Could not subscribe. Please try again.');
-      setEmail('');
+      setSubError('Could not subscribe. Please check your connection.');
     }
   };
 

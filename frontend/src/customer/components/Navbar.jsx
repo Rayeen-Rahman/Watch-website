@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, User, LogOut, Settings, Search, Menu, X as XIcon } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +12,7 @@ const Navbar = () => {
   const { cartCount, setIsCartOpen, clearCart } = useCart();
   const { user, logout }             = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [showLogin,      setShowLogin]      = useState(false);
   const [showUserMenu,   setShowUserMenu]   = useState(false);
@@ -22,6 +23,17 @@ const Navbar = () => {
   const [isBumping,      setIsBumping]      = useState(false);
   const { categories: allCategories } = useCategories();
   const categories = allCategories.slice(0, 6);
+
+  useEffect(() => {
+    if (!user) {
+      const shouldOpen = sessionStorage.getItem('openAuthModal');
+      const params = new URLSearchParams(location.search);
+      if (shouldOpen || params.get('login') === 'true') {
+        sessionStorage.removeItem('openAuthModal');
+        setShowLogin(true);
+      }
+    }
+  }, [location, user]);
 
   const userMenuRef = useRef(null);
 
@@ -48,7 +60,6 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    clearCart();
     setShowUserMenu(false);
     navigate('/');
   };

@@ -51,7 +51,7 @@ const CartPanel = () => {
                       )}
                       {!item.unavailable && item.outOfStock && (
                         <span style={{ color: '#E44', fontSize: '0.75rem', display: 'block', fontWeight: 600, marginTop: '4px' }}>
-                          Out of stock — please remove
+                          {item.stock > 0 ? `Only ${item.stock} available — reduce quantity` : 'Out of stock — please remove'}
                         </span>
                       )}
                     </h4>
@@ -65,8 +65,8 @@ const CartPanel = () => {
                     <span>{item.qty}</span>
                     <button
                       onClick={() => updateQuantity(item._id, item.qty + 1)}
-                      disabled={item.stock != null && item.qty >= item.stock}
-                      title={item.stock != null && item.qty >= item.stock ? 'Max stock reached' : ''}
+                      disabled={item.unavailable || item.outOfStock || (item.stock != null && item.qty >= item.stock)}
+                      title={item.unavailable ? 'Item unavailable' : item.outOfStock ? 'Out of stock' : (item.stock != null && item.qty >= item.stock) ? 'Max stock reached' : ''}
                       aria-label="Increase quantity"
                     >+</button>
                   </div>
@@ -82,6 +82,11 @@ const CartPanel = () => {
             <strong>৳{cartTotal.toLocaleString()}</strong>
           </div>
           <p className="cart-disclaimer">Shipping & taxes calculated at checkout</p>
+          {cartItems.some(i => i.unavailable || i.outOfStock) && (
+            <p style={{ color: '#E44', fontSize: '0.78rem', marginBottom: '8px', textAlign: 'center', fontWeight: 600 }}>
+              ⚠ Remove unavailable or out-of-stock items before checking out.
+            </p>
+          )}
           <button
             className="btn-checkout"
             disabled={cartItems.length === 0 || cartItems.some(i => i.unavailable || i.outOfStock)}
@@ -90,7 +95,7 @@ const CartPanel = () => {
               navigate('/checkout');
             }}
           >
-            {cartItems.some(i => i.unavailable || i.outOfStock) ? 'REMOVE UNAVAILABLE ITEMS' : 'GO TO CHECKOUT'}
+            GO TO CHECKOUT
           </button>
         </div>
       </div>

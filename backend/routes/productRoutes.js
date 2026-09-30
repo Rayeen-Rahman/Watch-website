@@ -35,11 +35,12 @@ router.post('/upload-image', protect, isAdmin, (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    // Cloudinary returns a full URL in req.file.path
-    // Local disk returns a filename — build a relative URL
-    const imageUrl = req.file.path
-      ? req.file.path                                        // Cloudinary URL (https://...)
-      : `/uploads/products/${req.file.filename}`;           // Local fallback
+    // Cloudinary returns a full URL in req.file.path starting with http
+    // Local disk returns filesystem path in req.file.path and filename in req.file.filename
+    const isCloudUrl = req.file.path && (req.file.path.startsWith('http://') || req.file.path.startsWith('https://'));
+    const imageUrl = isCloudUrl
+      ? req.file.path
+      : `/uploads/products/${req.file.filename}`;
     res.json({ imageUrl });
   });
 });
@@ -63,11 +64,27 @@ router.post('/bulk-delete', protect, isAdmin, deleteBulkProducts);
 // ── Standard routes ──────────────────────────────────────────────────────────
 // GET  /api/products  (supports ?bestSeller=true, ?category=, ?search=, ?limit=, ?pageNumber=)
 // POST /api/products  (with express-validator — C-5)
+// Strict validator for product creation (POST) — all required fields must be present
 const validateProduct = [
   body('name').trim().notEmpty().withMessage('Product name is required'),
   body('brand').trim().notEmpty().withMessage('Brand is required'),
   body('price').isFloat({ min: 0.01 }).withMessage('Price must be greater than 0'),
   body('stock').isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
+// Lenient validator for product updates (PUT) — only validates fields that ARE provided
+const validateProductUpdate = [
+  body('name').optional().trim().notEmpty().withMessage('Product name cannot be empty'),
+  body('brand').optional().trim().notEmpty().withMessage('Brand cannot be empty'),
+  body('price').optional().isFloat({ min: 0.01 }).withMessage('Price must be greater than 0'),
+  body('stock').optional().isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -84,7 +101,7 @@ router.route('/')
 // ── ID-based routes ──────────────────────────────────────────────────────────
 router.route('/:id')
   .get(getProductById)
-  .put(protect, isAdmin, validateProduct, updateProduct)
+  .put(protect, isAdmin, validateProductUpdate, updateProduct)
   .delete(protect, isAdmin, deleteProduct);
 
 module.exports = router;

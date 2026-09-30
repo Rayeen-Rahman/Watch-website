@@ -20,20 +20,31 @@ const {
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password)
+    if (!name || typeof name !== 'string' || !name.trim() ||
+        !email || typeof email !== 'string' || !email.trim() ||
+        !password) {
       return res.status(400).json({ message: 'All fields are required' });
-    if (password.length < 6)
+    }
+    if (password.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
 
-    const exists = await User.findOne({ email: email.toLowerCase().trim() });
-    if (exists)
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = name.trim();
+
+    const exists = await User.findOne({ email: cleanEmail });
+    if (exists) {
       return res.status(400).json({ message: 'An account with this email already exists' });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
-    await User.create({ name, email, password: hashed, role: 'customer' });
+    await User.create({ name: cleanName, email: cleanEmail, password: hashed, role: 'customer' });
 
     res.status(201).json({ message: 'Account created successfully' });
   } catch (err) {
+    if (err.name === 'ValidationError' || err.code === 11000) {
+      return res.status(400).json({ message: err.message || 'Invalid user data' });
+    }
     res.status(500).json({ message: err.message });
   }
 });
@@ -93,7 +104,8 @@ router.put('/profile', protect, async (req, res) => {
     const user = await User.findById(req.user.id).select('+password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const emailChanging = email && email.toLowerCase() !== user.email;
+    const normalizedEmail = email ? email.toLowerCase().trim() : '';
+    const emailChanging = normalizedEmail && normalizedEmail !== user.email;
     const passwordChanging = !!newPassword;
 
     // Verify current password first to prevent comparing against updated hash (Bug #19)
@@ -111,32 +123,46 @@ router.put('/profile', protect, async (req, res) => {
 
     // Mutate after verification succeeds
     if (newPassword) {
-      user.password = await bcrypt.hash(newPassword, 10);
+      if (typeof newPassword !== 'string' || newPassword.trim().length < 6) {
+        return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+      }
+      user.password = await bcrypt.hash(newPassword.trim(), 10);
     }
-    if (name) user.name = name;
+    if (name !== undefined) {
+      const cleanName = typeof name === 'string' ? name.trim() : '';
+      if (!cleanName) {
+        return res.status(400).json({ message: 'Name cannot be empty' });
+      }
+      user.name = cleanName;
+    }
     if (emailChanging) {
-      user.email = email.toLowerCase();
+      const emailLower = email.toLowerCase().trim();
+      const emailTaken = await User.findOne({
+        email: emailLower,
+        _id: { $ne: user._id }
+      });
+      if (emailTaken) {
+        return res.status(400).json({ message: 'Another account with this email address already exists.' });
+      }
+      user.email = emailLower;
     }
-    if (phone !== undefined) user.phone = phone;
+    if (phone !== undefined) user.phone = String(phone).trim();
 
     const updated = await user.save();
     res.json({ _id: updated._id, name: updated.name, email: updated.email, role: updated.role, phone: updated.phone || '' });
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: 'Another account with this email address already exists.' });
+    }
     res.status(500).json({ message: err.message });
   }
 });
 
-// ── ADMIN: list / get / update / delete (all require admin auth) ─────────────
-router.route('/').get(protect, isAdmin, getUsers).post(protect, isAdmin, createUser);
-router.route('/:id')
-  .get(protect, isAdmin, getUserById)
-  .put(protect, isAdmin, updateUser)
-  .delete(protect, isAdmin, deleteUser);
-
+// ── PASSWORD RESET (public routes — must be BEFORE /:id) ─────────────────────
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email is required' });
+    if (!email || typeof email !== 'string') return res.status(400).json({ message: 'A valid email is required' });
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     
     // If user exists, generate & save token before responding to ensure database write is successful
@@ -149,7 +175,8 @@ router.post('/forgot-password', async (req, res) => {
       user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
       await user.save();
       
-      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+      const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+      const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
@@ -201,5 +228,13 @@ router.put('/reset-password', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+// ── ADMIN: list / get / update / delete (all require admin auth) ─────────────
+// IMPORTANT: must be AFTER all named routes so /:id doesn't shadow them
+router.route('/').get(protect, isAdmin, getUsers).post(protect, isAdmin, createUser);
+router.route('/:id')
+  .get(protect, isAdmin, getUserById)
+  .put(protect, isAdmin, updateUser)
+  .delete(protect, isAdmin, deleteUser);
 
 module.exports = router;

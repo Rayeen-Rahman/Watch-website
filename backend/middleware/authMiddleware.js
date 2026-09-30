@@ -13,8 +13,8 @@ const protect = async (req, res, next) => {
     req.user      = await User.findById(decoded.id).select('-password');
     if (!req.user)
       return res.status(401).json({ message: 'User not found' });
-    // Check if user was banned AFTER their token was issued
-    if (req.user.status === 'Banned') {
+    // Check if user was banned or deactivated AFTER their token was issued
+    if (req.user.status === 'Banned' || req.user.isActive === false) {
       return res.status(403).json({
         message: 'Your account has been suspended. Please contact support.'
       });

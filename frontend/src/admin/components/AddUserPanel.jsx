@@ -22,10 +22,15 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       showToast('Password must be at least 6 characters.', true);
       return;
     }
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+    if (!fullName) {
+      showToast('First name is required.', true);
+      return;
+    }
     setIsSubmitting(true);
     const payload = {
-      name: `${formData.firstName} ${formData.lastName}`.trim(),
-      email: formData.email,
+      name: fullName,
+      email: formData.email.trim().toLowerCase(),
       password: formData.password,
       role: formData.role,
     };
@@ -63,12 +68,12 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
         <form className="panel-form" onSubmit={handleSubmit}>
           <div className="form-row-2">
             <div className="form-group">
-              <label>First Name</label>
+              <label>First Name *</label>
               <input type="text" name="firstName" required value={formData.firstName} onChange={handleChange} placeholder="e.g. Ahmad" />
             </div>
             <div className="form-group">
               <label>Last Name</label>
-              <input type="text" name="lastName" required value={formData.lastName} onChange={handleChange} placeholder="e.g. Reza" />
+              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="e.g. Reza" />
             </div>
           </div>
 

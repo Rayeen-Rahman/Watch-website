@@ -134,15 +134,6 @@ app.use(
     message: { message: 'Too many registration attempts. Try again in an hour.' },
   })
 );
-// B-03 fix: Tight rate limit on order lookup — prevents phone-number enumeration
-app.use(
-  '/api/orders/lookup',
-  rateLimit({
-    windowMs: 15 * 60 * 1000,   // 15 minutes
-    max: 10,                     // 10 lookups per IP per window
-    message: { message: 'Too many order lookups. Please try again later.' },
-  })
-);
 
 app.use(
   '/api/orders',
@@ -375,7 +366,7 @@ if (process.env.NODE_ENV === 'production') {
   // SPA fallback — send index.html for all non-API GET requests with soft 404 prevention
   const validRoutes = [
     /^\/$/,
-    /^\/product\/[a-f0-9]{24}$/,
+    /^\/product\/[a-fA-F0-9]{24}$/,
     /^\/category\/[a-zA-Z0-9_-]+$/,
     /^\/category$/,
     /^\/checkout$/,
@@ -383,17 +374,19 @@ if (process.env.NODE_ENV === 'production') {
     /^\/orders$/,
     /^\/profile$/,
     /^\/info\/[a-zA-Z0-9_-]+$/,
+    /^\/(faq|shipping|privacy|contact)$/,
     /^\/reset-password$/,
     /^\/admin(\/.*)?$/,
   ];
 
-  app.get('*any', (req, res) => {
-    const isApiOrUploads = req.path.startsWith('/api') || req.path.startsWith('/uploads');
-    if (!isApiOrUploads) {
-      const isValid = validRoutes.some(regex => regex.test(req.path));
-      if (!isValid) {
-        res.status(404);
-      }
+  app.get('*any', (req, res, next) => {
+    // If request is targeting /api or /uploads, do NOT serve index.html; pass to 404 handler
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    const isValid = validRoutes.some(regex => regex.test(req.path));
+    if (!isValid) {
+      res.status(404);
     }
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');

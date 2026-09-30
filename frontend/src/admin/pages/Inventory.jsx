@@ -4,11 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import './Products.css';
 import './Inventory.css';
 
-import { API } from '../../utils/api';
+import { API, resolveImg } from '../../utils/api';
 const LOW_STOCK_THRESHOLD = 5;
 
 const Inventory = ({ showToast }) => {
-  const { token, handleUnauthorized } = useAuth();
+  const { token, handleUnauthorized, loading: authLoading } = useAuth();
   const [products,  setProducts]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState(null);
@@ -16,11 +16,14 @@ const Inventory = ({ showToast }) => {
   const [saving,    setSaving]    = useState({});   // { [productId]: true/false }
   const [threshold, setThreshold] = useState(() => {
     const saved = localStorage.getItem('lowStockThreshold');
-    return saved ? parseInt(saved, 10) : LOW_STOCK_THRESHOLD;
+    const parsed = saved ? parseInt(saved, 10) : LOW_STOCK_THRESHOLD;
+    return !isNaN(parsed) && parsed >= 0 ? parsed : LOW_STOCK_THRESHOLD;
   });
 
   useEffect(() => {
-    localStorage.setItem('lowStockThreshold', threshold);
+    if (typeof threshold === 'number' && threshold >= 0) {
+      localStorage.setItem('lowStockThreshold', threshold);
+    }
   }, [threshold]);
   const [filterLow, setFilterLow] = useState(false);
   const [page,       setPage]       = useState(1);
@@ -33,13 +36,19 @@ const Inventory = ({ showToast }) => {
   }, [filterLow, threshold]);
 
   const fetchProducts = useCallback(async () => {
+    if (authLoading || !token) return;
     setLoading(true);
     try {
+      const activeThreshold = (typeof threshold === 'number' && threshold >= 0) ? threshold : 5;
       const params = new URLSearchParams({ limit: 50, pageNumber: page });
-      if (filterLow) params.set('maxStock', threshold);
+      if (filterLow) params.set('maxStock', activeThreshold);
       const res  = await fetch(`${API}/api/products/admin?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       setProducts(Array.isArray(data.products) ? data.products : []);
       setTotalPages(data.pages || 1);
@@ -49,7 +58,7 @@ const Inventory = ({ showToast }) => {
       setError('Failed to load inventory');
       setLoading(false);
     }
-  }, [page, filterLow, threshold, token]);
+  }, [page, filterLow, threshold, token, authLoading, handleUnauthorized]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -76,7 +85,10 @@ const Inventory = ({ showToast }) => {
         handleUnauthorized();
         return;
       }
-      if (!res.ok) throw new Error('Update failed');
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.message || 'Update failed');
+      }
       // Update local state
       setProducts(prev =>
         prev.map(p => p._id === product._id ? { ...p, stock: newStock } : p)
@@ -90,11 +102,12 @@ const Inventory = ({ showToast }) => {
     }
   };
 
+  const activeThreshold = (typeof threshold === 'number' && threshold >= 0) ? threshold : 5;
   const displayed = filterLow
-    ? products.filter(p => (p.stock ?? 0) <= threshold)
+    ? products.filter(p => (p.stock ?? 0) <= activeThreshold)
     : products;
 
-  const lowStockCount = products.filter(p => (p.stock ?? 0) <= threshold).length;
+  const lowStockCount = products.filter(p => (p.stock ?? 0) <= activeThreshold).length;
 
   return (
     <div className="admin-page">
@@ -118,10 +131,16 @@ const Inventory = ({ showToast }) => {
           <label>Low stock threshold:</label>
           <input
             type="number"
-            min={1}
-            max={50}
+            min={0}
+            max={100}
             value={threshold}
-            onChange={e => setThreshold(parseInt(e.target.value) || 5)}
+            onChange={e => {
+              const val = parseInt(e.target.value, 10);
+              setThreshold(isNaN(val) ? '' : Math.max(0, val));
+            }}
+            onBlur={() => {
+              if (threshold === '' || threshold < 0) setThreshold(5);
+            }}
             className="threshold-input"
           />
           <span>units</span>
@@ -173,11 +192,7 @@ const Inventory = ({ showToast }) => {
                 const isLow    = stock <= threshold;
                 const edited   = edits[product._id] !== undefined;
                 const isSaving = saving[product._id];
-                const img      = product.images?.[0]
-                  ? (product.images[0].startsWith('/uploads')
-                    ? `${API}${product.images[0]}`
-                    : product.images[0])
-                  : null;
+                const img      = product.images?.[0] ? resolveImg(product.images[0]) : null;
 
                 return (
                   <tr key={product._id} className={isLow ? 'low-stock-row' : ''}>

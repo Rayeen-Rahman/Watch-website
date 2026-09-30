@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Lock, Save, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './ProfilePage.css';
@@ -6,7 +6,7 @@ import './ProfilePage.css';
 import { API } from '../../utils/api';
 
 const ProfilePage = () => {
-  const { user, token, login } = useAuth();
+  const { user, token, login, loading: authLoading } = useAuth();
 
   const [name,        setName]        = useState(user?.name    || '');
   const [email,       setEmail]       = useState(user?.email   || '');
@@ -18,6 +18,23 @@ const ProfilePage = () => {
   const [showPass,    setShowPass]    = useState(false);
   const [saving,      setSaving]      = useState(false);
   const [msg,         setMsg]         = useState({ text: '', err: false });
+
+  // Sync profile form fields when authenticated user session is loaded
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+    }
+  }, [user]);
+
+  if (authLoading) {
+    return (
+      <div className="profile-page" style={{ textAlign: 'center', padding: '80px 20px', color: '#888' }}>
+        <p>Loading your profile…</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -45,11 +62,15 @@ const ProfilePage = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (email !== user?.email && email !== confirmEmail) {
+    const normEmail = email.trim().toLowerCase();
+    const currEmail = (user?.email || '').trim().toLowerCase();
+    const isEmailChanging = normEmail !== currEmail;
+
+    if (isEmailChanging && normEmail !== confirmEmail.trim().toLowerCase()) {
       setMsg({ text: 'Email addresses do not match', err: true });
       return;
     }
-    if (email !== user?.email && !curPass) {
+    if (isEmailChanging && !curPass) {
       setMsg({ text: 'Current password required to change email', err: true });
       return;
     }
@@ -64,14 +85,20 @@ const ProfilePage = () => {
       const res = await fetch(`${API}/api/users/profile`, {
         method:  'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({ name, email, phone, currentPassword: curPass, newPassword: newPass }),
+        body:    JSON.stringify({
+          name: name.trim(),
+          email: normEmail,
+          phone: phone.trim(),
+          currentPassword: curPass,
+          newPassword: newPass,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
       // Update auth context with new name/email
-      login({ ...user, name: data.name || name, email: data.email || email, phone: data.phone ?? phone }, token);
+      login({ ...user, name: data.name || name.trim(), email: data.email || normEmail, phone: data.phone ?? phone.trim() }, token);
       setMsg({ text: 'Profile updated successfully!', err: false });
-      setCurPass(''); setNewPass(''); setConfirmPass('');
+      setCurPass(''); setNewPass(''); setConfirmPass(''); setConfirmEmail('');
     } catch (err) {
       setMsg({ text: err.message, err: true });
     } finally {

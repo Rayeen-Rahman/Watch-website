@@ -25,7 +25,7 @@ const OrderModal = ({ order, onClose }) => {
     <div className="panel-overlay" onClick={onClose}>
       <div className="order-modal" onClick={e => e.stopPropagation()}>
         <div className="panel-header">
-          <h3>Order #{order._id.slice(-6).toUpperCase()}</h3>
+          <h3>Order #{order._id.slice(-8).toUpperCase()}</h3>
           <button className="btn-icon" onClick={onClose}><X size={20} /></button>
         </div>
         <div className="order-modal-body">
@@ -91,8 +91,11 @@ const Orders = ({ showToast }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, [openKebab]);
 
-  // ── Close kebab on page/filter change ───────────────────────────────────
-  useEffect(() => { setOpenKebab(null); }, [currentPage, statusFilter, search]);
+  // ── Close kebab & clear selection on page/filter change ─────────────────
+  useEffect(() => {
+    setOpenKebab(null);
+    setSelectedIds([]);
+  }, [currentPage, statusFilter, search, rowsPerPage]);
 
   // ── Kebab: open with smart up/down positioning ────────────────────────────
   const handleKebabClick = (e, id) => {
@@ -123,7 +126,7 @@ const Orders = ({ showToast }) => {
       }
       if (!res.ok) throw new Error('Failed to fetch orders');
       const data = await res.json();
-      setOrders(Array.isArray(data) ? data : []);
+      setOrders(Array.isArray(data) ? data : (data?.orders || []));
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -146,7 +149,10 @@ const Orders = ({ showToast }) => {
         handleUnauthorized();
         return;
       }
-      if (!res.ok) throw new Error('Status update failed');
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.message || 'Status update failed');
+      }
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
       setOpenKebab(null);
       toast('Order status updated.');
@@ -157,10 +163,16 @@ const Orders = ({ showToast }) => {
   // ── Filter + search ─────────────────────────────────────────────────────────
   const filtered = orders.filter(o => {
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;
-    const matchSearch = !search ||
-      o.customerName?.toLowerCase().includes(search.toLowerCase()) ||
-      o.phone?.includes(search) ||
-      o._id.slice(-6).toLowerCase().includes(search.toLowerCase());
+    if (!search.trim()) return matchStatus;
+    const cleanSearch = search.trim().toLowerCase();
+    const cleanHex = cleanSearch.replace(/^#/, '');
+    const matchSearch =
+      o.customerName?.toLowerCase().includes(cleanSearch) ||
+      o.phone?.includes(cleanSearch) ||
+      o.address?.toLowerCase().includes(cleanSearch) ||
+      o._id.toLowerCase().includes(cleanHex) ||
+      o._id.slice(-8).toLowerCase().includes(cleanHex) ||
+      o.products?.some(p => (p.name || p.product?.name)?.toLowerCase().includes(cleanSearch));
     return matchStatus && matchSearch;
   });
 
@@ -189,9 +201,12 @@ const Orders = ({ showToast }) => {
           <Search size={15} className="search-icon" />
           <input
             type="text"
-            placeholder="Search name, phone, order ID..."
+            placeholder="Search name, phone, order ID, address..."
             value={searchInput}
-            onChange={e => setSearchInput(e.target.value)}
+            onChange={e => {
+              setSearchInput(e.target.value);
+              if (!e.target.value.trim()) { setSearch(''); setCurrentPage(1); }
+            }}
             onKeyDown={e => { if (e.key === 'Enter') { setSearch(searchInput); setCurrentPage(1); } }}
           />
         </div>
@@ -208,7 +223,7 @@ const Orders = ({ showToast }) => {
               className={`filter-tab ${statusFilter === s ? 'filter-tab-active' : ''}`}
               onClick={() => { setStatusFilter(s); setCurrentPage(1); }}
             >
-              {s === 'failed' ? 'Failed/Cancelled' : s.charAt(0).toUpperCase() + s.slice(1)}
+              {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
         </div>
@@ -246,7 +261,7 @@ const Orders = ({ showToast }) => {
                       onChange={e => handleSelectOne(e, order._id)} />
                   </td>
                   <td className="order-id-cell">
-                    #{order._id.slice(-6).toUpperCase()}
+                    #{order._id.slice(-8).toUpperCase()}
                   </td>
                   <td style={{ fontWeight: 500 }}>{order.customerName}</td>
                   <td style={{ color: 'var(--admin-text-secondary)' }}>{order.phone}</td>

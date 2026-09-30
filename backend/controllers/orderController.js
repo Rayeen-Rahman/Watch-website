@@ -1,4 +1,6 @@
-const Order = require('../models/Order');
+const mongoose = require('mongoose');
+const Order    = require('../models/Order');
+const Product  = require('../models/Product');
 
 // @desc    Get all orders
 // @route   GET /api/orders
@@ -36,6 +38,9 @@ const getOrders = async (req, res) => {
 // @access  Private/Admin
 const getOrderById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
     const order = await Order.findById(req.params.id).populate('products.product', 'name price images');
     if (order) {
       // Check if user is admin OR if the order belongs to this user
@@ -73,15 +78,25 @@ const createOrder = async (req, res) => {
   try {
     const { customerName, phone, address, products, total } = req.body;
 
+    if (!customerName || typeof customerName !== 'string' || !customerName.trim()) {
+      return res.status(400).json({ message: 'Customer name is required' });
+    }
+    if (!phone || typeof phone !== 'string' || !phone.trim()) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+    if (!address || typeof address !== 'string' || !address.trim()) {
+      return res.status(400).json({ message: 'Shipping address is required' });
+    }
+
     // EDGE CASE: Ensure checkout wasn't fired with an empty cart
-    if (!products || products.length === 0) {
+    if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ message: 'Cannot create order: Cart is empty' });
     }
 
     // 1. Validate and consolidate items (Bug #7)
     const consolidatedMap = new Map();
     for (const item of products) {
-      if (!item.product) {
+      if (!item || !item.product || !mongoose.Types.ObjectId.isValid(item.product)) {
         return res.status(400).json({ message: 'Invalid product ID' });
       }
       const qty = Number(item.quantity);
@@ -174,12 +189,14 @@ const createOrder = async (req, res) => {
     const shipping = recalculatedTotal >= shippingConfig.freeShippingThreshold ? 0 : (isDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
     const verifiedTotal = recalculatedTotal + shipping;
 
+    const normalizedPhone = (phone || '').trim().replace(/[\s\-()]/g, '');
+
     // ── Create Order with verified total ─────────────
     const order = new Order({
       user: orderUserId,
       guestTrackingToken: hashedGuestTrackingToken,
-      customerName,
-      phone,
+      customerName: customerName ? customerName.trim() : '',
+      phone: normalizedPhone,
       address,
       products: validatedProducts, // use safe snapshots (Bug #6)
       total: verifiedTotal
@@ -230,6 +247,10 @@ const createOrder = async (req, res) => {
 // @access  Private/Admin
 const updateOrderStatus = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     const { status } = req.body;
 
     const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'failed'];
@@ -237,7 +258,6 @@ const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
     }
 
-    const Product = require('../models/Product');
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'Order not found' });
 

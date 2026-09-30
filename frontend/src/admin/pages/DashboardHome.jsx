@@ -93,7 +93,7 @@ const CustomTooltip = ({ active, payload, label, currency }) => {
    MAIN DASHBOARD
 ───────────────────────────────────────────── */
 const DashboardHome = ({ showToast }) => {
-  const { token, handleUnauthorized } = useAuth();
+  const { token, handleUnauthorized, loading: authLoading } = useAuth();
 
   /* ── State ── */
   const [stats,         setStats]         = useState(null);
@@ -116,6 +116,7 @@ const DashboardHome = ({ showToast }) => {
 
   /* ── Fetch KPIs, orders, products on mount ── */
   useEffect(() => {
+    if (authLoading || !token) return;
     setLoading(true);
     Promise.all([
       fetch(`${API}/api/admin/dashboard-stats?lowStockThreshold=${localStorage.getItem('lowStockThreshold') || 5}`,          { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
@@ -138,10 +139,11 @@ const DashboardHome = ({ showToast }) => {
       .then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); })
       .then(p => setHeroProduct(p || null))
       .catch(() => {});
-  }, [token, handleUnauthorized]); // eslint-disable-line
+  }, [token, authLoading, handleUnauthorized]); // eslint-disable-line
 
   /* ── Fetch chart data when range changes ── */
   useEffect(() => {
+    if (authLoading || !token) return;
     setChartLoading(true);
     fetch(`${API}/api/admin/revenue-chart?days=${chartRange}`, { headers })
       .then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); })
@@ -150,7 +152,7 @@ const DashboardHome = ({ showToast }) => {
         setChartLoading(false);
       })
       .catch(() => setChartLoading(false));
-  }, [token, chartRange, handleUnauthorized]); // eslint-disable-line
+  }, [token, chartRange, authLoading, handleUnauthorized]); // eslint-disable-line
 
   /* ── Helpers ── */
   const fmt = (n) => `৳${(n ?? 0).toLocaleString()}`;
@@ -521,7 +523,7 @@ const DashboardHome = ({ showToast }) => {
                   {recentOrders.map((order) => (
                     <tr key={order._id}>
                       <td className="order-id">
-                        #{String(order._id).slice(-6).toUpperCase()}
+                        #{String(order._id).slice(-8).toUpperCase()}
                       </td>
                       <td className="order-customer">
                         <div className="customer-avatar">

@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API } from '../../utils/api';
 
 const CartContext = createContext();
 
@@ -24,7 +25,6 @@ export const CartProvider = ({ children }) => {
   // Refresh cart item prices/stock from server on mount with single batch request
   useEffect(() => {
     if (cartItems.length === 0) return;
-    const API = import.meta.env.VITE_API_URL || '';
     const refreshCart = async () => {
       try {
         const ids = cartItems.map(item => item._id).filter(Boolean);
@@ -45,7 +45,7 @@ export const CartProvider = ({ children }) => {
             stock: fresh.stock,
             name: fresh.name,
             images: fresh.images,
-            outOfStock: fresh.stock === 0,
+            outOfStock: fresh.stock < item.qty,   // Bug #2 fix: flag if stock < cart qty
             unavailable: false,
           };
         });
@@ -78,10 +78,15 @@ export const CartProvider = ({ children }) => {
         // Clamp at available stock
         const newQty = Math.min(existing.qty + quantity, maxStock);
         return prev.map(item =>
-          item._id === product._id ? { ...item, qty: newQty } : item
+          item._id === product._id ? {
+            ...item,
+            qty: newQty,
+            outOfStock: maxStock < newQty,
+            unavailable: false
+          } : item
         );
       }
-      return [...prev, { ...cartItem, qty: Math.min(quantity, maxStock) }];
+      return [...prev, { ...cartItem, qty: Math.min(quantity, maxStock), outOfStock: false, unavailable: false }];
     });
     if (openCart) {
       setIsCartOpen(true);
@@ -98,7 +103,12 @@ export const CartProvider = ({ children }) => {
       if (item._id !== id) return item;
       // Clamp at available stock
       const maxStock = item.stock ?? Infinity;
-      return { ...item, qty: Math.min(quantity, maxStock) };
+      const newQty = Math.min(quantity, maxStock);
+      return {
+        ...item,
+        qty: newQty,
+        outOfStock: item.stock != null ? item.stock < newQty : false,
+      };
     }));
   };
 

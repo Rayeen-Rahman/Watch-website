@@ -37,6 +37,10 @@ const Products = ({ showToast }) => {
       const res  = await fetch(`${API}/api/products/admin?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
       setProducts(data.products || []);
@@ -47,7 +51,7 @@ const Products = ({ showToast }) => {
       setError(err.message);
       setLoading(false);
     }
-  }, [page, rowsPerPage, search, token]);
+  }, [page, rowsPerPage, search, token, handleUnauthorized]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -62,8 +66,11 @@ const Products = ({ showToast }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, [openKebab]);
 
-  // ── Close kebab on page/search change ────────────────────────────────────
-  useEffect(() => { setOpenKebab(null); }, [page, search]);
+  // ── Close kebab & clear selection on page/search/rows change ────────────
+  useEffect(() => {
+    setOpenKebab(null);
+    setSelectedIds([]);
+  }, [page, search, rowsPerPage]);
 
   // ── Toggle isBestSeller / isFeatured ──────────────────────────────────────
   const toggleFlag = async (product, flag) => {
@@ -78,7 +85,10 @@ const Products = ({ showToast }) => {
           handleUnauthorized();
           return;
         }
-        if (!res.ok) throw new Error('Update failed');
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.message || 'Update failed');
+        }
         fetchProducts();
         return;
       }
@@ -92,7 +102,10 @@ const Products = ({ showToast }) => {
         handleUnauthorized();
         return;
       }
-      if (!res.ok) throw new Error('Update failed');
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.message || 'Update failed');
+      }
       fetchProducts();
     } catch (err) {
       toast(err.message, true);
@@ -113,7 +126,7 @@ const Products = ({ showToast }) => {
         fetchProducts();
         toast('Product deleted.');
       } else {
-        const d = await res.json();
+        const d = await res.json().catch(() => ({}));
         toast(d.message || 'Delete failed', true);
       }
     } catch (err) { toast(err.message, true); }
@@ -134,11 +147,13 @@ const Products = ({ showToast }) => {
         return;
       }
       if (res.ok) {
+        const d = await res.json().catch(() => ({}));
         setSelectedIds([]);
         fetchProducts();
-        toast('Products deleted.');
+        toast(d.message || 'Products deleted.');
       } else {
-        toast('Bulk delete failed.', true);
+        const d = await res.json().catch(() => ({}));
+        toast(d.message || 'Bulk delete failed.', true);
       }
     } catch (err) { toast(err.message, true); }
   };

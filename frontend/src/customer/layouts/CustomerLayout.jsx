@@ -37,6 +37,10 @@ const CustomerLayout = () => {
           <Route path="/success"         element={<Success />} />
           <Route path="/orders"          element={<OrderHistoryPage />} />
           <Route path="/profile"         element={<ProfilePage />} />
+          <Route path="/faq"             element={<InfoPage page="faq" />} />
+          <Route path="/shipping"        element={<InfoPage page="shipping" />} />
+          <Route path="/privacy"         element={<InfoPage page="privacy" />} />
+          <Route path="/contact"         element={<InfoPage page="contact" />} />
           <Route path="/info/faq"        element={<InfoPage page="faq" />} />
           <Route path="/info/shipping"   element={<InfoPage page="shipping" />} />
           <Route path="/info/privacy"    element={<InfoPage page="privacy" />} />

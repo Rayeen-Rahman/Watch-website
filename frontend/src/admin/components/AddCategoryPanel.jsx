@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { API } from '../../utils/api';
 import './AddCategoryPanel.css';
 
-const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
+const AddCategoryPanel = ({ isOpen, onClose, showToast, onSave }) => {
   const { token, handleUnauthorized } = useAuth();
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,9 +14,7 @@ const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
     setIsSubmitting(true);
 
     try {
-      const _raw = import.meta.env.VITE_API_URL || '';
-      const _api = _raw.includes('localhost') ? '' : _raw;
-      const res = await fetch(`${_api}/api/categories`, {
+      const res = await fetch(`${API}/api/categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ name })
@@ -30,6 +29,7 @@ const AddCategoryPanel = ({ isOpen, onClose, showToast }) => {
       if (!res.ok) throw new Error(data.message || 'Failed to add category');
 
       showToast('Category added successfully', false);
+      if (onSave) onSave(data);
       setName('');
       onClose();
     } catch (err) {

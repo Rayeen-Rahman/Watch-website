@@ -34,7 +34,7 @@ const LoginModal = ({ onClose }) => {
       const res  = await fetch(`${API}/api/users/login`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body:    JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
@@ -54,7 +54,7 @@ const LoginModal = ({ onClose }) => {
       const res = await fetch(`${API}/api/users/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Failed to send reset email');
@@ -77,7 +77,7 @@ const LoginModal = ({ onClose }) => {
       const res  = await fetch(`${API}/api/users/register`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, email, password }),
+        body:    JSON.stringify({ name: name.trim(), email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Registration failed');

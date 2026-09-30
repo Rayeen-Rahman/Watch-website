@@ -110,8 +110,20 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
   // ── Form submit ─────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.name.trim()) {
+      showToast('Please enter a product name.', true);
+      return;
+    }
+    if (!formData.category) {
+      showToast('Please select a category from the dropdown.', true);
+      return;
+    }
     if (images.length === 0) {
       showToast('Please add at least one product image.', true);
+      return;
+    }
+    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      showToast('Please enter a valid selling price greater than 0.', true);
       return;
     }
     if (formData.oldPrice && Number(formData.oldPrice) <= Number(formData.price)) {
@@ -122,17 +134,28 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       showToast('Stock must be a whole number of 0 or more.', true);
       return;
     }
+    if (!formData.description || !formData.description.trim()) {
+      showToast('Please enter a product description.', true);
+      return;
+    }
     setIsSubmitting(true);
+    const numPrice = Number(formData.price);
+    const numOldPrice = formData.oldPrice ? Number(formData.oldPrice) : null;
+    const computedDiscount = (numOldPrice && numOldPrice > numPrice)
+      ? Math.round(((numOldPrice - numPrice) / numOldPrice) * 100)
+      : 0;
+
     const payload = {
-      name:             formData.name,
-      brand:            formData.brand || '',
-      price:            Number(formData.price),
-      oldPrice:         formData.oldPrice ? Number(formData.oldPrice) : null,
-      shortDescription: formData.shortDescription,
-      description:      formData.description,
+      name:             formData.name.trim(),
+      brand:            formData.brand ? formData.brand.trim() : '',
+      price:            numPrice,
+      oldPrice:         numOldPrice,
+      discount:         computedDiscount,
+      shortDescription: formData.shortDescription ? formData.shortDescription.trim() : '',
+      description:      formData.description.trim(),
       images,
       category:         formData.category,
-      tag:              formData.tag,
+      tag:              formData.tag ? formData.tag.trim() : '',
       stock:            Math.max(0, Math.floor(Number(formData.stock) || 0)),
       dialColor:        formData.dialColor,
       strapMaterial:    formData.strapMaterial,

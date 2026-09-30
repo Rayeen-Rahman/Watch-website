@@ -107,14 +107,20 @@ const Homepage = () => {
           <div className="hero-panel hero-panel-right">
             <div className="hero-image-container">
               <div className="hero-watch-wrapper">
-                {<img
-                  src={featuredProd?.images?.[0] ? resolveImg(featuredProd.images[0]) : heroFallback}
-                  alt={featuredProd?.name || 'Premium Chronograph Watch'}
-                  className="hero-watch-img"
-                  width="480"
-                  height="480"
-                  fetchPriority="high"
-                />}
+                <Link
+                  to={featuredProd?._id ? `/product/${featuredProd._id}` : '/category/all'}
+                  className="hero-watch-link"
+                  aria-label={featuredProd?.name ? `View ${featuredProd.name}` : 'Shop All Watches'}
+                >
+                  <img
+                    src={featuredProd?.images?.[0] ? resolveImg(featuredProd.images[0]) : heroFallback}
+                    alt={featuredProd?.name || 'Premium Chronograph Watch'}
+                    className="hero-watch-img"
+                    width="480"
+                    height="480"
+                    fetchPriority="high"
+                  />
+                </Link>
 
                 {/* Floating featured product card */}
                 {featuredProd ? (

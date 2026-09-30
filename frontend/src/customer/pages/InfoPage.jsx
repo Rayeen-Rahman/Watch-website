@@ -104,6 +104,17 @@ const InfoPage = ({ page }) => {
   };
 
   const pageData = content[page];
+
+  React.useEffect(() => {
+    const prevTitle = document.title;
+    if (pageData?.title) {
+      document.title = `${pageData.title} — Artifact BD`;
+    }
+    return () => {
+      document.title = prevTitle;
+    };
+  }, [pageData?.title]);
+
   if (!pageData) return null;
 
   return (

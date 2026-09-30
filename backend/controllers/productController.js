@@ -52,9 +52,16 @@ const getProducts = async (req, res) => {
 
     // ?search=<term>
     if (req.query.search) {
-      // Use index-backed text search (Bug #7)
       const raw = req.query.search.trim().slice(0, 100);
-      filter.$text = { $search: raw };
+      if (raw) {
+        const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const searchRegex = new RegExp(escaped, 'i');
+        filter.$or = [
+          { name: searchRegex },
+          { brand: searchRegex },
+          { shortDescription: searchRegex },
+        ];
+      }
     }
 
     // ── Sort ─────────────────────────────────────────────────────────────────
@@ -113,7 +120,15 @@ const getAdminProducts = async (req, res) => {
 
     if (req.query.search) {
       const raw = req.query.search.trim().slice(0, 100);
-      filter.$text = { $search: raw };
+      if (raw) {
+        const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const searchRegex = new RegExp(escaped, 'i');
+        filter.$or = [
+          { name: searchRegex },
+          { brand: searchRegex },
+          { shortDescription: searchRegex },
+        ];
+      }
     }
 
     let sortObj = { createdAt: -1 };
@@ -140,8 +155,16 @@ const getAdminProducts = async (req, res) => {
 // @access  Public
 const getFeaturedProduct = async (req, res) => {
   try {
-    const product = await Product.findOne({ isFeatured: true, isActive: true })
+    let product = await Product.findOne({ isFeatured: true, isActive: true })
       .populate('category', 'name slug');
+
+    // Fallback: If no product is explicitly flagged as featured, spotlight the newest active product
+    if (!product) {
+      product = await Product.findOne({ isActive: true })
+        .populate('category', 'name slug')
+        .sort({ createdAt: -1 });
+    }
+
     if (product) {
       res.json(product);
     } else {
@@ -163,7 +186,20 @@ const getProductById = async (req, res) => {
     }
     const product = await Product.findById(req.params.id).populate('category', 'name slug');
     if (product) {
-      if (product.isActive) {
+      let isAdminUser = false;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        try {
+          const token = authHeader.split(' ')[1];
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          if (decoded && decoded.role === 'admin') isAdminUser = true;
+        } catch {
+          // guest or invalid token
+        }
+      }
+
+      if (product.isActive || isAdminUser) {
         res.json(product);
       } else {
         res.status(404).json({ message: 'Product not found' });
@@ -214,8 +250,24 @@ const createProduct = async (req, res) => {
       isBestSeller, isFeatured, isActive,
     } = req.body;
 
+    const mongoose = require('mongoose');
+    if (!category || !mongoose.Types.ObjectId.isValid(category)) {
+      return res.status(400).json({ message: 'A valid category is required' });
+    }
+
+    if (isFeatured) {
+      await Product.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });
+    }
+
+    const numPrice = Number(price);
+    const numOldPrice = oldPrice ? Number(oldPrice) : null;
+    const computedDiscount = (numOldPrice && numOldPrice > numPrice)
+      ? Math.round(((numOldPrice - numPrice) / numOldPrice) * 100)
+      : (Number(discount) || 0);
+
     const product = new Product({
-      name, brand, price, oldPrice, discount,
+      name, brand, price: numPrice, oldPrice: numOldPrice,
+      discount: computedDiscount,
       shortDescription, description,
       images:  images  || [],
       category, tag,
@@ -238,8 +290,22 @@ const createProduct = async (req, res) => {
 // @access  Private/Admin
 const updateProduct = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    if (req.body.isFeatured === true) {
+      await Product.updateMany({ _id: { $ne: product._id }, isFeatured: true }, { $set: { isFeatured: false } });
+    }
+
+    if (req.body.category !== undefined) {
+      if (!req.body.category || !mongoose.Types.ObjectId.isValid(req.body.category)) {
+        return res.status(400).json({ message: 'A valid category is required' });
+      }
+    }
 
     const fields = [
       'name', 'brand', 'price', 'oldPrice', 'discount',
@@ -253,6 +319,13 @@ const updateProduct = async (req, res) => {
       if (req.body[f] !== undefined) product[f] = req.body[f];
     });
 
+    // Auto-recalculate discount whenever price or oldPrice is updated
+    if (product.oldPrice && product.oldPrice > product.price) {
+      product.discount = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
+    } else {
+      product.discount = 0;
+    }
+
     const updated = await product.save();
     res.json(updated);
   } catch (error) {
@@ -265,12 +338,17 @@ const updateProduct = async (req, res) => {
 // @access  Private/Admin
 const deleteProduct = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
     const product = await Product.findById(req.params.id);
     if (product) {
       const Order = require('../models/Order');
       const orderCount = await Order.countDocuments({ 'products.product': product._id });
       if (orderCount > 0) {
         product.isActive = false;
+        product.isFeatured = false;
         await product.save();
         res.json({ message: 'Product is linked to historical orders. Deactivated (discontinued) successfully.' });
       } else {
@@ -291,22 +369,31 @@ const deleteProduct = async (req, res) => {
 const deleteBulkProducts = async (req, res) => {
   try {
     const { productIds } = req.body;
-    if (!productIds || productIds.length === 0) {
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
       return res.status(400).json({ message: 'No product IDs provided' });
     }
 
+    const mongoose = require('mongoose');
+    const validIds = productIds
+      .map(id => String(id).trim())
+      .filter(id => mongoose.Types.ObjectId.isValid(id));
+
+    if (validIds.length === 0) {
+      return res.status(400).json({ message: 'No valid product IDs provided' });
+    }
+
     const Order = require('../models/Order');
-    const referencedProducts = await Order.distinct('products.product', { 'products.product': { $in: productIds } });
+    const referencedProducts = await Order.distinct('products.product', { 'products.product': { $in: validIds } });
     const referencedIds = referencedProducts.map(id => String(id));
     
-    const toDeleteIds = productIds.filter(id => !referencedIds.includes(String(id)));
-    const toDeactivateIds = productIds.filter(id => referencedIds.includes(String(id)));
+    const toDeleteIds = validIds.filter(id => !referencedIds.includes(String(id)));
+    const toDeactivateIds = validIds.filter(id => referencedIds.includes(String(id)));
 
     if (toDeleteIds.length > 0) {
       await Product.deleteMany({ _id: { $in: toDeleteIds } });
     }
     if (toDeactivateIds.length > 0) {
-      await Product.updateMany({ _id: { $in: toDeactivateIds } }, { $set: { isActive: false } });
+      await Product.updateMany({ _id: { $in: toDeactivateIds } }, { $set: { isActive: false, isFeatured: false } });
     }
 
     if (toDeactivateIds.length > 0) {

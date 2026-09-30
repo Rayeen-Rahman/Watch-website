@@ -36,19 +36,30 @@ const getCategories = async (req, res) => {
 const createCategory = async (req, res) => {
   try {
     const { name, slug: customSlug } = req.body;
-    const slug = customSlug
-      ? customSlug.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '')
-      : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ message: 'Category name is required' });
+    }
+    const cleanName = name.trim();
+    const slug = (customSlug && typeof customSlug === 'string' && customSlug.trim())
+      ? customSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '')
+      : cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    if (!slug) {
+      return res.status(400).json({ message: 'A valid category name or slug is required' });
+    }
 
     const categoryExists = await Category.findOne({ slug });
     if (categoryExists) {
       return res.status(400).json({ message: `Category with slug "${slug}" already exists` });
     }
 
-    const category = new Category({ name, slug });
+    const category = new Category({ name: cleanName, slug });
     const created  = await category.save();
     res.status(201).json(created);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'A category with this slug already exists' });
+    }
     res.status(400).json({ message: error.message || 'Invalid category data' });
   }
 };
@@ -58,17 +69,48 @@ const createCategory = async (req, res) => {
 // @access  Private/Admin
 const updateCategory = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
     const { name, slug: customSlug } = req.body;
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
 
-    if (name)        category.name = name;
-    if (customSlug)  category.slug = customSlug.toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '');
+    if (name !== undefined) {
+      if (typeof name !== 'string' || !name.trim()) {
+        return res.status(400).json({ message: 'Category name cannot be empty' });
+      }
+      category.name = name.trim();
+    }
+    if (customSlug !== undefined) {
+      if (typeof customSlug !== 'string' || !customSlug.trim()) {
+        return res.status(400).json({ message: 'Category slug cannot be empty' });
+      }
+      const formattedSlug = customSlug.trim().toLowerCase()
+        .replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '');
+      if (!formattedSlug) {
+        return res.status(400).json({ message: 'Category slug must contain valid alphanumeric characters' });
+      }
+      if (formattedSlug !== category.slug) {
+        const slugExists = await Category.findOne({
+          slug: formattedSlug,
+          _id: { $ne: category._id }
+        });
+        if (slugExists) {
+          return res.status(400).json({ message: `Category with slug "${formattedSlug}" already exists` });
+        }
+        category.slug = formattedSlug;
+      }
+    }
 
     const updated = await category.save();
     res.json(updated);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'A category with this slug already exists' });
+    }
     res.status(400).json({ message: error.message || 'Update failed' });
   }
 };
@@ -78,6 +120,10 @@ const updateCategory = async (req, res) => {
 // @access  Private/Admin
 const deleteCategory = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
 

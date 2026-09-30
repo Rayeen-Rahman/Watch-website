@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CheckCircle, Package, Clock, ArrowRight, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Package, Clock, ArrowRight, ShoppingBag, Copy, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './Success.css';
 
 const Success = () => {
   const [animate, setAnimate] = useState(false);
   const [allowed, setAllowed] = useState(false);
+  const [copied, setCopied]   = useState(false);
   const navigate = useNavigate();
   const [oid, setOid] = useState('');
   const [trackingToken, setTrackingToken] = useState('');
   const { reloadCartFromStorage } = useCart();
+
+  const handleCopyToken = () => {
+    if (!trackingToken) return;
+    navigator.clipboard.writeText(trackingToken).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  };
 
   useEffect(() => {
     const placed = sessionStorage.getItem('orderPlaced');
@@ -30,6 +39,7 @@ const Success = () => {
     const tToken = sessionStorage.getItem('lastOrderTrackingToken');
     if (tToken) {
       setTrackingToken(tToken);
+      sessionStorage.removeItem('lastOrderTrackingToken'); // Bug #7 fix: consume the token
     }
     setAllowed(true);
 
@@ -80,9 +90,20 @@ const Success = () => {
         </p>
       )}
       {trackingToken && (
-        <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '24px', maxWidth: '400px', margin: '0 auto 24px auto', border: '1px solid #e0e0e0' }}>
+        <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '8px', marginBottom: '24px', maxWidth: '420px', margin: '0 auto 24px auto', border: '1px solid #e0e0e0' }}>
           <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#555' }}>Your Guest Tracking Token:</p>
-          <code style={{ display: 'block', fontSize: '1rem', color: '#111', fontWeight: 'bold', userSelect: 'all', padding: '8px', background: '#fff', borderRadius: '4px', border: '1px dashed #ccc' }}>{trackingToken}</code>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <code style={{ flex: 1, fontSize: '0.95rem', color: '#111', fontWeight: 'bold', userSelect: 'all', padding: '8px 10px', background: '#fff', borderRadius: '4px', border: '1px dashed #ccc', wordBreak: 'break-all' }}>
+              {trackingToken}
+            </code>
+            <button
+              onClick={handleCopyToken}
+              type="button"
+              style={{ padding: '8px 14px', background: copied ? '#16a34a' : '#111', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', transition: 'background-color 0.2s', flexShrink: 0 }}
+            >
+              {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+            </button>
+          </div>
           <p style={{ margin: '8px 0 0 0', fontSize: '0.8rem', color: '#888' }}>Please save this token. You will need it to track your order.</p>
         </div>
       )}

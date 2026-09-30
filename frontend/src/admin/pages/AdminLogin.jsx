@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { API } from '../../utils/api';
 import './AdminLogin.css';
 
 const AdminLogin = () => {
-  const { login } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
   const navigate   = useNavigate();
 
   const [formData, setFormData]     = useState({ email: '', password: '' });
   const [error, setError]           = useState('');
   const [isLoading, setIsLoading]   = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user?.role === 'admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,9 +27,7 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const _raw   = import.meta.env.VITE_API_URL || '';
-      const apiUrl = _raw.includes('localhost') ? '' : _raw;
-      const res  = await fetch(`${apiUrl}/api/users/login`, {
+      const res  = await fetch(`${API}/api/users/login`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(formData),

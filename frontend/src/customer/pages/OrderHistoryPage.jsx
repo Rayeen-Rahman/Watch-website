@@ -72,7 +72,7 @@ function renderOrderList(orders) {
 }
 
 const OrderHistoryPage = () => {
-  const { user, token, handleUnauthorized } = useAuth();
+  const { user, token, handleUnauthorized, loading: authLoading } = useAuth();
   const [orders,   setOrders]   = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
@@ -83,6 +83,7 @@ const OrderHistoryPage = () => {
   const [phoneInput, setPhoneInput] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
     const searchParams = new URLSearchParams(window.location.search);
     const queryToken = searchParams.get('token');
     const prefilledToken = queryToken || sessionStorage.getItem('lastOrderTrackingToken');
@@ -107,9 +108,10 @@ const OrderHistoryPage = () => {
         }
       })();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!token || !user) { setLoading(false); return; }
 
     // Admins see all orders
@@ -122,7 +124,7 @@ const OrderHistoryPage = () => {
           if (!r.ok) throw new Error('Failed to load orders');
           return r.json();
         })
-        .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
+        .then(data => { setOrders(Array.isArray(data) ? data : (data?.orders || [])); setLoading(false); })
         .catch((err) => { setError(err.message === 'Session expired' ? 'Session expired — please log in again.' : 'Failed to load orders'); setLoading(false); });
     } else {
       // Regular customers: GET /api/orders/myorders
@@ -134,10 +136,10 @@ const OrderHistoryPage = () => {
           if (!r.ok) throw new Error('Failed to load orders');
           return r.json();
         })
-        .then(data => { setOrders(Array.isArray(data) ? data : []); setLoading(false); })
+        .then(data => { setOrders(Array.isArray(data) ? data : (data?.orders || [])); setLoading(false); })
         .catch((err) => { setError(err.message === 'Session expired' ? 'Session expired — please log in again.' : 'Failed to load orders'); setLoading(false); });
     }
-  }, [token, user, handleUnauthorized]);
+  }, [token, user, authLoading, handleUnauthorized]);
 
   const handleTokenLookup = async (e) => {
     e.preventDefault();
@@ -181,6 +183,29 @@ const OrderHistoryPage = () => {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="orders-page">
+        <div className="orders-container" style={{ textAlign: 'center', padding: '60px 20px', color: '#888' }}>
+          <p>Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleTabSwitch = (tab) => {
+    setActiveTab(tab);
+    setError('');
+    setSearched(false);
+    setOrders([]);
+    if (tab === 'token') {
+      setOrderIdInput('');
+      setPhoneInput('');
+    } else {
+      setTrackingToken('');
+    }
+  };
+
   /* ── Guest view: phone lookup ── */
   if (!user) {
     return (
@@ -194,7 +219,7 @@ const OrderHistoryPage = () => {
         {/* Tab Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
           <button
-            onClick={() => { setActiveTab('token'); setError(''); setSearched(false); }}
+            onClick={() => handleTabSwitch('token')}
             style={{
               background: 'none',
               border: 'none',
@@ -210,7 +235,7 @@ const OrderHistoryPage = () => {
             Track with Token
           </button>
           <button
-            onClick={() => { setActiveTab('phone'); setError(''); setSearched(false); }}
+            onClick={() => handleTabSwitch('phone')}
             style={{
               background: 'none',
               border: 'none',
@@ -227,9 +252,6 @@ const OrderHistoryPage = () => {
           </button>
         </div>
 
-        <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px' }}>
-          For security, you can search up to 5 times every 15 minutes.
-        </p>
 
         {activeTab === 'token' ? (
           <form
@@ -258,7 +280,7 @@ const OrderHistoryPage = () => {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <input
                 type="text"
-                placeholder="Order ID (e.g. 64b3ef...)"
+                placeholder="Order ID / Ref (e.g. #E7B8220A or full ID)"
                 value={orderIdInput}
                 onChange={e => setOrderIdInput(e.target.value)}
                 style={{ padding: '10px 14px', border: '1px solid #ccc', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.9rem', color: '#111', background: '#fff', minWidth: '220px' }}

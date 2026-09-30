@@ -70,7 +70,13 @@ const ResetPasswordPage = () => {
               <p className="success-desc">
                 Your password has been successfully updated. You can now use your new password to sign in.
               </p>
-              <button onClick={() => navigate('/')} className="btn-reset-home">
+              <button
+                onClick={() => {
+                  sessionStorage.setItem('openAuthModal', 'login');
+                  navigate('/');
+                }}
+                className="btn-reset-home"
+              >
                 Go to Home & Sign In
               </button>
             </div>

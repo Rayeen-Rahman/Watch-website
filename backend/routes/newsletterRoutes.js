@@ -7,13 +7,13 @@ const NewsletterSubscriber = require('../models/NewsletterSubscriber');
 router.post('/subscribe', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ message: 'A valid email address is required' });
     }
 
     const emailLower = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(emailLower)) {
+    if (!emailRegex.test(emailLower) || emailLower.length > 254) {
       return res.status(400).json({ message: 'Please provide a valid email address' });
     }
 

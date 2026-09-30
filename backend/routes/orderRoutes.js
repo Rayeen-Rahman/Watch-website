@@ -46,26 +46,49 @@ router.get('/lookup', lookupLimiter, async (req, res) => {
   }
 });
 
-// PUBLIC: order lookup by order ID and phone number for guests (secure alternative)
+// PUBLIC: order lookup by order ID (full 24-char or 8-char reference) and phone number
 // GET /api/orders/lookup-by-phone?orderId=xxx&phone=yyy
 router.get('/lookup-by-phone', lookupLimiter, async (req, res) => {
   try {
     const { orderId, phone } = req.query;
     if (!orderId || !orderId.trim() || !phone || !phone.trim()) {
-      return res.status(400).json({ message: 'Order ID and Phone Number are required' });
+      return res.status(400).json({ message: 'Order ID / Reference and Phone Number are required' });
     }
-    if (!mongoose.Types.ObjectId.isValid(orderId.trim())) {
-      return res.status(400).json({ message: 'Invalid Order ID format' });
+
+    const cleanId = orderId.trim().replace(/^#/, '');
+    const cleanDigits = phone.trim().replace(/\D/g, '');
+    if (!cleanDigits) {
+      return res.status(400).json({ message: 'Valid phone number is required' });
+    }
+    const digitsToMatch = cleanDigits.length >= 10 ? cleanDigits.slice(-10) : cleanDigits;
+    const phonePattern = digitsToMatch.split('').join('\\D*');
+
+    let idQuery = null;
+    if (mongoose.Types.ObjectId.isValid(cleanId) && cleanId.length === 24) {
+      idQuery = { _id: cleanId };
+    } else if (/^[a-fA-F0-9]{6,23}$/.test(cleanId)) {
+      idQuery = {
+        $expr: {
+          $regexMatch: {
+            input: { $toString: '$_id' },
+            regex: cleanId + '$',
+            options: 'i'
+          }
+        }
+      };
+    } else {
+      return res.status(400).json({ message: 'Invalid Order ID or Reference format' });
     }
 
     const OrderModel = require('../models/Order');
     const order = await OrderModel.findOne({
-      _id: orderId.trim(),
-      phone: phone.trim()
+      ...idQuery,
+      phone: { $regex: phonePattern + '$' }
     })
       .populate('products.product', 'name price images')
       .select('-__v')
       .lean();
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found with those details' });
     }

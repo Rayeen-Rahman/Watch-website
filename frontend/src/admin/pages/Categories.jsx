@@ -50,23 +50,29 @@ const Categories = ({ showToast }) => {
 
   // ── Auto-generate slug from name ─────────────────────────────────────────
   const toSlug = (str) =>
-    str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    (str || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
 
   const handleNameChange = (val) => {
     setNewName(val);
-    setNewSlug(toSlug(val));
+    const generated = toSlug(val);
+    if (generated) setNewSlug(generated);
   };
 
   // ── Add ───────────────────────────────────────────────────────────────────
   const handleAdd = async (e) => {
     e.preventDefault();
     if (!newName.trim()) { toast('Category name is required', true); return; }
+    const finalSlug = (newSlug.trim() ? toSlug(newSlug) : toSlug(newName)) || `cat-${Date.now().toString(36)}`;
     setAdding(true);
     try {
       const res = await fetch(`${API}/api/categories`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({ name: newName.trim(), slug: newSlug || toSlug(newName) }),
+        body:    JSON.stringify({ name: newName.trim(), slug: finalSlug }),
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -94,12 +100,13 @@ const Categories = ({ showToast }) => {
 
   const handleSaveEdit = async (id) => {
     if (!editName.trim()) { toast('Name cannot be empty', true); return; }
+    const finalSlug = (editSlug.trim() ? toSlug(editSlug) : toSlug(editName)) || `cat-${Date.now().toString(36)}`;
     setEditSaving(true);
     try {
       const res = await fetch(`${API}/api/categories/${id}`, {
         method:  'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body:    JSON.stringify({ name: editName.trim(), slug: editSlug || toSlug(editName) }),
+        body:    JSON.stringify({ name: editName.trim(), slug: finalSlug }),
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -119,17 +126,18 @@ const Categories = ({ showToast }) => {
 
   // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async (cat) => {
-    const productWarning = cat.productCount > 0
-      ? ` This will remove the category from ${cat.productCount} product(s).`
-      : ' No products will be affected.';
-    if (!window.confirm(`Delete "${cat.name}"?${productWarning}`)) return;
+    if (cat.productCount > 0) {
+      toast(`Cannot delete "${cat.name}": ${cat.productCount} product(s) are still assigned to it. Please reassign or delete those products first.`, true);
+      return;
+    }
+    if (!window.confirm(`Delete category "${cat.name}"?`)) return;
     try {
       const res = await fetch(`${API}/api/categories/${cat._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (res.status === 401) {
         handleUnauthorized();
         return;
       }
-      if (!res.ok) { const d = await res.json(); throw new Error(d.message || 'Delete failed'); }
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.message || 'Delete failed'); }
       fetchCategories();
       toast(`"${cat.name}" deleted.`);
     } catch (err) {

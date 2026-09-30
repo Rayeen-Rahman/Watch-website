@@ -19,10 +19,14 @@ router.use(protect, isAdmin);
  ───────────────────────────────────────────── */
 router.get('/dashboard-stats', async (req, res) => {
   try {
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    // Start of current day in Bangladesh (UTC+6)
+    const BD_OFFSET_MS = 6 * 60 * 60 * 1000;
+    const now = new Date();
+    const bdNow = new Date(now.getTime() + BD_OFFSET_MS);
+    const todayStart = new Date(Date.UTC(bdNow.getUTCFullYear(), bdNow.getUTCMonth(), bdNow.getUTCDate()) - BD_OFFSET_MS);
 
-    const lowStockThreshold = parseInt(req.query.lowStockThreshold, 10) || 5;
+    const parsedThreshold = parseInt(req.query.lowStockThreshold, 10);
+    const lowStockThreshold = !isNaN(parsedThreshold) && parsedThreshold >= 0 ? parsedThreshold : 5;
 
     const [
       revenueAgg,
@@ -45,9 +49,9 @@ router.get('/dashboard-stats', async (req, res) => {
       Product.countDocuments({ isActive: { $ne: false } }),
       // Count orders waiting to be processed
       Order.countDocuments({ status: 'pending' }),
-      // Products with stock at or below the threshold
+      // Products with stock at or below the threshold (including out of stock)
       Product.countDocuments({
-        stock: { $gt: 0, $lte: lowStockThreshold },
+        stock: { $lte: lowStockThreshold },
         isActive: { $ne: false },
       }),
     ]);
@@ -105,7 +109,6 @@ router.get('/popular-products', async (req, res) => {
       },
       // Sort by most sold first
       { $sort: { totalSold: -1 } },
-      { $limit: limit },
       // Join product details
       {
         $lookup: {
@@ -116,6 +119,7 @@ router.get('/popular-products', async (req, res) => {
         },
       },
       { $unwind: '$product' },
+      { $limit: limit },
       // Project only the fields needed by the frontend
       {
         $project: {
@@ -142,19 +146,23 @@ router.get('/popular-products', async (req, res) => {
  ───────────────────────────────────────────── */
 router.get('/revenue-chart', async (req, res) => {
   try {
-    const days      = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - (days - 1));
-    startDate.setHours(0, 0, 0, 0);
+    const days = Math.min(Math.max(parseInt(req.query.days) || 7, 1), 90);
+    const BD_OFFSET_MS = 6 * 60 * 60 * 1000;
+    const now = new Date();
+    const bdNow = new Date(now.getTime() + BD_OFFSET_MS);
+    const todayStart = new Date(Date.UTC(bdNow.getUTCFullYear(), bdNow.getUTCMonth(), bdNow.getUTCDate()) - BD_OFFSET_MS);
+    const startDate = new Date(todayStart.getTime() - (days - 1) * 24 * 60 * 60 * 1000);
 
     const raw = await Order.aggregate([
       { $match: { createdAt: { $gte: startDate } } },
       {
         $group: {
           _id: {
-            year:  { $year:  '$createdAt' },
-            month: { $month: '$createdAt' },
-            day:   { $dayOfMonth: '$createdAt' },
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$createdAt',
+              timezone: '+06:00',
+            },
           },
           orders:  { $sum: 1 },
           revenue: {
@@ -164,24 +172,25 @@ router.get('/revenue-chart', async (req, res) => {
           },
         },
       },
-      { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } },
+      { $sort: { _id: 1 } },
     ]);
 
     // Fill in missing days with 0s
     const dataMap = {};
     raw.forEach(r => {
-      const key = `${r._id.year}-${r._id.month}-${r._id.day}`;
-      dataMap[key] = r;
+      dataMap[r._id] = r;
     });
 
     const result = [];
     for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key   = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      const d = new Date(todayStart.getTime() - i * 24 * 60 * 60 * 1000 + BD_OFFSET_MS);
+      const year  = d.getUTCFullYear();
+      const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day   = String(d.getUTCDate()).padStart(2, '0');
+      const key   = `${year}-${month}-${day}`;
       const entry = dataMap[key];
       result.push({
-        name:    d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' }),
+        name:    d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }),
         orders:  entry?.orders  || 0,
         revenue: entry?.revenue || 0,
       });
@@ -213,6 +222,11 @@ router.get('/featured-product', async (req, res) => {
  ───────────────────────────────────────────── */
 router.put('/set-featured/:id', async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
     // Check if target product exists first to avoid clearing feature state if ID is invalid (Bug #17)
     const exists = await Product.findById(req.params.id);
     if (!exists) return res.status(404).json({ message: 'Product not found' });

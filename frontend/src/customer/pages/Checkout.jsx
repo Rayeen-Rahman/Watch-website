@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, CheckCircle, ShoppingBag } from 'lucide-react';
@@ -11,6 +11,7 @@ const Checkout = () => {
   const { cartItems, clearCart, setIsCartOpen } = useCart();
   const { user, token, login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const submittingRef = useRef(false);
 
   const [formData, setFormData] = useState({
@@ -33,6 +34,17 @@ const Checkout = () => {
       .catch(console.error);
   }, []);
 
+  // Prefill name and phone if authenticated user is present
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        customerName: prev.customerName || user.name || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
+
   useEffect(() => {
     const hasData = Object.values(formData).some(v => v.trim().length > 0);
     if (!hasData || orderSubmitted) return;
@@ -45,7 +57,7 @@ const Checkout = () => {
   }, [formData, orderSubmitted]);
 
   // BUY NOW mode: read a single item from sessionStorage instead of full cart
-  const isBuyNow = new URLSearchParams(window.location.search).get('mode') === 'buynow';
+  const isBuyNow = new URLSearchParams(location.search).get('mode') === 'buynow';
   let buyNowItem = null;
   try {
     const buyNowRaw = sessionStorage.getItem('buyNowItem');
@@ -112,15 +124,23 @@ const Checkout = () => {
       return; 
     }
 
+    if (checkoutItems.some(i => i.unavailable || i.outOfStock)) {
+      setError('Some items in your order are out of stock or unavailable. Please return to your cart and adjust them before proceeding.');
+      submittingRef.current = false;
+      return;
+    }
+
     setIsSubmitting(true);
 
     // B-04 fix: city-aware shipping cost (matches InfoPage shipping info)
     const isInsideDhaka = formData.city.trim().toLowerCase().includes('dhaka');
     const shippingCost  = checkoutTotal >= shippingConfig.freeShippingThreshold ? 0 : (isInsideDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
 
+    const normalizedPhone = formData.phone.trim().replace(/[\s\-()]/g, '');
+
     const orderPayload = {
       customerName: formData.customerName.trim(),
-      phone: formData.phone.trim(),
+      phone: normalizedPhone,
       address: [formData.address, formData.city, formData.postalCode]
         .filter(Boolean).join(', '),
       products: checkoutItems.map(item => ({
@@ -155,22 +175,22 @@ const Checkout = () => {
       }
       sessionStorage.setItem('orderPlaced', 'true');
       sessionStorage.setItem('lastOrderId', data._id || '');
-      sessionStorage.setItem('lastOrderPhone', formData.phone.trim());
+      sessionStorage.setItem('lastOrderPhone', normalizedPhone);
       if (data.rawGuestTrackingToken) {
         sessionStorage.setItem('lastOrderTrackingToken', data.rawGuestTrackingToken);
       }
 
       // Auto-save the checkout phone to user profile if logged in and no phone saved yet
-      if (user && token && !user.phone && formData.phone) {
+      if (user && token && !user.phone && normalizedPhone) {
         try {
           const profileRes = await fetch(`${API}/api/users/profile`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ name: user.name, email: user.email, phone: formData.phone }),
+            body: JSON.stringify({ name: user.name, email: user.email, phone: normalizedPhone }),
           });
           if (profileRes.ok) {
             const updated = await profileRes.json();
-            login({ ...user, phone: updated.phone || formData.phone }, token);
+            login({ ...user, phone: updated.phone || normalizedPhone }, token);
           }
         } catch (e) {
           // Non-critical — order already placed, just couldn't save phone
@@ -271,10 +291,16 @@ const Checkout = () => {
               </div>
             </div>
 
+            {checkoutItems.some(i => i.unavailable || i.outOfStock) && (
+              <p style={{ color: '#E44', fontSize: '0.85rem', marginBottom: '14px', fontWeight: 600 }}>
+                ⚠ Some items in your order are out of stock or unavailable. Please adjust your cart before confirming.
+              </p>
+            )}
+
             <button
               type="submit"
               className="btn-confirm-order"
-              disabled={isSubmitting}
+              disabled={isSubmitting || checkoutItems.some(i => i.unavailable || i.outOfStock)}
             >
               {isSubmitting ? (
                 <span className="btn-spinner">Processing…</span>

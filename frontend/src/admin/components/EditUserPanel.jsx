@@ -40,18 +40,27 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+    if (!fullName) {
+      showToast('First name is required', true);
+      return;
+    }
+    const cleanEmail = formData.email.trim().toLowerCase();
+    if (!cleanEmail) {
+      showToast('Valid email is required', true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      
       const res = await fetch(`${API}/api/users/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           name: fullName,
-          email: formData.email,
-          phone: formData.phone,
+          email: cleanEmail,
+          phone: formData.phone ? formData.phone.trim() : '',
           role: formData.role,
           status: formData.status
         })
@@ -88,12 +97,12 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
         <form className="panel-form" onSubmit={handleSubmit}>
           <div className="form-row" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
             <div className="form-group">
-              <label>First Name</label>
+              <label>First Name *</label>
               <input type="text" name="firstName" required value={formData.firstName} onChange={handleChange} />
             </div>
             <div className="form-group">
               <label>Last Name</label>
-              <input type="text" name="lastName" required value={formData.lastName} onChange={handleChange} />
+              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} />
             </div>
           </div>
 

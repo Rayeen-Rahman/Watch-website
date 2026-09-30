@@ -96,6 +96,8 @@ const ProductDetail = () => {
   }, [product]);
 
   useEffect(() => {
+    setQuantity(1);
+    setActiveAccordion('details');
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -162,13 +164,15 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    if (!product || (product.stock != null && product.stock <= 0)) return;
+    const safeQty = Math.max(1, Math.min(quantity, product.stock ?? quantity));
     // Save current cart so we can restore it on the Success page
     const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
     sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
     sessionStorage.setItem('buyNowProductId', product._id);
     // Do NOT call clearCart() here — instead set a flag and let Checkout
     // send only this product while keeping the rest of the cart intact.
-    sessionStorage.setItem('buyNowItem', JSON.stringify({ product, quantity }));
+    sessionStorage.setItem('buyNowItem', JSON.stringify({ product, quantity: safeQty }));
     navigate('/checkout?mode=buynow');
   };
 
@@ -456,11 +460,15 @@ const ProductDetail = () => {
                       ) : (
                         <div className="img-placeholder">{(rel.brand || 'W').charAt(0)}</div>
                       )}
-                      {rel.oldPrice > rel.price && (
+                      {rel.stock === 0 ? (
+                        <div className="badge-oos" style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, padding: '3px 8px', fontSize: '0.75rem' }}>
+                          Out of Stock
+                        </div>
+                      ) : rel.oldPrice > rel.price ? (
                         <div className="related-discount-badge">
                           ৳{(rel.oldPrice - rel.price).toLocaleString()} OFF
                         </div>
-                      )}
+                      ) : null}
                     </div>
                     <div className="related-info">
                       <h3>{rel.name}</h3>
@@ -473,11 +481,13 @@ const ProductDetail = () => {
                     </div>
                   </Link>
                   <div className="related-card-actions">
-                    <Link to={`/product/${rel._id}`} className="btn-related-buy">Buy Now</Link>
+                    <Link to={`/product/${rel._id}`} className="btn-related-buy">View Details</Link>
                     <button
                       className="btn-related-cart"
                       onClick={() => addToCart(rel, 1)}
-                      aria-label="Add to cart"
+                      aria-label={rel.stock === 0 ? "Out of stock" : "Add to cart"}
+                      disabled={rel.stock === 0}
+                      style={rel.stock === 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
                     >
                       <ShoppingBag size={15} />
                     </button>

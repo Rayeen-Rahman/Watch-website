@@ -1,6 +1,7 @@
-const crypto  = require('crypto');
-const User    = require('../models/User');
-const bcrypt  = require('bcryptjs');
+const crypto   = require('crypto');
+const mongoose = require('mongoose');
+const User     = require('../models/User');
+const bcrypt   = require('bcryptjs');
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -35,6 +36,9 @@ const getUsers = async (req, res) => {
 // @access  Private/Admin
 const getUserById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     const user = await User.findById(req.params.id).select('-password');
     if (user) {
       res.json(user);
@@ -52,9 +56,18 @@ const getUserById = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { name, email, phone, role, status, password } = req.body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+    if (!email || typeof email !== 'string' || !email.trim()) {
+      return res.status(400).json({ message: 'A valid email is required' });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = name.trim();
 
     // EDGE CASE: Verify user doesn't already exist (prevent E11000 Mongo error)
-    const userExists = await User.findOne({ email: email.toLowerCase() });
+    const userExists = await User.findOne({ email: cleanEmail });
     if (userExists) {
       return res.status(400).json({ message: 'A user with this email already exists' });
     }
@@ -70,12 +83,14 @@ const createUser = async (req, res) => {
       hashedPassword = await bcrypt.hash(randomPassword, 10);
     }
 
+    const userStatus = status || 'Active';
     const user = new User({
-      name,
-      email: email.toLowerCase(),
-      phone,
-      role,
-      status,
+      name: cleanName,
+      email: cleanEmail,
+      phone: phone ? String(phone).trim() : '',
+      role: role || 'customer',
+      status:   userStatus,
+      isActive: userStatus === 'Active',
       password: hashedPassword,
     });
 
@@ -93,6 +108,10 @@ const createUser = async (req, res) => {
 // @access  Private/Admin
 const updateUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const { name, email, phone, role, status } = req.body;
     
     // Prevent admins from demoting or deactivating their own account
@@ -124,23 +143,39 @@ const updateUser = async (req, res) => {
         }
       }
 
-      user.name = name || user.name;
-      if (email && email.toLowerCase() !== user.email) {
-        // Check no other user already has this email
-        const emailTaken = await User.findOne({
-          email: email.toLowerCase(),
-          _id: { $ne: user._id }  // exclude the current user
-        });
-        if (emailTaken) {
-          return res.status(400).json({
-            message: 'Another account with this email address already exists.'
-          });
+      if (name !== undefined) {
+        const cleanName = typeof name === 'string' ? name.trim() : '';
+        if (!cleanName) {
+          return res.status(400).json({ message: 'User name cannot be empty' });
         }
-        user.email = email.toLowerCase();
+        user.name = cleanName;
       }
-      user.phone = phone !== undefined ? phone : user.phone;
+
+      if (email !== undefined) {
+        const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        if (!cleanEmail) {
+          return res.status(400).json({ message: 'A valid email is required' });
+        }
+        if (cleanEmail !== user.email) {
+          // Check no other user already has this email
+          const emailTaken = await User.findOne({
+            email: cleanEmail,
+            _id: { $ne: user._id }  // exclude the current user
+          });
+          if (emailTaken) {
+            return res.status(400).json({
+              message: 'Another account with this email address already exists.'
+            });
+          }
+          user.email = cleanEmail;
+        }
+      }
+      user.phone = phone !== undefined ? String(phone).trim() : user.phone;
       user.role = role || user.role;
-      user.status = status || user.status;
+      if (status) {
+        user.status = status;
+        user.isActive = status === 'Active';
+      }
 
       const updatedUser = await user.save();
       const { password: _pw, resetToken: _rt, resetTokenExpiry: _rte, ...safeUser } = updatedUser.toObject();
@@ -158,6 +193,10 @@ const updateUser = async (req, res) => {
 // @access  Private/Admin
 const deleteUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     // Prevent admins from deleting their own account
     if (req.params.id === String(req.user._id)) {
       return res.status(400).json({

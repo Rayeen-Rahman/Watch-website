@@ -65,8 +65,11 @@ const Users = ({ showToast }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, [openKebab]);
 
-  // ── Close kebab on page change ────────────────────────────────────────────
-  useEffect(() => { setOpenKebab(null); }, [currentPage, search]);
+  // ── Close kebab & clear selection on page/filter change ─────────────────
+  useEffect(() => {
+    setOpenKebab(null);
+    setSelectedIds([]);
+  }, [currentPage, search, roleFilter, rowsPerPage]);
 
   // ── Delete ──────────────────────────────────────────────────────────────────
   const handleDeleteUser = async (id) => {
@@ -82,7 +85,7 @@ const Users = ({ showToast }) => {
         return;
       }
       if (res.ok) { setOpenKebab(null); fetchUsers(); toast('User deleted.'); }
-      else { const d = await res.json(); toast(d.message || 'Delete failed', true); }
+      else { const d = await res.json().catch(() => ({})); toast(d.message || 'Delete failed', true); }
     } catch (err) { toast(err.message, true); }
   };
 
@@ -99,7 +102,10 @@ const Users = ({ showToast }) => {
         handleUnauthorized();
         return;
       }
-      if (!res.ok) throw new Error('Status update failed');
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.message || 'Status update failed');
+      }
       setUsers(prev => prev.map(u => u._id === user._id ? { ...u, status: newStatus } : u));
       setOpenKebab(null);
       toast(`User ${newStatus === 'Banned' ? 'banned' : 'unbanned'}.`);
@@ -107,12 +113,14 @@ const Users = ({ showToast }) => {
   };
 
   // ── Filter & sort ───────────────────────────────────────────────────────────
+  const cleanSearch = search.trim().toLowerCase();
   const filtered = [...users]
     .filter(u => {
       const matchRole   = roleFilter === 'all' || u.role === roleFilter;
-      const matchSearch = !search ||
-        u.name?.toLowerCase().includes(search.toLowerCase()) ||
-        u.email?.toLowerCase().includes(search.toLowerCase());
+      const matchSearch = !cleanSearch ||
+        u.name?.toLowerCase().includes(cleanSearch) ||
+        u.email?.toLowerCase().includes(cleanSearch) ||
+        u.phone?.toLowerCase().includes(cleanSearch);
       return matchRole && matchSearch;
     })
     .sort((a, b) => {

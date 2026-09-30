@@ -82,27 +82,28 @@ const CategoryPage = () => {
     }
   }, [slug, page, sort, movement, gender, maxPrice, searchText]);
 
-  // Re-read URL search param when URL changes (navbar search navigates here)
+  // Sync search text + reset filters when the URL (slug or ?search) changes
+  // Merged into one effect so setSearchText is set exactly once per URL change
   useEffect(() => {
     const q = new URLSearchParams(location.search).get('search') || '';
+    setPage(1);
     setSearchText(q);
-    setPage(1);
-  }, [location.search]);
-
-  // Reset page and filters when category slug changes
-  useEffect(() => {
-    const q = new URLSearchParams(location.search).get('search') || '';
-    setPage(1);
     setMovement('');
     setGender('');
     setMaxPrice(500000);
     setMaxPriceDraft(500000);
     setSort('newest');
-    if (!q) setSearchText('');
   }, [slug, location.search]);
 
-  // Reset page when any filter changes
   useEffect(() => { setPage(1); }, [sort, movement, gender, maxPrice]);
+
+  // Debounce maxPriceDraft changes to maxPrice (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMaxPrice(maxPriceDraft);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [maxPriceDraft]);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [page]);
 
@@ -201,7 +202,8 @@ const CategoryPage = () => {
                   <label className="filter-check">
                     <input type="radio" name="movement" value={m}
                       checked={movement === m}
-                      onChange={() => setMovement(m === movement ? '' : m)} />
+                      onClick={() => setMovement(prev => prev === m ? '' : m)}
+                      onChange={() => {}} />
                     {m}
                   </label>
                 </li>
@@ -218,7 +220,8 @@ const CategoryPage = () => {
                   <label className="filter-check">
                     <input type="radio" name="gender" value={g}
                       checked={gender === g}
-                      onChange={() => setGender(g === gender ? '' : g)} />
+                      onClick={() => setGender(prev => prev === g ? '' : g)}
+                      onChange={() => {}} />
                     {g}
                   </label>
                 </li>
@@ -232,8 +235,7 @@ const CategoryPage = () => {
             <input type="range" min={1000} max={500000} step={1000}
               value={maxPriceDraft}
               onChange={e => setMaxPriceDraft(Number(e.target.value))}
-              onMouseUp={() => setMaxPrice(maxPriceDraft)}
-              onTouchEnd={() => setMaxPrice(maxPriceDraft)}
+              aria-label="Filter by maximum price"
               className="price-slider" />
             <div className="price-range-labels">
               <span>৳1,000</span>

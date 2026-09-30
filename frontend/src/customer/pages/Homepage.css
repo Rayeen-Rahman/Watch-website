@@ -136,6 +136,12 @@
   width: 100%;
 }
 
+.hero-watch-link {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 @keyframes float {
   0%   { transform: translateY(0px); }
   50%  { transform: translateY(-12px); }
