@@ -48,7 +48,12 @@ const getProducts = async (req, res) => {
     if (req.query.gender) filter.gender = req.query.gender;
 
     // ?maxPrice=50000
-    if (req.query.maxPrice) filter.price = { $lte: Number(req.query.maxPrice) };
+    if (req.query.maxPrice) {
+      const parsedMaxPrice = Number(req.query.maxPrice);
+      if (!isNaN(parsedMaxPrice) && parsedMaxPrice > 0) {
+        filter.price = { $lte: parsedMaxPrice };
+      }
+    }
 
     // ?search=<term>
     if (req.query.search) {
@@ -116,7 +121,12 @@ const getAdminProducts = async (req, res) => {
     }
     if (req.query.movementType) filter.movementType = req.query.movementType;
     if (req.query.gender) filter.gender = req.query.gender;
-    if (req.query.maxPrice) filter.price = { $lte: Number(req.query.maxPrice) };
+    if (req.query.maxPrice) {
+      const parsedMaxPrice = Number(req.query.maxPrice);
+      if (!isNaN(parsedMaxPrice) && parsedMaxPrice > 0) {
+        filter.price = { $lte: parsedMaxPrice };
+      }
+    }
 
     if (req.query.search) {
       const raw = req.query.search.trim().slice(0, 100);
@@ -316,7 +326,21 @@ const updateProduct = async (req, res) => {
     ];
 
     fields.forEach(f => {
-      if (req.body[f] !== undefined) product[f] = req.body[f];
+      if (req.body[f] !== undefined) {
+        if (f === 'oldPrice') {
+          product.oldPrice = (req.body.oldPrice !== null && req.body.oldPrice !== '' && !isNaN(Number(req.body.oldPrice)))
+            ? Number(req.body.oldPrice)
+            : null;
+        } else if (f === 'price') {
+          product.price = Number(req.body.price);
+        } else if (f === 'stock') {
+          product.stock = Math.max(0, Math.floor(Number(req.body.stock) || 0));
+        } else if (f === 'name' || f === 'brand') {
+          product[f] = String(req.body[f]).trim();
+        } else {
+          product[f] = req.body[f];
+        }
+      }
     });
 
     // Auto-recalculate discount whenever price or oldPrice is updated

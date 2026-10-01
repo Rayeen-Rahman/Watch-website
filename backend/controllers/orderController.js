@@ -76,7 +76,7 @@ const getMyOrders = async (req, res) => {
 // @access  Public
 const createOrder = async (req, res) => {
   try {
-    const { customerName, phone, address, products, total } = req.body;
+    const { customerName, phone, address, city, products, total } = req.body;
 
     if (!customerName || typeof customerName !== 'string' || !customerName.trim()) {
       return res.status(400).json({ message: 'Customer name is required' });
@@ -185,7 +185,8 @@ const createOrder = async (req, res) => {
 
     // Add shipping based on config
     const shippingConfig = require('../config/shipping');
-    const isDhaka = (address || '').toLowerCase().includes('dhaka');
+    const targetCity = (city || '').trim().toLowerCase();
+    const isDhaka = targetCity ? targetCity.includes('dhaka') : (address || '').toLowerCase().includes('dhaka');
     const shipping = recalculatedTotal >= shippingConfig.freeShippingThreshold ? 0 : (isDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
     const verifiedTotal = recalculatedTotal + shipping;
 

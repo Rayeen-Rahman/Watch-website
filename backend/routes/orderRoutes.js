@@ -86,7 +86,7 @@ router.get('/lookup-by-phone', lookupLimiter, async (req, res) => {
       phone: { $regex: phonePattern + '$' }
     })
       .populate('products.product', 'name price images')
-      .select('-__v')
+      .select('-__v -guestTrackingToken')
       .lean();
 
     if (!order) {

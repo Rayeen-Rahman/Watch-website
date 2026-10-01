@@ -141,7 +141,8 @@ const Checkout = () => {
     const orderPayload = {
       customerName: formData.customerName.trim(),
       phone: normalizedPhone,
-      address: [formData.address, formData.city, formData.postalCode]
+      city: formData.city.trim(),
+      address: [formData.address.trim(), formData.city.trim(), formData.postalCode ? formData.postalCode.trim() : '']
         .filter(Boolean).join(', '),
       products: checkoutItems.map(item => ({
         product:  item._id,

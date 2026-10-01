@@ -154,6 +154,7 @@ const Orders = ({ showToast }) => {
         throw new Error(d.message || 'Status update failed');
       }
       setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus } : o));
+      setViewOrder(prev => (prev && prev._id === id ? { ...prev, status: newStatus } : prev));
       setOpenKebab(null);
       toast('Order status updated.');
     } catch (err) { toast(err.message, true); }

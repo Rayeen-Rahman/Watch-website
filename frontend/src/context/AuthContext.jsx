@@ -14,8 +14,19 @@ export const AuthProvider = ({ children }) => {
       const storedUser  = localStorage.getItem('watchstore_user');
       const storedToken = localStorage.getItem('watchstore_token');
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
+        try {
+          const payload = JSON.parse(atob(storedToken.split('.')[1]));
+          if (payload.exp && payload.exp * 1000 <= Date.now()) {
+            localStorage.removeItem('watchstore_user');
+            localStorage.removeItem('watchstore_token');
+          } else {
+            setUser(JSON.parse(storedUser));
+            setToken(storedToken);
+          }
+        } catch {
+          setUser(JSON.parse(storedUser));
+          setToken(storedToken);
+        }
       }
     } catch {
       // Corrupted storage — clear it

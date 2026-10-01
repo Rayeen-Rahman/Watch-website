@@ -32,6 +32,8 @@ const Homepage = () => {
       if (collRes.status === 'fulfilled' && collRes.value.ok) {
         const d = await collRes.value.json();
         setCollection(d.products || []);
+      } else if (collRes.status === 'rejected' || (collRes.status === 'fulfilled' && !collRes.value.ok)) {
+        setError('Failed to connect to the store. Please check your internet connection and try again.');
       }
       if (bsRes.status === 'fulfilled' && bsRes.value.ok) {
         const d = await bsRes.value.json();
@@ -42,7 +44,7 @@ const Homepage = () => {
         setFeaturedProd(d);
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to load products.');
     } finally {
       setLoading(false);
     }
