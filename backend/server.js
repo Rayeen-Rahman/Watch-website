@@ -410,16 +410,23 @@ const startServer = async () => {
     console.log('Backend successfully started after MongoDB connection!');
   });
 
-  // Graceful shutdown — handles Docker stop, PM2 restart, deployment restarts
-  process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully...');
-    server.close(() => {
-      mongoose.connection.close(false, () => {
+  // Graceful shutdown — handles Docker stop, PM2 restart, deployment restarts, Ctrl+C
+  const gracefulShutdown = (signal) => {
+    console.log(`${signal} received. Shutting down gracefully...`);
+    server.close(async () => {
+      try {
+        await mongoose.connection.close(false);
         console.log('MongoDB connection closed. Process exiting.');
         process.exit(0);
-      });
+      } catch (err) {
+        console.error('Error closing MongoDB connection:', err);
+        process.exit(1);
+      }
     });
-  });
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   process.on('unhandledRejection', (err) => {
     console.error('Unhandled Promise Rejection:', err?.message || err);

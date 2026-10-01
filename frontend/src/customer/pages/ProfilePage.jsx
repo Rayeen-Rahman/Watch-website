@@ -71,7 +71,11 @@ const ProfilePage = () => {
       return;
     }
     if (isEmailChanging && !curPass) {
-      setMsg({ text: 'Current password required to change email', err: true });
+      setMsg({ text: 'Current password is required to change email', err: true });
+      return;
+    }
+    if (newPass && !curPass) {
+      setMsg({ text: 'Current password is required to set a new password', err: true });
       return;
     }
     if (newPass && newPass !== confirmPass) {
@@ -79,6 +83,11 @@ const ProfilePage = () => {
     }
     if (newPass && newPass.length < 6) {
       setMsg({ text: 'New password must be at least 6 characters', err: true }); return;
+    }
+    const cleanPhone = phone.trim();
+    if (cleanPhone && !/^(\+?880|0)[1-9]\d{8,9}$/.test(cleanPhone.replace(/[\s\-()]/g, ''))) {
+      setMsg({ text: 'Please enter a valid phone number (e.g. 017XXXXXXXX)', err: true });
+      return;
     }
     setSaving(true); setMsg({ text: '', err: false });
     try {
@@ -88,7 +97,7 @@ const ProfilePage = () => {
         body:    JSON.stringify({
           name: name.trim(),
           email: normEmail,
-          phone: phone.trim(),
+          phone: cleanPhone,
           currentPassword: curPass,
           newPassword: newPass,
         }),
@@ -96,7 +105,7 @@ const ProfilePage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
       // Update auth context with new name/email
-      login({ ...user, name: data.name || name.trim(), email: data.email || normEmail, phone: data.phone ?? phone.trim() }, token);
+      login({ ...user, name: data.name || name.trim(), email: data.email || normEmail, phone: data.phone ?? cleanPhone }, token);
       setMsg({ text: 'Profile updated successfully!', err: false });
       setCurPass(''); setNewPass(''); setConfirmPass(''); setConfirmEmail('');
     } catch (err) {
@@ -134,7 +143,7 @@ const ProfilePage = () => {
               <label><Mail size={14} /> Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
             </div>
-            {email !== (user?.email || '') && (
+            {email.trim().toLowerCase() !== (user?.email || '').trim().toLowerCase() && (
               <div className="profile-field">
                 <label><Mail size={14} /> Confirm New Email</label>
                 <input

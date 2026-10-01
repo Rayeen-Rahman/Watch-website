@@ -11,13 +11,19 @@ const AddCategoryPanel = ({ isOpen, onClose, showToast, onSave }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const cleanName = name.trim();
+    if (!cleanName) {
+      showToast('Category name is required', true);
+      return;
+    }
+    const cleanSlug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `cat-${Date.now().toString(36)}`;
     setIsSubmitting(true);
 
     try {
       const res = await fetch(`${API}/api/categories`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name: cleanName, slug: cleanSlug })
       });
 
       if (res.status === 401) {

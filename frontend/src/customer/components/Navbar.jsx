@@ -45,14 +45,24 @@ const Navbar = () => {
   }, [cartCount]);
 
   const mobileSearchRef = useRef(null);
+  const mobileDrawerRef = useRef(null);
 
-  // Close user menu on outside click
+  // Close menus and drawer on route navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMobileSearch(false);
+    setShowUserMenu(false);
+  }, [location.pathname]);
+
+  // Close menus on outside click
   useEffect(() => {
     const handleClick = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target))
         setShowUserMenu(false);
-      if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target))
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(e.target) && !e.target.closest('.mobile-search-toggle'))
         setMobileSearch(false);
+      if (mobileDrawerRef.current && !mobileDrawerRef.current.contains(e.target) && !e.target.closest('.mobile-menu-toggle'))
+        setMobileMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
@@ -210,7 +220,7 @@ const Navbar = () => {
 
       {/* Mobile category drawer */}
       {mobileMenuOpen && (
-        <div className="mobile-menu-drawer">
+        <div className="mobile-menu-drawer" ref={mobileDrawerRef}>
           <Link to="/category/all" className="mobile-menu-link"
             onClick={() => setMobileMenuOpen(false)}>All Watches</Link>
           {categories.map(cat => (

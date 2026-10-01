@@ -18,15 +18,17 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!token) {
+    const cleanToken = (token || '').trim();
+    const cleanPass = password.trim();
+    if (!cleanToken) {
       setMsg({ text: 'Reset token is missing or invalid.', err: true });
       return;
     }
-    if (password.length < 6) {
+    if (cleanPass.length < 6) {
       setMsg({ text: 'Password must be at least 6 characters.', err: true });
       return;
     }
-    if (password !== confirmPassword) {
+    if (cleanPass !== confirmPassword.trim()) {
       setMsg({ text: 'Passwords do not match.', err: true });
       return;
     }
@@ -38,7 +40,7 @@ const ResetPasswordPage = () => {
       const res = await fetch(`${API}/api/users/reset-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password })
+        body: JSON.stringify({ token: cleanToken, newPassword: cleanPass })
       });
 
       const data = await res.json();

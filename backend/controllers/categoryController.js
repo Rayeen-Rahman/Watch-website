@@ -39,13 +39,12 @@ const createCategory = async (req, res) => {
     if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ message: 'Category name is required' });
     }
-    const cleanName = name.trim();
-    const slug = (customSlug && typeof customSlug === 'string' && customSlug.trim())
-      ? customSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '')
-      : cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    let slug = (customSlug && typeof customSlug === 'string' && customSlug.trim())
+      ? customSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/(^-|-$)+/g, '')
+      : cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-{2,}/g, '-').replace(/(^-|-$)+/g, '');
 
     if (!slug) {
-      return res.status(400).json({ message: 'A valid category name or slug is required' });
+      slug = `cat-${Date.now().toString(36)}`;
     }
 
     const categoryExists = await Category.findOne({ slug });
@@ -89,7 +88,7 @@ const updateCategory = async (req, res) => {
         return res.status(400).json({ message: 'Category slug cannot be empty' });
       }
       const formattedSlug = customSlug.trim().toLowerCase()
-        .replace(/[^a-z0-9-]+/g, '-').replace(/(^-|-$)+/g, '');
+        .replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/(^-|-$)+/g, '');
       if (!formattedSlug) {
         return res.status(400).json({ message: 'Category slug must contain valid alphanumeric characters' });
       }

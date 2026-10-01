@@ -189,8 +189,8 @@ const Inventory = ({ showToast }) => {
             <tbody>
               {displayed.map(product => {
                 const stock    = product.stock ?? 0;
-                const isLow    = stock <= threshold;
-                const edited   = edits[product._id] !== undefined;
+                const isLow    = stock <= activeThreshold;
+                const edited   = edits[product._id] !== undefined && Number(edits[product._id]) !== stock;
                 const isSaving = saving[product._id];
                 const img      = product.images?.[0] ? resolveImg(product.images[0]) : null;
 
@@ -225,6 +225,7 @@ const Inventory = ({ showToast }) => {
                         className="stock-edit-input"
                         value={edits[product._id] ?? stock}
                         onChange={e => handleStockChange(product._id, e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && edited) handleSave(product); }}
                       />
                     </td>
                     <td>

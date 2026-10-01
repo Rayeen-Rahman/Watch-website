@@ -206,11 +206,17 @@ router.put('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
     if (!token || !newPassword)
       return res.status(400).json({ message: 'Token and new password are required' });
-    if (newPassword.length < 6)
+
+    const cleanToken = String(token).trim();
+    const cleanPassword = String(newPassword).trim();
+
+    if (!cleanToken)
+      return res.status(400).json({ message: 'A valid token is required' });
+    if (cleanPassword.length < 6)
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
 
     // Hash the token to compare against database (Bug #20)
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(cleanToken).digest('hex');
 
     const user = await User.findOne({
       resetToken: hashedToken,
@@ -219,7 +225,7 @@ router.put('/reset-password', async (req, res) => {
     if (!user)
       return res.status(400).json({ message: 'Reset link is invalid or has expired' });
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(cleanPassword, 10);
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
     await user.save();

@@ -106,6 +106,7 @@ const InfoPage = ({ page }) => {
   const pageData = content[page];
 
   React.useEffect(() => {
+    window.scrollTo(0, 0);
     const prevTitle = document.title;
     if (pageData?.title) {
       document.title = `${pageData.title} — Artifact BD`;
@@ -113,7 +114,7 @@ const InfoPage = ({ page }) => {
     return () => {
       document.title = prevTitle;
     };
-  }, [pageData?.title]);
+  }, [page, pageData?.title]);
 
   if (!pageData) return null;
 

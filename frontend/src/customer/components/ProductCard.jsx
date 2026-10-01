@@ -35,11 +35,11 @@ const ProductCard = ({ product, sliderCard = false }) => {
   if (rawUrl) rawUrl = rawUrl.replace(/\\/g, '/');
   const imgSrc = resolveImg(rawUrl);
   
-  const isOutOfStock = product.stock === 0;
+  const isOutOfStock = product.stock != null && product.stock <= 0;
   const cls = `product-card${sliderCard ? ' slider-card' : ''}${isOutOfStock ? ' out-of-stock-card' : ''}`;
 
   const handleAddToCart = () => {
-    if (added) return;           // prevent spam during feedback window
+    if (added || isOutOfStock) return;           // prevent spam or out-of-stock addition
     addToCart(product, 1, false);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
