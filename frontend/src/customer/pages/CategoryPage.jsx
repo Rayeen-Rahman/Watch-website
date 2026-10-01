@@ -303,7 +303,7 @@ const CategoryPage = () => {
               )}
               {movement  && <span className="filter-pill">{movement} <button onClick={() => setMovement('')}><X size={10}/></button></span>}
               {gender    && <span className="filter-pill">{gender}   <button onClick={() => setGender('')}><X size={10}/></button></span>}
-              {maxPrice < 500000 && <span className="filter-pill">Max ৳{maxPrice.toLocaleString()} <button onClick={() => setMaxPrice(500000)}><X size={10}/></button></span>}
+              {maxPrice < 500000 && <span className="filter-pill">Max ৳{maxPrice.toLocaleString()} <button onClick={() => { setMaxPrice(500000); setMaxPriceDraft(500000); }}><X size={10}/></button></span>}
             </div>
           )}
 

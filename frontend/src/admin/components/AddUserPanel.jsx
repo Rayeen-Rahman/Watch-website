@@ -22,11 +22,11 @@ const AddUserPanel = ({ isOpen, onClose, showToast, onSave }) => {
       showToast('Password must be at least 6 characters.', true);
       return;
     }
-    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-    if (!fullName) {
+    if (!formData.firstName || !formData.firstName.trim()) {
       showToast('First name is required.', true);
       return;
     }
+    const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
     setIsSubmitting(true);
     const payload = {
       name: fullName,

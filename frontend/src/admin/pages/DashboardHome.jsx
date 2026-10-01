@@ -328,7 +328,7 @@ const DashboardHome = ({ showToast }) => {
           icon={AlertTriangle}
           label="Low Stock"
           value={loading ? '' : stats?.lowStockCount ?? 0}
-          sub="Items ≤ 5 units"
+          sub={`Items ≤ ${parseInt(localStorage.getItem('lowStockThreshold'), 10) || 5} units`}
           trend={stats?.lowStockCount > 0 ? 'down' : undefined}
           color="yellow"
           loading={loading}
@@ -388,7 +388,7 @@ const DashboardHome = ({ showToast }) => {
                     tick={{ fill: '#6b7280', fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={v => `৳${(v/1000).toFixed(0)}k`}
+                    tickFormatter={v => v >= 1000 ? `৳${(v/1000).toFixed(0)}k` : `৳${v}`}
                     width={48}
                   />
                   <Tooltip content={<CustomTooltip currency />} />

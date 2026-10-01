@@ -40,11 +40,11 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-    if (!fullName) {
+    if (!formData.firstName || !formData.firstName.trim()) {
       showToast('First name is required', true);
       return;
     }
+    const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
     const cleanEmail = formData.email.trim().toLowerCase();
     if (!cleanEmail) {
       showToast('Valid email is required', true);

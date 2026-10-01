@@ -96,6 +96,7 @@ const ProductDetail = () => {
   }, [product]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setQuantity(1);
     setActiveAccordion('details');
     const fetchProduct = async () => {
@@ -323,7 +324,7 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {product.stock === 0 ? (
+            {product.stock != null && product.stock <= 0 ? (
               <div className="badge-oos" style={{ textAlign: 'center', padding: '14px', fontSize: '0.9rem', borderRadius: '4px', marginBottom: '12px' }}>Out of Stock</div>
             ) : (
               <>
@@ -460,7 +461,7 @@ const ProductDetail = () => {
                       ) : (
                         <div className="img-placeholder">{(rel.brand || 'W').charAt(0)}</div>
                       )}
-                      {rel.stock === 0 ? (
+                      {rel.stock != null && rel.stock <= 0 ? (
                         <div className="badge-oos" style={{ position: 'absolute', top: 8, left: 8, zIndex: 2, padding: '3px 8px', fontSize: '0.75rem' }}>
                           Out of Stock
                         </div>
@@ -485,9 +486,9 @@ const ProductDetail = () => {
                     <button
                       className="btn-related-cart"
                       onClick={() => addToCart(rel, 1)}
-                      aria-label={rel.stock === 0 ? "Out of stock" : "Add to cart"}
-                      disabled={rel.stock === 0}
-                      style={rel.stock === 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                      aria-label={rel.stock != null && rel.stock <= 0 ? "Out of stock" : "Add to cart"}
+                      disabled={rel.stock != null && rel.stock <= 0}
+                      style={rel.stock != null && rel.stock <= 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
                     >
                       <ShoppingBag size={15} />
                     </button>
@@ -508,7 +509,7 @@ const ProductDetail = () => {
             <p>৳{product.price.toLocaleString()}</p>
           </div>
         </div>
-        {product.stock === 0 ? (
+        {product.stock != null && product.stock <= 0 ? (
           <div style={{ padding: '0 20px', fontWeight: 700, fontSize: '0.9rem', color: '#999' }}>
             Out of Stock
           </div>

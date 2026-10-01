@@ -39,6 +39,7 @@ const createCategory = async (req, res) => {
     if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ message: 'Category name is required' });
     }
+    const cleanName = name.trim();
     let slug = (customSlug && typeof customSlug === 'string' && customSlug.trim())
       ? customSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/-{2,}/g, '-').replace(/(^-|-$)+/g, '')
       : cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-{2,}/g, '-').replace(/(^-|-$)+/g, '');

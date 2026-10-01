@@ -114,6 +114,10 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       showToast('Please enter a product name.', true);
       return;
     }
+    if (!formData.brand || !formData.brand.trim()) {
+      showToast('Please enter a brand name.', true);
+      return;
+    }
     if (!formData.category) {
       showToast('Please select a category from the dropdown.', true);
       return;

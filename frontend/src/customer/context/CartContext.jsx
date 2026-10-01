@@ -103,11 +103,12 @@ export const CartProvider = ({ children }) => {
       if (item._id !== id) return item;
       // Clamp at available stock
       const maxStock = item.stock ?? Infinity;
-      const newQty = Math.min(quantity, maxStock);
+      const isOos = item.stock != null && item.stock <= 0;
+      const newQty = isOos ? 1 : Math.max(1, Math.min(Math.floor(quantity), maxStock));
       return {
         ...item,
         qty: newQty,
-        outOfStock: item.stock != null ? item.stock < newQty : false,
+        outOfStock: isOos || (item.stock != null && item.stock < newQty),
       };
     }));
   };

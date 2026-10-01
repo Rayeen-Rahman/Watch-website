@@ -36,6 +36,7 @@ const Success = () => {
       setOid(orderId);
       sessionStorage.removeItem('lastOrderId');
     }
+    sessionStorage.removeItem('lastOrderPhone');
     const tToken = sessionStorage.getItem('lastOrderTrackingToken');
     if (tToken) {
       setTrackingToken(tToken);
