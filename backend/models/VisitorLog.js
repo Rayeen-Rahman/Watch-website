@@ -9,7 +9,7 @@ const visitorLogSchema = new mongoose.Schema(
   {
     // SHA-256 hash of (IP + daily salt) — allows unique-visitor dedup
     // without storing the raw IP address.
-    ipHash: { type: String, required: true, index: true },
+    ipHash: { type: String, required: true },
 
     // Normalised pathname only — no query string, no PII
     path: { type: String, required: true, maxlength: 500 },
@@ -37,15 +37,12 @@ const visitorLogSchema = new mongoose.Schema(
   }
 );
 
-// ── Compound indexes for common query patterns ─────────────────────────────
-// Time-series queries (most common)
-visitorLogSchema.index({ createdAt: -1 });
-// Daily unique-visitor dedup check
-visitorLogSchema.index({ ipHash: 1, createdAt: -1 });
-// Path popularity queries
-visitorLogSchema.index({ path: 1, createdAt: -1 });
-
-// TTL: auto-delete records older than 90 days to cap storage
+// ── Indexes for query performance and data lifecycle ────────────────────────
+// TTL: auto-delete records older than 90 days AND serves all { createdAt: { $gte: ... } } range filters
 visitorLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });
+// Path popularity queries over time
+visitorLogSchema.index({ path: 1, createdAt: -1 });
+// Unique-visitor deduplication queries over time
+visitorLogSchema.index({ ipHash: 1, createdAt: -1 });
 
 module.exports = mongoose.model('VisitorLog', visitorLogSchema);
