@@ -53,6 +53,7 @@ const hashIp = (ip = '') =>
 // ── Paths we never want to track ──────────────────────────────────────────
 const SKIP_PREFIXES = [
   '/api/',
+  '/admin',
   '/uploads/',
   '/health',
   '/sitemap.xml',
@@ -72,11 +73,11 @@ const visitorTracker = (req, res, next) => {
   // Deferred so the response is already sent before we do DB work
   setImmediate(async () => {
     try {
-      const path = (req.path || '/').slice(0, 500);
-
-      // Skip non-HTML resource requests
-      if (shouldSkip(path)) return;
+      // Only track storefront GET page requests
       if (req.method !== 'GET') return;
+
+      const path = (req.path || '/').slice(0, 500);
+      if (shouldSkip(path)) return;
 
       const ua = req.headers['user-agent'] || '';
       const deviceType = getDeviceType(ua);

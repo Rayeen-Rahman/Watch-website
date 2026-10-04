@@ -491,10 +491,10 @@ const Analytics = ({ showToast }) => {
                   <div className="an-country-left">
                     <span className="an-country-rank">#{i + 1}</span>
                     <span className="an-country-flag">
-                      {/* Use emoji flag from country code */}
-                      {c.country
+                      {/* Use emoji flag from 2-letter ISO country code */}
+                      {c.country && /^[A-Za-z]{2}$/.test(c.country)
                         ? String.fromCodePoint(
-                            ...[...c.country.toUpperCase()].map(ch => 0x1F1E0 - 65 + ch.charCodeAt(0))
+                            ...[...c.country.toUpperCase()].map(ch => 0x1F1E6 - 65 + ch.charCodeAt(0))
                           )
                         : '🌐'}
                     </span>
