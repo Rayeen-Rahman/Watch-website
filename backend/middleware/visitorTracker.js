@@ -50,11 +50,13 @@ const hashIp = (ip = '') =>
     .update(ip)
     .digest('hex');
 
-// ── Paths we never want to track ──────────────────────────────────────────
+// ── Paths and file extensions we never want to track ────────────────────────
 const SKIP_PREFIXES = [
   '/api/',
   '/admin',
+  '/assets',
   '/uploads/',
+  '/images/',
   '/health',
   '/sitemap.xml',
   '/robots.txt',
@@ -62,8 +64,12 @@ const SKIP_PREFIXES = [
   '/_',        // vite HMR and internal chunks
 ];
 
+// Skip static assets (scripts, stylesheets, images, fonts, source maps, data files)
+const STATIC_EXT_PATTERN =
+  /\.(?:js|mjs|cjs|css|png|jpg|jpeg|gif|svg|ico|webp|avif|woff|woff2|ttf|eot|otf|map|json|xml|txt|webmanifest)$/i;
+
 const shouldSkip = (path = '') =>
-  SKIP_PREFIXES.some(p => path.startsWith(p));
+  SKIP_PREFIXES.some(p => path.startsWith(p)) || STATIC_EXT_PATTERN.test(path);
 
 // ── Main middleware ────────────────────────────────────────────────────────
 const visitorTracker = (req, res, next) => {
@@ -76,7 +82,7 @@ const visitorTracker = (req, res, next) => {
       // Only track storefront GET page requests
       if (req.method !== 'GET') return;
 
-      const path = (req.path || '/').slice(0, 500);
+      const path = (req.path || '/').trim().slice(0, 500) || '/';
       if (shouldSkip(path)) return;
 
       const ua = req.headers['user-agent'] || '';
@@ -85,9 +91,12 @@ const visitorTracker = (req, res, next) => {
       // Skip bots — they inflate numbers without adding business value
       if (deviceType === 'bot') return;
 
+      const rawForwarded = req.headers['x-forwarded-for'];
+      const xForwardedFor = Array.isArray(rawForwarded) ? rawForwarded[0] : rawForwarded;
+
       const ip =
         req.headers['cf-connecting-ip'] ||       // Cloudflare
-        req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+        xForwardedFor?.split(',')[0]?.trim() ||
         req.socket?.remoteAddress ||
         'unknown';
 

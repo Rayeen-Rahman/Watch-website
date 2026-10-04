@@ -34,6 +34,11 @@ const clampDays = (val, defaultVal = 7, max = 90) => {
   return (!isNaN(n) && n >= 1) ? Math.min(n, max) : defaultVal;
 };
 
+const clampLimit = (val, defaultVal = 10, max = 50) => {
+  const n = parseInt(val, 10);
+  return (!isNaN(n) && n >= 1) ? Math.min(n, max) : defaultVal;
+};
+
 /* ───────────────────────────────────────────────────────────────────────────
    GET /api/analytics/overview
    Returns headline numbers for the analytics dashboard header cards.
@@ -176,7 +181,7 @@ router.get('/traffic', async (req, res) => {
 router.get('/top-pages', async (req, res) => {
   try {
     const days      = clampDays(req.query.days, 30);
-    const limit     = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const limit     = clampLimit(req.query.limit, 10, 50);
     const startDate = getStartDate(days);
 
     const pages = await VisitorLog.aggregate([
@@ -246,7 +251,7 @@ router.get('/devices', async (req, res) => {
 router.get('/countries', async (req, res) => {
   try {
     const days      = clampDays(req.query.days, 30);
-    const limit     = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const limit     = clampLimit(req.query.limit, 10, 50);
     const startDate = getStartDate(days);
 
     const countries = await VisitorLog.aggregate([
