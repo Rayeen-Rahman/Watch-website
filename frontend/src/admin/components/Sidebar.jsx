@@ -3,15 +3,16 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   Home, Package, Users, ShoppingCart,
-  Tag, Layers,
+  Tag, Layers, TrendingUp,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
   {
     label: 'Overview',
     items: [
-      { to: '/admin',            icon: Home,         label: 'Dashboard', end: true },
+      { to: '/admin',            icon: Home,         label: 'Dashboard',  end: true },
       { to: '/admin/orders',     icon: ShoppingCart,  label: 'Orders'               },
+      { to: '/admin/analytics',  icon: TrendingUp,    label: 'Analytics'            },
     ],
   },
   {

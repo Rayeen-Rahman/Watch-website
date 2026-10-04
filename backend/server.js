@@ -229,13 +229,15 @@ const connectDB = async () => {
 };
 
 // ── Route imports ─────────────────────────────────────────────────────────────
-const productRoutes  = require('./routes/productRoutes');
-const userRoutes     = require('./routes/userRoutes');
-const orderRoutes    = require('./routes/orderRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const adminRoutes    = require('./routes/adminRoutes');     // Steps 14-16
-const paymentRoutes  = require('./routes/paymentRoutes'); // Step 27 — COD
+const productRoutes    = require('./routes/productRoutes');
+const userRoutes       = require('./routes/userRoutes');
+const orderRoutes      = require('./routes/orderRoutes');
+const categoryRoutes   = require('./routes/categoryRoutes');
+const adminRoutes      = require('./routes/adminRoutes');     // Steps 14-16
+const paymentRoutes    = require('./routes/paymentRoutes'); // Step 27 — COD
 const newsletterRoutes = require('./routes/newsletterRoutes');
+const analyticsRoutes  = require('./routes/analyticsRoutes'); // Visitor analytics
+const visitorTracker   = require('./middleware/visitorTracker');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // ── STEP 7: Health check endpoint ────────────────────────────────────────────
@@ -323,14 +325,19 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// ── Visitor tracker (must come BEFORE route handlers so every GET is recorded)
+// Fire-and-forget: never blocks the request cycle
+app.use(visitorTracker);
+
 // API Routes
 app.use('/api/products',   productRoutes);
 app.use('/api/users',      userRoutes);
 app.use('/api/orders',     orderRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/admin',      adminRoutes);    // Steps 14-16: dashboard stats/orders/charts
-app.use('/api/payments',   paymentRoutes); // Step 27: COD payment route
+app.use('/api/admin',      adminRoutes);      // Steps 14-16: dashboard stats/orders/charts
+app.use('/api/payments',   paymentRoutes);    // Step 27: COD payment route
 app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/analytics',  analyticsRoutes);  // Visitor analytics (admin-only)
 
 app.get('/api/settings/shipping', (req, res) => {
   res.json(require('./config/shipping'));
