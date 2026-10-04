@@ -75,7 +75,7 @@ router.get('/dashboard-stats', async (req, res) => {
  ───────────────────────────────────────────── */
 router.get('/recent-orders', async (req, res) => {
   try {
-    const limit = Math.min(parseInt(req.query.limit) || 8, 50);
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 8, 50));
     const orders = await Order.find({})
       .sort({ createdAt: -1 })
       .limit(limit)
@@ -93,7 +93,7 @@ router.get('/recent-orders', async (req, res) => {
  ───────────────────────────────────────────── */
 router.get('/popular-products', async (req, res) => {
   try {
-    const limit = Math.min(parseInt(req.query.limit) || 5, 20);
+    const limit = Math.max(1, Math.min(parseInt(req.query.limit, 10) || 5, 20));
 
     const products = await Order.aggregate([
       // Filter out orders that are not delivered

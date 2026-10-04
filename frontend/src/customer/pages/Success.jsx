@@ -10,6 +10,7 @@ const Success = () => {
   const [copied, setCopied]   = useState(false);
   const navigate = useNavigate();
   const [oid, setOid] = useState('');
+  const [orderPhone, setOrderPhone] = useState('');
   const [trackingToken, setTrackingToken] = useState('');
   const { reloadCartFromStorage } = useCart();
 
@@ -36,7 +37,11 @@ const Success = () => {
       setOid(orderId);
       sessionStorage.removeItem('lastOrderId');
     }
-    sessionStorage.removeItem('lastOrderPhone');
+    const phone = sessionStorage.getItem('lastOrderPhone') || '';
+    if (phone) {
+      setOrderPhone(phone);
+      sessionStorage.removeItem('lastOrderPhone');
+    }
     const tToken = sessionStorage.getItem('lastOrderTrackingToken');
     if (tToken) {
       setTrackingToken(tToken);
@@ -140,7 +145,13 @@ const Success = () => {
       {/* ── CTA buttons ────────────────────────────────────────────────── */}
       <div className="success-actions">
         <Link
-          to={trackingToken ? `/orders?token=${encodeURIComponent(trackingToken)}` : "/orders"}
+          to={
+            trackingToken
+              ? `/orders?token=${encodeURIComponent(trackingToken)}`
+              : (oid && orderPhone
+                  ? `/orders?orderId=${encodeURIComponent(oid)}&phone=${encodeURIComponent(orderPhone)}`
+                  : "/orders")
+          }
           className="btn-success-primary"
         >
           Track My Order <ArrowRight size={16} />

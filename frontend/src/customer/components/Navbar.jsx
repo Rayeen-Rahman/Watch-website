@@ -223,7 +223,7 @@ const Navbar = () => {
         <div className="mobile-menu-drawer" ref={mobileDrawerRef}>
           <Link to="/category/all" className="mobile-menu-link"
             onClick={() => setMobileMenuOpen(false)}>All Watches</Link>
-          {categories.map(cat => (
+          {allCategories.map(cat => (
             <Link
               key={cat._id}
               to={`/category/${cat.slug}`}

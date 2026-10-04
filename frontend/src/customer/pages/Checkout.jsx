@@ -34,13 +34,16 @@ const Checkout = () => {
       .catch(console.error);
   }, []);
 
-  // Prefill name and phone if authenticated user is present
+  // Prefill name, phone, and saved delivery address if authenticated user is present
   useEffect(() => {
     if (user) {
       setFormData(prev => ({
         ...prev,
         customerName: prev.customerName || user.name || '',
         phone: prev.phone || user.phone || '',
+        address: prev.address || user.address?.street || '',
+        city: prev.city || user.address?.city || '',
+        postalCode: prev.postalCode || user.address?.zip || '',
       }));
     }
   }, [user]);
@@ -181,21 +184,37 @@ const Checkout = () => {
         sessionStorage.setItem('lastOrderTrackingToken', data.rawGuestTrackingToken);
       }
 
-      // Auto-save the checkout phone to user profile if logged in and no phone saved yet
-      if (user && token && !user.phone && normalizedPhone) {
+      // Auto-save the checkout phone and address to user profile if logged in and missing
+      const shouldSavePhone = user && token && !user.phone && normalizedPhone;
+      const shouldSaveAddress = user && token && (!user.address?.street || !user.address?.city) && formData.address.trim();
+      if (shouldSavePhone || shouldSaveAddress) {
         try {
+          const profilePayload = {
+            name: user.name,
+            email: user.email,
+            phone: user.phone || normalizedPhone,
+            address: {
+              street: user.address?.street || formData.address.trim(),
+              city: user.address?.city || formData.city.trim(),
+              zip: user.address?.zip || (formData.postalCode ? formData.postalCode.trim() : ''),
+            },
+          };
           const profileRes = await fetch(`${API}/api/users/profile`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ name: user.name, email: user.email, phone: normalizedPhone }),
+            body: JSON.stringify(profilePayload),
           });
           if (profileRes.ok) {
             const updated = await profileRes.json();
-            login({ ...user, phone: updated.phone || normalizedPhone }, token);
+            login({
+              ...user,
+              phone: updated.phone || profilePayload.phone,
+              address: updated.address || profilePayload.address,
+            }, token);
           }
         } catch (e) {
-          // Non-critical — order already placed, just couldn't save phone
-          console.warn('Could not auto-save phone to profile:', e);
+          // Non-critical — order already placed, just couldn't save profile info
+          console.warn('Could not auto-save address/phone to profile:', e);
         }
       }
 

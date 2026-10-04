@@ -216,7 +216,7 @@ const ProductDetail = () => {
 
   const discountPercent = product.oldPrice > product.price
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-    : 0;
+    : (product.discount > 0 ? product.discount : 0);
 
   return (
     <div className="product-detail-page">

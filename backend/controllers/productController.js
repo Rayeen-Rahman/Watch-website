@@ -357,6 +357,8 @@ const updateProduct = async (req, res) => {
     // Auto-recalculate discount whenever price or oldPrice is updated
     if (product.oldPrice && product.oldPrice > product.price) {
       product.discount = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
+    } else if (req.body.discount !== undefined) {
+      product.discount = Math.max(0, Math.min(100, Number(req.body.discount) || 0));
     } else {
       product.discount = 0;
     }

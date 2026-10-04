@@ -227,7 +227,7 @@ const Products = ({ showToast }) => {
               <tr>
                 <th style={{ width: 40 }}>
                   <input type="checkbox" onChange={handleSelectAll}
-                    checked={selectedIds.length === products.length && products.length > 0} />
+                    checked={products.length > 0 && products.every(p => selectedIds.includes(p._id))} />
                 </th>
                 <th>Image</th>
                 <th>Name</th>

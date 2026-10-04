@@ -24,6 +24,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
     caseSize:         '',
     waterResistance:  '',
     gender:           '',
+    isActive:         true,
     isBestSeller:     false,
     isFeatured:       false,
   });
@@ -174,8 +175,9 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       caseSize:         formData.caseSize,
       waterResistance:  formData.waterResistance,
       gender:           formData.gender,
+      isActive:         Boolean(formData.isActive),
       isBestSeller:     Boolean(formData.isBestSeller),  // B-07 fix
-      isFeatured:       Boolean(formData.isFeatured),    // B-07 fix
+      isFeatured:       Boolean(formData.isActive && formData.isFeatured),    // B-07 fix
     };
 
     try {
@@ -218,7 +220,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
         description: '', category: '', tag: '',
         stock: '', dialColor: '', strapMaterial: '', movementType: '',
         caseSize: '', waterResistance: '', gender: '',
-        isBestSeller: false, isFeatured: false,
+        isActive: true, isBestSeller: false, isFeatured: false,
       });
       setImages([]);
       onClose();
@@ -252,6 +254,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
         caseSize:         editProduct.caseSize         || '',
         waterResistance:  editProduct.waterResistance  || '',
         gender:           editProduct.gender           || '',
+        isActive:         editProduct.isActive         !== undefined ? editProduct.isActive : true,
         isBestSeller:     editProduct.isBestSeller     || false,
         isFeatured:       editProduct.isFeatured       || false,
       });
@@ -262,7 +265,7 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
         description: '', category: '', tag: '',
         stock: '', dialColor: '', strapMaterial: '', movementType: '',
         caseSize: '', waterResistance: '', gender: '',
-        isBestSeller: false, isFeatured: false,
+        isActive: true, isBestSeller: false, isFeatured: false,
       });
       setImages([]);
     }
@@ -506,6 +509,19 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--admin-text-primary)' }}>
               <input
                 type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
+                onChange={handleChange}
+                style={{ width: '16px', height: '16px', accentColor: '#10b981', cursor: 'pointer' }}
+              />
+              <span>
+                <strong>Active in Store</strong>
+                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Visible in storefront catalog, search, and category pages</span>
+              </span>
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--admin-text-primary)' }}>
+              <input
+                type="checkbox"
                 name="isBestSeller"
                 checked={formData.isBestSeller}
                 onChange={handleChange}
@@ -516,17 +532,26 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
                 <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Shows in the Best Sellers slider on the homepage</span>
               </span>
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--admin-text-primary)' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              cursor: formData.isActive ? 'pointer' : 'not-allowed',
+              fontSize: '0.9rem',
+              color: 'var(--admin-text-primary)',
+              opacity: formData.isActive ? 1 : 0.5
+            }}>
               <input
                 type="checkbox"
                 name="isFeatured"
-                checked={formData.isFeatured}
+                checked={formData.isActive && formData.isFeatured}
+                disabled={!formData.isActive}
                 onChange={handleChange}
-                style={{ width: '16px', height: '16px', accentColor: '#6366f1', cursor: 'pointer' }}
+                style={{ width: '16px', height: '16px', accentColor: '#6366f1', cursor: formData.isActive ? 'pointer' : 'not-allowed' }}
               />
               <span>
                 <strong>Featured Product</strong>
-                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Displayed in the hero section spotlight card</span>
+                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--admin-text-secondary)' }}>Displayed in the hero section spotlight card {!formData.isActive ? '(Requires product to be active)' : ''}</span>
               </span>
             </label>
           </div>

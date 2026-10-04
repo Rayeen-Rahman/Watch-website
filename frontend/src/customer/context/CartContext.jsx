@@ -22,6 +22,22 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('watchCart', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Synchronize cart across browser tabs via storage event
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'watchCart') {
+        try {
+          const fresh = e.newValue ? JSON.parse(e.newValue) : [];
+          setCartItems(Array.isArray(fresh) ? fresh : []);
+        } catch {
+          // Ignore malformed json
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Refresh cart item prices/stock from server on mount with single batch request
   useEffect(() => {
     if (cartItems.length === 0) return;

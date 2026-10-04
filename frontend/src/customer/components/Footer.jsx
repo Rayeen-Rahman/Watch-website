@@ -100,6 +100,9 @@ const Footer = () => {
             {categories.map(c => (
               <li key={c._id}><Link to={`/category/${c.slug}`}>{c.name}</Link></li>
             ))}
+            {allCategories.length > 5 && (
+              <li><Link to="/category/all" style={{ opacity: 0.8, fontSize: '0.85em' }}>View All Categories →</Link></li>
+            )}
           </ul>
         </div>
 

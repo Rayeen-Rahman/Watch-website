@@ -241,7 +241,7 @@ const Orders = ({ showToast }) => {
               <tr>
                 <th style={{ width: 40 }}>
                   <input type="checkbox" onChange={handleSelectAll}
-                    checked={selectedIds.length === pageRows.length && pageRows.length > 0} />
+                    checked={pageRows.length > 0 && pageRows.every(o => selectedIds.includes(o._id))} />
                 </th>
                 <th>Order ID</th>
                 <th>Customer</th>

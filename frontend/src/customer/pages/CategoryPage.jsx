@@ -200,10 +200,14 @@ const CategoryPage = () => {
               {MOVEMENT_OPTIONS.map(m => (
                 <li key={m}>
                   <label className="filter-check">
-                    <input type="radio" name="movement" value={m}
+                    <input
+                      type="radio"
+                      name="movement"
+                      value={m}
                       checked={movement === m}
-                      onClick={() => setMovement(prev => prev === m ? '' : m)}
-                      onChange={() => {}} />
+                      onChange={(e) => { if (e.target.checked) setMovement(m); }}
+                      onClick={() => { if (movement === m) setMovement(''); }}
+                    />
                     {m}
                   </label>
                 </li>
@@ -218,10 +222,14 @@ const CategoryPage = () => {
               {GENDER_OPTIONS.map(g => (
                 <li key={g}>
                   <label className="filter-check">
-                    <input type="radio" name="gender" value={g}
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={g}
                       checked={gender === g}
-                      onClick={() => setGender(prev => prev === g ? '' : g)}
-                      onChange={() => {}} />
+                      onChange={(e) => { if (e.target.checked) setGender(g); }}
+                      onClick={() => { if (gender === g) setGender(''); }}
+                    />
                     {g}
                   </label>
                 </li>

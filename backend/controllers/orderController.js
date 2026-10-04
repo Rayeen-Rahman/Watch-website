@@ -12,6 +12,7 @@ const getOrders = async (req, res) => {
       let limit = parseInt(req.query.limit, 10) || 20;
       let page  = parseInt(req.query.pageNumber, 10) || 1;
       if (limit < 1) limit = 20;
+      if (limit > 100) limit = 100;
       if (page < 1) page = 1;
 
       const count = await Order.countDocuments({});
@@ -185,8 +186,14 @@ const createOrder = async (req, res) => {
 
     // Add shipping based on config
     const shippingConfig = require('../config/shipping');
-    const targetCity = (city || '').trim().toLowerCase();
-    const isDhaka = targetCity ? targetCity.includes('dhaka') : (address || '').toLowerCase().includes('dhaka');
+    const resolvedCity = (city || (req.body.shippingAddress && req.body.shippingAddress.city) || '').trim().toLowerCase();
+    let isDhaka = false;
+    if (resolvedCity) {
+      isDhaka = resolvedCity.includes('dhaka');
+    } else {
+      const addrTokens = (address || '').toLowerCase().split(/[\s,.-]+/);
+      isDhaka = addrTokens.includes('dhaka');
+    }
     const shipping = recalculatedTotal >= shippingConfig.freeShippingThreshold ? 0 : (isDhaka ? shippingConfig.insideDhaka : shippingConfig.outsideDhaka);
     const verifiedTotal = recalculatedTotal + shipping;
 

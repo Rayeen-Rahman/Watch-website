@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, Lock, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Phone, Lock, Save, Eye, EyeOff, MapPin } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './ProfilePage.css';
 
@@ -12,6 +12,9 @@ const ProfilePage = () => {
   const [email,       setEmail]       = useState(user?.email   || '');
   const [confirmEmail, setConfirmEmail] = useState('');
   const [phone,       setPhone]       = useState(user?.phone   || '');
+  const [street,      setStreet]      = useState(user?.address?.street || '');
+  const [city,        setCity]        = useState(user?.address?.city   || '');
+  const [zip,         setZip]         = useState(user?.address?.zip    || '');
   const [curPass,     setCurPass]     = useState('');
   const [newPass,     setNewPass]     = useState('');
   const [confirmPass, setConfirmPass] = useState('');
@@ -25,6 +28,9 @@ const ProfilePage = () => {
       setName(user.name || '');
       setEmail(user.email || '');
       setPhone(user.phone || '');
+      setStreet(user.address?.street || '');
+      setCity(user.address?.city || '');
+      setZip(user.address?.zip || '');
     }
   }, [user]);
 
@@ -98,14 +104,25 @@ const ProfilePage = () => {
           name: name.trim(),
           email: normEmail,
           phone: cleanPhone,
+          address: {
+            street: street.trim(),
+            city: city.trim(),
+            zip: zip.trim(),
+          },
           currentPassword: curPass,
           newPassword: newPass,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Update failed');
-      // Update auth context with new name/email
-      login({ ...user, name: data.name || name.trim(), email: data.email || normEmail, phone: data.phone ?? cleanPhone }, token);
+      // Update auth context with new name/email/address
+      login({
+        ...user,
+        name: data.name || name.trim(),
+        email: data.email || normEmail,
+        phone: data.phone ?? cleanPhone,
+        address: data.address || { street: street.trim(), city: city.trim(), zip: zip.trim() },
+      }, token);
       setMsg({ text: 'Profile updated successfully!', err: false });
       setCurPass(''); setNewPass(''); setConfirmPass(''); setConfirmEmail('');
     } catch (err) {
@@ -158,6 +175,39 @@ const ProfilePage = () => {
             <div className="profile-field">
               <label><Phone size={14} /> Phone</label>
               <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="01XXXXXXXXX" />
+            </div>
+          </div>
+
+          <div className="profile-section">
+            <h3 className="profile-section-title">Delivery Address <span>(Default)</span></h3>
+            <div className="profile-field">
+              <label><MapPin size={14} /> Street / Apartment Address</label>
+              <input
+                type="text"
+                value={street}
+                onChange={e => setStreet(e.target.value)}
+                placeholder="House, Road, Area (e.g. House 12, Road 4, Banani)"
+              />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="profile-field">
+                <label>City</label>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  placeholder="Dhaka, Chittagong, etc."
+                />
+              </div>
+              <div className="profile-field">
+                <label>Postal Code</label>
+                <input
+                  type="text"
+                  value={zip}
+                  onChange={e => setZip(e.target.value)}
+                  placeholder="e.g. 1213"
+                />
+              </div>
             </div>
           </div>
 

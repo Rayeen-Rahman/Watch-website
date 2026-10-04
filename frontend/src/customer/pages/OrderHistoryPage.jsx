@@ -87,6 +87,9 @@ const OrderHistoryPage = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const queryToken = searchParams.get('token');
     const prefilledToken = queryToken || sessionStorage.getItem('lastOrderTrackingToken');
+    const queryOrderId = searchParams.get('orderId') || sessionStorage.getItem('lastOrderId');
+    const queryPhone = searchParams.get('phone') || sessionStorage.getItem('lastOrderPhone');
+
     if (prefilledToken && !user) {
       setTrackingToken(prefilledToken);
       sessionStorage.removeItem('lastOrderTrackingToken');
@@ -107,13 +110,39 @@ const OrderHistoryPage = () => {
           setLoading(false);
         }
       })();
+    } else if (queryOrderId && queryPhone && !user) {
+      setActiveTab('phone');
+      setOrderIdInput(queryOrderId);
+      setPhoneInput(queryPhone);
+      (async () => {
+        setLoading(true);
+        setError('');
+        try {
+          const res = await fetch(`${API}/api/orders/lookup-by-phone?orderId=${encodeURIComponent(queryOrderId.trim())}&phone=${encodeURIComponent(queryPhone.trim())}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'No order found');
+          setOrders(data && data._id ? [data] : []);
+          setSearched(true);
+        } catch (err) {
+          setError(err.message || 'Failed to search orders. Please check your phone number and order ID.');
+          setOrders([]);
+          setSearched(true);
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
   }, [user, authLoading]);
 
   useEffect(() => {
     if (authLoading) return;
     const searchParams = new URLSearchParams(window.location.search);
-    const hasPrefill = Boolean(searchParams.get('token') || sessionStorage.getItem('lastOrderTrackingToken'));
+    const hasPrefill = Boolean(
+      searchParams.get('token') ||
+      sessionStorage.getItem('lastOrderTrackingToken') ||
+      (searchParams.get('orderId') && searchParams.get('phone')) ||
+      (sessionStorage.getItem('lastOrderId') && sessionStorage.getItem('lastOrderPhone'))
+    );
     if (!token || !user) {
       if (!hasPrefill) setLoading(false);
       return;

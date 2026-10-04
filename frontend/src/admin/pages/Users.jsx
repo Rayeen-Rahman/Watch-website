@@ -212,7 +212,7 @@ const Users = ({ showToast }) => {
               <tr>
                 <th style={{ width: 40 }}>
                   <input type="checkbox" onChange={handleSelectAll}
-                    checked={selectedIds.length === pageRows.length && pageRows.length > 0} />
+                    checked={pageRows.length > 0 && pageRows.every(u => selectedIds.includes(u._id))} />
                 </th>
                 <th>Avatar</th>
                 <th>Name</th>

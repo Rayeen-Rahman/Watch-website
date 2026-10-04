@@ -14,7 +14,12 @@ const getCategories = async (req, res) => {
         { $group: { _id: '$category', count: { $sum: 1 } } }
       ]);
       const countMap = {};
-      counts.forEach(c => { if (c._id) countMap[c._id.toString()] = c.count; });
+      counts.forEach(c => {
+        if (c._id) {
+          const key = c._id.toString();
+          countMap[key] = (countMap[key] || 0) + c.count;
+        }
+      });
 
       const enriched = categories.map(c => ({
         ...c,

@@ -13,6 +13,7 @@ const getUsers = async (req, res) => {
       let limit = parseInt(req.query.limit, 10) || 20;
       let page  = parseInt(req.query.pageNumber, 10) || 1;
       if (limit < 1) limit = 20;
+      if (limit > 100) limit = 100;
       if (page < 1) page = 1;
 
       const count = await User.countDocuments({});
