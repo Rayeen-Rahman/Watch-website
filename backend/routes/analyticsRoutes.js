@@ -9,9 +9,8 @@
 //   GET /api/analytics/countries?limit=10– top countries (when CF headers present)
 //   DELETE /api/analytics/clear          – wipe all logs (admin only, requires confirmation)
 
-const express  = require('express');
-const router   = express.Router();
-const mongoose = require('mongoose');
+const express    = require('express');
+const router     = express.Router();
 const VisitorLog = require('../models/VisitorLog');
 const { protect, isAdmin } = require('../middleware/authMiddleware');
 

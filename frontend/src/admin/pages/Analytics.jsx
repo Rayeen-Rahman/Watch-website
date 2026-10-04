@@ -105,7 +105,6 @@ const Analytics = ({ showToast }) => {
   const [clearing,      setClearing]      = useState(false);
   const [confirmClear,  setConfirmClear]  = useState(false);
 
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   /* ── Fetch all analytics data ── */
   const fetchAll = useCallback(async (isRefresh = false) => {
@@ -113,8 +112,11 @@ const Analytics = ({ showToast }) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
     setError(null);
 
+    // Build headers fresh inside the callback so it always uses the current token
+    const authHeaders = { Authorization: `Bearer ${token}` };
+
     const fetchJson = async (url) => {
-      const r = await fetch(url, { headers });
+      const r = await fetch(url, { headers: authHeaders });
       if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); }
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.message || 'Request failed');
@@ -152,9 +154,10 @@ const Analytics = ({ showToast }) => {
   const handleClear = async () => {
     setClearing(true);
     try {
+      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
       const r = await fetch(`${API}/api/analytics/clear`, {
         method:  'DELETE',
-        headers: { ...headers, 'Content-Type': 'application/json' },
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
         body:    JSON.stringify({ confirm: true }),
       });
       const data = await r.json().catch(() => ({}));
