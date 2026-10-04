@@ -8,6 +8,7 @@ const rateLimit  = require('express-rate-limit');
 const morgan     = require('morgan');
 const compression = require('compression');
 const dns        = require('dns');
+const visitorTracker = require('./middleware/visitorTracker');
 
 // Load environment variables
 dotenv.config();
@@ -243,7 +244,6 @@ const adminRoutes      = require('./routes/adminRoutes');     // Steps 14-16
 const paymentRoutes    = require('./routes/paymentRoutes'); // Step 27 — COD
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const analyticsRoutes  = require('./routes/analyticsRoutes'); // Visitor analytics
-const visitorTracker   = require('./middleware/visitorTracker');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 // ── STEP 7: Health check endpoint ────────────────────────────────────────────
