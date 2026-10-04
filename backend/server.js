@@ -420,12 +420,20 @@ app.use(errorHandler);
 // ── STEP 8: Start server + graceful SIGTERM shutdown ─────────────────────────
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  await connectDB();   // wait for DB before accepting requests
+const startServer = () => {
+  // Bind port immediately so Hostinger's 3-second startup watchdog succeeds (<100ms)
   const server = app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    console.log('Backend successfully started after MongoDB connection!');
   });
+
+  // Connect to MongoDB Atlas (Mongoose buffers queries until ready)
+  connectDB()
+    .then(() => {
+      console.log('Backend successfully started after MongoDB connection!');
+    })
+    .catch((err) => {
+      console.error(`MongoDB connection error: ${err.message}`);
+    });
 
   // Graceful shutdown — handles Docker stop, PM2 restart, deployment restarts, Ctrl+C
   const gracefulShutdown = (signal) => {
