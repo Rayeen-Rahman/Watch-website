@@ -1,7 +1,39 @@
 const multer  = require('multer');
 const path    = require('path');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('../config/cloudinary');
+
+// ── Native Cloudinary Multer Storage Engine ─────────────────────────────────
+// Direct stream upload to Cloudinary v2 avoiding legacy third-party dependencies.
+class CloudinaryCustomStorage {
+  constructor(options = {}) {
+    this.cloudinary = options.cloudinary;
+    this.params = options.params || {};
+  }
+
+  _handleFile(req, file, cb) {
+    const uploadStream = this.cloudinary.uploader.upload_stream(
+      this.params,
+      (err, result) => {
+        if (err) return cb(err);
+        cb(null, {
+          path: result.secure_url,
+          size: result.bytes,
+          filename: result.public_id,
+        });
+      }
+    );
+
+    file.stream.pipe(uploadStream);
+  }
+
+  _removeFile(req, file, cb) {
+    if (file && file.filename) {
+      this.cloudinary.uploader.destroy(file.filename, { invalidate: true }, cb);
+    } else {
+      cb(null);
+    }
+  }
+}
 
 // ── Decide storage based on environment ─────────────────────────────────────
 // If Cloudinary credentials exist → upload to cloud.
@@ -16,7 +48,7 @@ let storage;
 
 if (hasCloudinary) {
   // ── Cloudinary Storage ─────────────────────────────────────────────────────
-  storage = new CloudinaryStorage({
+  storage = new CloudinaryCustomStorage({
     cloudinary,
     params: {
       folder:         'watch-vault/products',   // Cloudinary folder

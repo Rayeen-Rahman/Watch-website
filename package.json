@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.11.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -23,11 +24,12 @@
     "mongoose": "^9.7.2",
     "morgan": "^1.10.1",
     "multer": "^2.2.0",
-    "multer-storage-cloudinary": "^4.0.0",
-    "nodemailer": "^10.0.14",
-    "cloudinary": "^1.41.3"
+    "nodemailer": "^10.0.14"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
+  },
+  "overrides": {
+    "braces": "^3.0.3"
   }
 }
