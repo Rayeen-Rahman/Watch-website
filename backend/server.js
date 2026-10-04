@@ -167,6 +167,12 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));  // required for payment callbacks & form POSTs
 
+// ── Visitor tracker ──────────────────────────────────────────────────────────
+// Must be registered BEFORE routes so every storefront GET is recorded.
+// Fire-and-forget design: calls next() first, defers DB write via setImmediate()
+// so it NEVER adds latency to the visitor's request.
+app.use(visitorTracker);
+
 // Add short-lived cache headers to public GET endpoints to reduce repeat load times (skip admin/authenticated)
 app.use('/api/products', (req, res, next) => {
   if (req.method === 'GET') {
@@ -324,10 +330,6 @@ if (process.env.NODE_ENV !== 'production') {
     res.json({ message: 'Watch Store API is running...' });
   });
 }
-
-// ── Visitor tracker (must come BEFORE route handlers so every GET is recorded)
-// Fire-and-forget: never blocks the request cycle
-app.use(visitorTracker);
 
 // API Routes
 app.use('/api/products',   productRoutes);

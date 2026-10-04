@@ -84,7 +84,7 @@ router.get('/overview', async (req, res) => {
     const prev = previous[0] || { pageViews: 0, uniqueVisits: 0 };
 
     const pctChange = (cur, prev) => {
-      if (!prev) return null;
+      if (prev === 0 || prev === null || prev === undefined) return null;
       return Math.round(((cur - prev) / prev) * 100);
     };
 
