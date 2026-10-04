@@ -8,7 +8,7 @@ const cloudinary = require('../config/cloudinary');
 // Otherwise fall back to local disk (keeps local dev working without Cloudinary).
 
 const hasCloudinary =
-  process.env.CLOUDINARY_NAME &&
+  (process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME) &&
   process.env.CLOUDINARY_API_KEY &&
   process.env.CLOUDINARY_API_SECRET;
 

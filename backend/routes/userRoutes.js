@@ -100,7 +100,7 @@ router.get('/profile', protect, async (req, res) => {
 // PUT /api/users/profile  — update name, email, phone, optional password
 router.put('/profile', protect, async (req, res) => {
   try {
-    const { name, email, phone, currentPassword, newPassword } = req.body;
+    const { name, email, phone, address, currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user.id).select('+password');
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -147,9 +147,31 @@ router.put('/profile', protect, async (req, res) => {
       user.email = emailLower;
     }
     if (phone !== undefined) user.phone = String(phone).trim();
+    if (address !== undefined) {
+      if (typeof address === 'object' && address !== null) {
+        user.address = {
+          street: address.street ? String(address.street).trim() : (user.address?.street || ''),
+          city: address.city ? String(address.city).trim() : (user.address?.city || ''),
+          zip: address.zip ? String(address.zip).trim() : (user.address?.zip || ''),
+        };
+      } else if (typeof address === 'string') {
+        user.address = {
+          street: address.trim(),
+          city: user.address?.city || '',
+          zip: user.address?.zip || '',
+        };
+      }
+    }
 
     const updated = await user.save();
-    res.json({ _id: updated._id, name: updated.name, email: updated.email, role: updated.role, phone: updated.phone || '' });
+    res.json({
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      phone: updated.phone || '',
+      address: updated.address || null,
+    });
   } catch (err) {
     if (err.code === 11000) {
       return res.status(400).json({ message: 'Another account with this email address already exists.' });

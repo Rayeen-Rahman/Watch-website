@@ -53,7 +53,7 @@ const Success = () => {
         let parsed = JSON.parse(saved);
         if (buyNowProductId && Array.isArray(parsed)) {
           // Reconcile by filtering out the item that was just bought via Buy Now
-          parsed = parsed.filter(item => (item._id || item.product) !== buyNowProductId);
+          parsed = parsed.filter(item => String(item._id || item.product) !== String(buyNowProductId));
         }
         localStorage.setItem("watchCart", JSON.stringify(parsed));
         reloadCartFromStorage();   // ← update React state immediately

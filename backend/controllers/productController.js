@@ -235,10 +235,11 @@ const getProductsBatch = async (req, res) => {
       .map(id => id.trim())
       .filter(id => mongoose.Types.ObjectId.isValid(id));
 
-    if (ids.length === 0) return res.json([]);
+    const uniqueIds = Array.from(new Set(ids)).slice(0, 50);
+    if (uniqueIds.length === 0) return res.json([]);
 
-    const products = await Product.find({ _id: { $in: ids } })
-      .select('name price stock images isActive')
+    const products = await Product.find({ _id: { $in: uniqueIds } })
+      .select('name brand price stock images isActive')
       .lean();
 
     res.json(products);

@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import AddProductPanel from '../components/AddProductPanel';
 import './Products.css';
 
-import { API } from '../../utils/api';
+import { API, resolveImg } from '../../utils/api';
 
 const Products = ({ showToast }) => {
   const { token, handleUnauthorized } = useAuth();
@@ -260,7 +260,7 @@ const Products = ({ showToast }) => {
                       <div className="table-img">
                         {p.images?.[0] ? (
                           <img
-                            src={p.images[0].startsWith('/uploads') ? `${API}${p.images[0]}` : p.images[0]}
+                            src={resolveImg(p.images[0])}
                             alt={p.name}
                           />
                         ) : (

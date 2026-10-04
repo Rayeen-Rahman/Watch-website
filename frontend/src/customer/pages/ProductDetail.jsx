@@ -169,7 +169,12 @@ const ProductDetail = () => {
     if (!product || (product.stock != null && product.stock <= 0)) return;
     const safeQty = Math.max(1, Math.min(quantity, product.stock ?? quantity));
     // Save current cart so we can restore it on the Success page
-    const existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
+    let existingCart = [];
+    try {
+      existingCart = JSON.parse(localStorage.getItem('watchCart') || '[]');
+    } catch {
+      existingCart = [];
+    }
     sessionStorage.setItem('savedCartBeforeBuyNow', JSON.stringify(existingCart));
     sessionStorage.setItem('buyNowProductId', product._id);
     // Do NOT call clearCart() here — instead set a flag and let Checkout

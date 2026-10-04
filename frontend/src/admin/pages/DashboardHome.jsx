@@ -118,10 +118,23 @@ const DashboardHome = ({ showToast }) => {
   useEffect(() => {
     if (authLoading || !token) return;
     setLoading(true);
+    const handleFetchJson = async (url) => {
+      const r = await fetch(url, { headers });
+      if (r.status === 401) {
+        handleUnauthorized();
+        throw new Error('Unauthorized');
+      }
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        throw new Error(data.message || 'Failed to load dashboard data');
+      }
+      return data;
+    };
+
     Promise.all([
-      fetch(`${API}/api/admin/dashboard-stats?lowStockThreshold=${localStorage.getItem('lowStockThreshold') || 5}`,          { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
-      fetch(`${API}/api/admin/recent-orders?limit=8`,    { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
-      fetch(`${API}/api/admin/popular-products?limit=5`, { headers }).then(r => { if (r.status === 401) { handleUnauthorized(); throw new Error('Unauthorized'); } return r.json(); }),
+      handleFetchJson(`${API}/api/admin/dashboard-stats?lowStockThreshold=${localStorage.getItem('lowStockThreshold') || 5}`),
+      handleFetchJson(`${API}/api/admin/recent-orders?limit=8`),
+      handleFetchJson(`${API}/api/admin/popular-products?limit=5`),
     ])
       .then(([s, ro, pp]) => {
         setStats(s);
