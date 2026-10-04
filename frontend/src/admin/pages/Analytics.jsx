@@ -286,7 +286,7 @@ const Analytics = ({ showToast }) => {
         <KpiCard
           icon={Globe}
           label="Countries Tracked"
-          value={loading ? '' : countries.length}
+          value={loading ? '' : (overview?.totalCountries ?? countries.length)}
           color="orange"
           loading={loading}
         />

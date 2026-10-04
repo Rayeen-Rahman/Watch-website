@@ -11,7 +11,8 @@
 //  • The write is deferred with setImmediate() so it executes AFTER the
 //    response is sent, adding zero latency to the visitor.
 
-const crypto = require('crypto');
+const crypto   = require('crypto');
+const mongoose = require('mongoose');
 
 // ── Bot detection heuristic ────────────────────────────────────────────────
 const BOT_UA_PATTERN =
@@ -26,12 +27,17 @@ const getDeviceType = (ua = '') => {
   return 'desktop';
 };
 
-// ── Extract root domain from Referer header ────────────────────────────────
-const getReferrerDomain = (referer = '') => {
+// ── Extract root domain from Referer header (skipping self-referrals) ──────
+const getReferrerDomain = (referer = '', host = '') => {
   if (!referer) return null;
   try {
     const url = new URL(referer);
-    return url.hostname.replace(/^www\./, '').slice(0, 200) || null;
+    const domain = url.hostname.replace(/^www\./, '').toLowerCase().slice(0, 200) || null;
+    const currentHost = (host || '').split(':')[0].replace(/^www\./, '').toLowerCase();
+    if (domain && currentHost && (domain === currentHost || domain.endsWith(`.${currentHost}`))) {
+      return null; // internal navigation within the site
+    }
+    return domain;
   } catch {
     return null;
   }
@@ -82,7 +88,12 @@ const visitorTracker = (req, res, next) => {
       // Only track storefront GET page requests
       if (req.method !== 'GET') return;
 
-      const path = (req.path || '/').trim().slice(0, 500) || '/';
+      // Drop tracking if database connection is not active
+      if (mongoose.connection.readyState !== 1) return;
+
+      const rawPath = (req.path || '/').trim().slice(0, 500) || '/';
+      // Normalize trailing slash so '/category/all/' and '/category/all' are counted together
+      const path = (rawPath.length > 1 && rawPath.endsWith('/')) ? rawPath.slice(0, -1) : rawPath;
       if (shouldSkip(path)) return;
 
       const ua = req.headers['user-agent'] || '';
@@ -101,7 +112,7 @@ const visitorTracker = (req, res, next) => {
         'unknown';
 
       const ipHash = hashIp(ip);
-      const referrerDomain = getReferrerDomain(req.headers['referer'] || req.headers['referrer']);
+      const referrerDomain = getReferrerDomain(req.headers['referer'] || req.headers['referrer'], req.headers['host']);
       const country = (req.headers['cf-ipcountry'] || null)?.toString().slice(0, 2).toUpperCase() || null;
 
       // Lazy-require model to avoid circular-dep issues at module load time

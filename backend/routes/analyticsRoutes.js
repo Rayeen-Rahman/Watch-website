@@ -57,12 +57,22 @@ router.get('/overview', async (req, res) => {
             _id:          null,
             pageViews:    { $sum: 1 },
             uniqueIps:    { $addToSet: '$ipHash' },
+            countries:    { $addToSet: '$country' },
           },
         },
         {
           $project: {
             pageViews:    1,
             uniqueVisits: { $size: '$uniqueIps' },
+            totalCountries: {
+              $size: {
+                $filter: {
+                  input: '$countries',
+                  as: 'c',
+                  cond: { $and: [{ $ne: ['$$c', null] }, { $ne: ['$$c', ''] }] },
+                },
+              },
+            },
           },
         },
       ]),
@@ -84,7 +94,7 @@ router.get('/overview', async (req, res) => {
       ]),
     ]);
 
-    const cur  = current[0]  || { pageViews: 0, uniqueVisits: 0 };
+    const cur  = current[0]  || { pageViews: 0, uniqueVisits: 0, totalCountries: 0 };
     const prev = previous[0] || { pageViews: 0, uniqueVisits: 0 };
 
     const pctChange = (cur, prev) => {
@@ -101,6 +111,7 @@ router.get('/overview', async (req, res) => {
       days,
       pageViews:          cur.pageViews,
       uniqueVisits:       cur.uniqueVisits,
+      totalCountries:     cur.totalCountries || 0,
       avgPagesPerVisit,
       pageViewsChange:    pctChange(cur.pageViews,    prev.pageViews),
       uniqueVisitsChange: pctChange(cur.uniqueVisits, prev.uniqueVisits),
