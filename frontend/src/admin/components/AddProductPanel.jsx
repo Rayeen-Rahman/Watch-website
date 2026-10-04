@@ -130,9 +130,16 @@ const AddProductPanel = ({ isOpen, onClose, showToast, onSave, editProduct = nul
       showToast('Please enter a valid selling price greater than 0.', true);
       return;
     }
-    if (formData.oldPrice && Number(formData.oldPrice) <= Number(formData.price)) {
-      showToast('Original price must be higher than the selling price. If there is no discount, leave Original Price empty.', true);
-      return;
+    if (formData.oldPrice) {
+      const numOld = Number(formData.oldPrice);
+      if (isNaN(numOld) || numOld <= 0) {
+        showToast('Original price must be a valid positive number.', true);
+        return;
+      }
+      if (numOld <= Number(formData.price)) {
+        showToast('Original price must be higher than the selling price. If there is no discount, leave Original Price empty.', true);
+        return;
+      }
     }
     if (formData.stock !== '' && (isNaN(Number(formData.stock)) || Number(formData.stock) < 0)) {
       showToast('Stock must be a whole number of 0 or more.', true);

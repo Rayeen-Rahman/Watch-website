@@ -91,6 +91,10 @@ const Users = ({ showToast }) => {
 
   // ── Ban / Unban ─────────────────────────────────────────────────────────────
   const toggleBan = async (user) => {
+    if (user._id === loggedInUser?._id) {
+      toast('You cannot deactivate or ban your own account.', true);
+      return;
+    }
     const newStatus = user.status === 'Active' ? 'Banned' : 'Active';
     try {
       const res = await fetch(`${API}/api/users/${user._id}`, {
@@ -292,7 +296,12 @@ const Users = ({ showToast }) => {
           <button onClick={() => { setSelectedUser(activeKebabUser); setIsEditOpen(true); setOpenKebab(null); }}>
             ✏️ Edit
           </button>
-          <button onClick={() => { toggleBan(activeKebabUser); setOpenKebab(null); }}>
+          <button
+            onClick={() => { toggleBan(activeKebabUser); setOpenKebab(null); }}
+            disabled={activeKebabUser._id === loggedInUser?._id}
+            title={activeKebabUser._id === loggedInUser?._id ? 'Cannot ban your own account' : ''}
+            style={activeKebabUser._id === loggedInUser?._id ? { opacity: 0.4, cursor: 'not-allowed' } : {}}
+          >
             {activeKebabUser.status === 'Active'
               ? <><ShieldOff size={13} style={{ marginRight: 6 }} />Ban User</>
               : <><ShieldCheck size={13} style={{ marginRight: 6 }} />Unban User</>}

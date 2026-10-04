@@ -265,27 +265,37 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: 'A valid category is required' });
     }
 
-    if (isFeatured) {
+    const activeFlag = isActive ?? true;
+    const featuredFlag = (activeFlag === false) ? false : Boolean(isFeatured);
+
+    if (featuredFlag) {
       await Product.updateMany({ isFeatured: true }, { $set: { isFeatured: false } });
     }
 
     const numPrice = Number(price);
-    const numOldPrice = oldPrice ? Number(oldPrice) : null;
+    const numOldPrice = (oldPrice !== undefined && oldPrice !== null && oldPrice !== '' && !isNaN(Number(oldPrice)))
+      ? Number(oldPrice)
+      : null;
     const computedDiscount = (numOldPrice && numOldPrice > numPrice)
       ? Math.round(((numOldPrice - numPrice) / numOldPrice) * 100)
       : (Number(discount) || 0);
 
     const product = new Product({
-      name, brand, price: numPrice, oldPrice: numOldPrice,
+      name: name ? String(name).trim() : '',
+      brand: brand ? String(brand).trim() : '',
+      price: numPrice,
+      oldPrice: numOldPrice,
       discount: computedDiscount,
-      shortDescription, description,
+      shortDescription: shortDescription ? String(shortDescription).trim() : '',
+      description: description ? String(description).trim() : '',
       images:  images  || [],
-      category, tag,
-      stock:   stock   ?? 0,
+      category,
+      tag: tag ? String(tag).trim() : '',
+      stock:   Math.max(0, Math.floor(Number(stock) || 0)),
       dialColor, strapMaterial, movementType, caseSize, waterResistance, gender,
       isBestSeller: isBestSeller ?? false,
-      isFeatured:   isFeatured   ?? false,
-      isActive:     isActive     ?? true,
+      isFeatured:   featuredFlag,
+      isActive:     activeFlag,
     });
 
     const created = await product.save();
@@ -348,6 +358,11 @@ const updateProduct = async (req, res) => {
       product.discount = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
     } else {
       product.discount = 0;
+    }
+
+    // Inactive products can never be featured (Bug #112)
+    if (product.isActive === false && product.isFeatured) {
+      product.isFeatured = false;
     }
 
     const updated = await product.save();

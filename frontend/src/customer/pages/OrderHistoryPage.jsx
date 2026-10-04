@@ -12,7 +12,7 @@ const STATUS_CONFIG = {
   shipped:    { label: 'Shipped',    color: '#3B82F6', Icon: Truck },
   delivered:  { label: 'Delivered',  color: '#22C55E', Icon: CheckCircle },
   cancelled:  { label: 'Cancelled',  color: '#EF4444', Icon: XCircle },
-  failed:     { label: 'Cancelled',  color: '#EF4444', Icon: XCircle },
+  failed:     { label: 'Failed',     color: '#EF4444', Icon: XCircle },
 };
 
 /* Renders a list of order cards — used both for authenticated and guest views */
@@ -112,7 +112,12 @@ const OrderHistoryPage = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!token || !user) { setLoading(false); return; }
+    const searchParams = new URLSearchParams(window.location.search);
+    const hasPrefill = Boolean(searchParams.get('token') || sessionStorage.getItem('lastOrderTrackingToken'));
+    if (!token || !user) {
+      if (!hasPrefill) setLoading(false);
+      return;
+    }
 
     // Admins see all orders
     if (user.role === 'admin') {

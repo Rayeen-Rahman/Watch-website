@@ -112,7 +112,8 @@ const ProductDetail = () => {
 
         // Step 30: fetch related by same category
         try {
-          const catParam = data.category?._id ? `&category=${data.category._id}` : '';
+          const catId = data.category?._id || (typeof data.category === 'string' ? data.category : null);
+          const catParam = catId ? `&category=${catId}` : '';
           const relatedRes = await fetch(`${API}/api/products?limit=12${catParam}`);
           if (relatedRes.ok) {
             const relatedData = await relatedRes.json();

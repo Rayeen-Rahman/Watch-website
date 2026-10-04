@@ -6,7 +6,8 @@ import './EditUserPanel.css';
 import { API } from '../../utils/api';
 
 const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
-  const { token, handleUnauthorized } = useAuth();
+  const { token, user: loggedInUser, handleUnauthorized } = useAuth();
+  const isSelf = Boolean(loggedInUser && user && String(loggedInUser._id) === String(user._id));
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -118,15 +119,15 @@ const EditUserPanel = ({ isOpen, onClose, user, onSave, showToast }) => {
 
           <div className="form-row" style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px'}}>
             <div className="form-group">
-              <label>Role</label>
-              <select name="role" value={formData.role} onChange={handleChange}>
+              <label>Role {isSelf && <span style={{ fontSize: '0.75rem', color: '#888' }}>(Cannot self-modify)</span>}</label>
+              <select name="role" value={formData.role} onChange={handleChange} disabled={isSelf} title={isSelf ? 'You cannot change your own role' : ''}>
                 <option value="admin">Admin</option>
                 <option value="customer">Customer</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Status</label>
-              <select name="status" value={formData.status} onChange={handleChange}>
+              <label>Status {isSelf && <span style={{ fontSize: '0.75rem', color: '#888' }}>(Cannot self-modify)</span>}</label>
+              <select name="status" value={formData.status} onChange={handleChange} disabled={isSelf} title={isSelf ? 'You cannot change your own status' : ''}>
                 <option value="Active">Active</option>
                 <option value="Banned">Banned</option>
               </select>

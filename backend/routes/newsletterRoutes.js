@@ -26,7 +26,10 @@ router.post('/subscribe', async (req, res) => {
     await NewsletterSubscriber.create({ email: emailLower });
     res.status(201).json({ message: 'Subscribed successfully!' });
   } catch (err) {
-    if (err.name === 'ValidationError' || err.code === 11000) {
+    if (err.code === 11000) {
+      return res.status(200).json({ message: 'Already subscribed!' });
+    }
+    if (err.name === 'ValidationError') {
       return res.status(400).json({ message: err.message || 'Invalid email address' });
     }
     res.status(500).json({ message: err.message });

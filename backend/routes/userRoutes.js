@@ -65,8 +65,8 @@ router.post('/login', async (req, res) => {
     if (!match)
       return res.status(401).json({ message: 'Invalid email or password' });
 
-    // Reject banned accounts before issuing a token
-    if (user.status === 'Banned')
+    // Reject banned or deactivated accounts before issuing a token
+    if (user.status === 'Banned' || user.isActive === false)
       return res.status(403).json({ message: 'Your account has been suspended. Please contact support.' });
 
     const token = jwt.sign(
@@ -201,7 +201,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-router.put('/reset-password', async (req, res) => {
+const handleResetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword)
@@ -233,7 +233,11 @@ router.put('/reset-password', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+};
+
+router.route('/reset-password')
+  .put(handleResetPassword)
+  .post(handleResetPassword);
 
 // ── ADMIN: list / get / update / delete (all require admin auth) ─────────────
 // IMPORTANT: must be AFTER all named routes so /:id doesn't shadow them

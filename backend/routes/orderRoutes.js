@@ -35,7 +35,7 @@ router.get('/lookup', lookupLimiter, async (req, res) => {
     const OrderModel = require('../models/Order');
     const order = await OrderModel.findOne({ guestTrackingToken: hashedToken })
       .populate('products.product', 'name price images')
-      .select('-__v')
+      .select('-__v -guestTrackingToken')
       .lean();
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
